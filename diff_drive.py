@@ -1,6 +1,6 @@
 import os
 import pygame
-from math import sin, radians, degrees, copysign, cos, sin
+import math
 from pygame.math import Vector2
 
 
@@ -47,7 +47,7 @@ class Car:
         self.angular_velocity = (self.wr - self.wl) * self.wheel_radius / self.wheels_distance
 
         self.position += self.velocity.rotate(-self.angle) * dt
-        self.angle += degrees((self.angular_velocity) * dt)
+        self.angle += math.degrees((self.angular_velocity) * dt)
 
 
 class Game:
@@ -75,9 +75,6 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.exit = True
-
-
-
 
             pressed = pygame.key.get_pressed()
 
