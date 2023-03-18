@@ -60,6 +60,7 @@ class Game:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "raiju.png")
         car_image = pygame.image.load(image_path)
+        resized_image = pygame.transform.scale(car_image, (50, 50))
         car = Car(100, 360)
         ppu = 1
 
@@ -72,8 +73,8 @@ class Game:
             dt = self.clock.get_time() / 1000
 
             # Line sensor
-            sensor_position_1 = car.position + Vector2(50, 10).rotate(-car.angle)
-            sensor_position_2 = car.position + Vector2(50, -10).rotate(-car.angle)
+            sensor_position_1 = car.position + Vector2(40, 10).rotate(-car.angle)
+            sensor_position_2 = car.position + Vector2(40, -10).rotate(-car.angle)
             line_sensor_1 = self.screen.get_at((int(sensor_position_1.x), int(sensor_position_1.y)))
             line_sensor_2 = self.screen.get_at((int(sensor_position_2.x), int(sensor_position_2.y)))
 
@@ -101,7 +102,7 @@ class Game:
             pygame.draw.circle(self.screen, (255, 0, 255), (line_sensor_draw_1.x, line_sensor_draw_1.y), 4)
             pygame.draw.circle(self.screen, (255, 0, 255), (line_sensor_draw_2.x, line_sensor_draw_2.y), 4)
 
-            rotated = pygame.transform.rotate(car_image, car.angle)
+            rotated = pygame.transform.rotate(resized_image, car.angle)
             rect = rotated.get_rect()
             self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
             pygame.display.flip()
