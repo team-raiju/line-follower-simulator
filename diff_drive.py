@@ -12,33 +12,28 @@ class Car:
         self.angle = 0
         self.velocity = Vector2(1, 0.0)
         self.angular_velocity = 0
-        self.wheels_distance = 1
-        self.wheel_radius = 0.2
+        self.wheels_distance = 64
+        self.wheel_radius = 6.4
         self.desired_wl = 0
         self.desired_wr = 0
 
 
     def update(self, dt):
-        # self.velocity.x = (self.wl + self.wr) * self.wheel_radius / 2
-        # self.angular_velocity = (self.wr - self.wl) * self.wheel_radius / self.wheels_distance
-
-        # self.position += self.velocity.rotate(-self.angle) * dt
-        # self.angle += degrees((self.angular_velocity) * dt)
         diff_wl = abs(self.wl - self.desired_wl)
-        if diff_wl > 0.4:
+        if diff_wl > 6:
             if (self.desired_wl > self.wl):
-                self.wl += 0.4
+                self.wl += 6
             else:
-                self.wl -= 0.4
+                self.wl -= 6
         else:
             self.wl = self.desired_wl 
         
         diff_wr = abs(self.wr - self.desired_wr)
-        if diff_wr > 0.4:
+        if diff_wr > 6:
             if (self.desired_wr > self.wr):
-                self.wr += 0.4
+                self.wr += 6
             else:
-                self.wr -= 0.4
+                self.wr -= 6
         else:
             self.wr = self.desired_wr 
         
@@ -65,8 +60,8 @@ class Game:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "raiju.png")
         car_image = pygame.image.load(image_path)
-        car = Car(20, 10)
-        ppu = 32
+        car = Car(400, 300)
+        ppu = 1
 
         while not self.exit:
             dt = self.clock.get_time() / 1000
@@ -82,18 +77,18 @@ class Game:
             car.desired_wr = 0
             
             if pressed[pygame.K_UP]:
-                car.desired_wl = 20
-                car.desired_wr = 20
+                car.desired_wl = 75
+                car.desired_wr = 75
             elif pressed[pygame.K_DOWN]:
-                car.desired_wl = -20
-                car.desired_wr = -20
+                car.desired_wl = -75
+                car.desired_wr = -75
 
             if pressed[pygame.K_LEFT]:
-                car.desired_wl -= 10
-                car.desired_wr += 10
+                car.desired_wl = -75
+                car.desired_wr = 75
             elif pressed[pygame.K_RIGHT]:
-                car.desired_wl += 10
-                car.desired_wr -= 10
+                car.desired_wl = 75
+                car.desired_wr = -75
 
             car.update(dt)
             
