@@ -104,6 +104,100 @@ class Map:
 
         pygame.draw.polygon(self.screen, self.line_color, (point1, point2, point3, point4))
 
+    def gen_default_track(self):
+        self.gen_marker('Right', self.last_point)
+        self.gen_line(100)
+        self.gen_marker('Right', self.last_point)
+
+        self.gen_line(110)
+        self.gen_arc_right(15, 90)
+        
+        self.gen_line(240)
+
+        self.gen_arc_right(50, 16)
+        self.gen_arc_left(60, 32)
+        self.gen_arc_right(50, 16)
+
+
+        self.gen_line(190)
+
+        self.gen_arc_right(50, 90)
+        self.gen_arc_right(40, 90)
+        self.gen_arc_right(10, 90)
+
+        self.gen_line(10)
+        self.gen_arc_left(40, 260)
+
+        self.gen_line(80)
+
+        self.gen_arc_right(25, 175)
+
+        self.gen_line(330)
+
+        self.gen_arc_left(10, 80)
+
+        self.gen_line(135)
+
+        self.gen_arc_left(40, 90)
+
+        self.gen_arc_left(800, 10)
+        self.gen_arc_left(600, 15)
+        self.gen_arc_left(400, 15)
+
+        self.gen_arc_left(10, 180)
+        self.gen_line(25)
+
+        self.gen_arc_right(25, 60)
+        self.gen_arc_left(25, 65)
+        self.gen_arc_right(25, 65)
+        self.gen_arc_left(25, 70)
+        self.gen_arc_right(25, 70)
+        self.gen_arc_left(25, 70)
+        self.gen_arc_right(25, 70)
+        self.gen_arc_left(25, 70)
+        self.gen_arc_right(25, 70)
+        self.gen_arc_left(25, 65)
+        self.gen_arc_right(25, 125)
+
+        self.gen_line(220)
+
+        self.gen_arc_right(10, 180)
+        self.gen_line(40)
+        self.gen_arc_left(10, 180)
+        self.gen_line(40)
+
+        self.gen_arc_right(15, 110)
+        self.gen_arc_left(30, 40)
+        self.gen_arc_right(30, 110)
+        self.gen_arc_right(10, 90)
+
+        self.gen_line(220)
+
+        self.gen_arc_left(50, 90)
+        self.gen_arc_left(10, 90)
+        self.gen_line(10)
+        self.gen_arc_right(25, 85)
+
+        self.gen_line(168)
+
+        self.gen_arc_right(40, 90)
+        self.gen_arc_right(10, 206.4)
+        self.gen_arc_left(10, 264.6)
+        self.gen_arc_right(10, 180)
+
+        self.gen_arc_left(10, 243.3)
+
+        self.gen_arc_right(10, 180)
+        self.gen_arc_left(10, 264.6)
+        self.gen_arc_right(10, 206.4)
+
+
+        self.gen_line(28)
+        self.gen_arc_right(10, 90)
+
+        #manual adjust of angle to compasete for errors
+        self.last_angle = 270
+        self.gen_line(130)
 
 
 def main():
@@ -112,102 +206,8 @@ def main():
 
     # Set up the display window
     screen = pygame.display.set_mode((1280, 810))
-
     map = Map(20, 245, 270, screen)
-
-    map.gen_marker('Right', map.last_point)
-    map.gen_line(100)
-    map.gen_marker('Right', map.last_point)
-
-    map.gen_line(110)
-    map.gen_arc_right(15, 90)
-    
-    map.gen_line(240)
-
-    map.gen_arc_right(50, 16)
-    map.gen_arc_left(60, 32)
-    map.gen_arc_right(50, 16)
-
-
-    map.gen_line(190)
-
-    map.gen_arc_right(50, 90)
-    map.gen_arc_right(40, 90)
-    map.gen_arc_right(10, 90)
-
-    map.gen_line(10)
-    map.gen_arc_left(40, 260)
-
-    map.gen_line(80)
-
-    map.gen_arc_right(25, 175)
-
-    map.gen_line(330)
-
-    map.gen_arc_left(10, 80)
-
-    map.gen_line(135)
-
-    map.gen_arc_left(40, 90)
-
-    map.gen_arc_left(800, 10)
-    map.gen_arc_left(600, 15)
-    map.gen_arc_left(400, 15)
-
-    map.gen_arc_left(10, 180)
-    map.gen_line(25)
-
-    map.gen_arc_right(25, 60)
-    map.gen_arc_left(25, 65)
-    map.gen_arc_right(25, 65)
-    map.gen_arc_left(25, 70)
-    map.gen_arc_right(25, 70)
-    map.gen_arc_left(25, 70)
-    map.gen_arc_right(25, 70)
-    map.gen_arc_left(25, 70)
-    map.gen_arc_right(25, 70)
-    map.gen_arc_left(25, 65)
-    map.gen_arc_right(25, 125)
-
-    map.gen_line(220)
-
-    map.gen_arc_right(10, 180)
-    map.gen_line(40)
-    map.gen_arc_left(10, 180)
-    map.gen_line(40)
-
-    map.gen_arc_right(15, 110)
-    map.gen_arc_left(30, 40)
-    map.gen_arc_right(30, 110)
-    map.gen_arc_right(10, 90)
-
-    map.gen_line(220)
-
-    map.gen_arc_left(50, 90)
-    map.gen_arc_left(10, 90)
-    map.gen_line(10)
-    map.gen_arc_right(25, 85)
-
-    map.gen_line(168)
-
-    map.gen_arc_right(40, 90)
-    map.gen_arc_right(10, 206.4)
-    map.gen_arc_left(10, 264.6)
-    map.gen_arc_right(10, 180)
-
-    map.gen_arc_left(10, 243.3)
-
-    map.gen_arc_right(10, 180)
-    map.gen_arc_left(10, 264.6)
-    map.gen_arc_right(10, 206.4)
-
-
-    map.gen_line(28)
-    map.gen_arc_right(10, 90)
-
-    #manual adjust of angle to compasete for errors
-    map.last_angle = 270
-    map.gen_line(130)
+    map.gen_default_track()
 
     # Update the display
     pygame.display.update()
