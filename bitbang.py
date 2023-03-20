@@ -40,14 +40,14 @@ class Game:
             is_white_2 = (line_sensor_2[0] == 255)
             
             if is_white_1:
-                robot.motor_l.set_voltage(20)
+                robot.motor_l.set_voltage(40)
                 robot.motor_r.set_voltage(0)
             elif is_white_2:
                 robot.motor_l.set_voltage(0)
-                robot.motor_r.set_voltage(20)
+                robot.motor_r.set_voltage(40)
             else :
-                robot.motor_l.set_voltage(20)
-                robot.motor_r.set_voltage(20)
+                robot.motor_l.set_voltage(40)
+                robot.motor_r.set_voltage(40)
 
             robot.update(dt)
             
