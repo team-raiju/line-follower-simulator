@@ -1,6 +1,5 @@
 import os
 import pygame
-import math
 from pygame.math import Vector2
 from generate_track import Map
 from robot import Robot
@@ -41,14 +40,14 @@ class Game:
             is_white_2 = (line_sensor_2[0] == 255)
             
             if is_white_1:
-                robot.desired_wl = 20
-                robot.desired_wr = 0
+                robot.motor_l.set_voltage(20)
+                robot.motor_r.set_voltage(0)
             elif is_white_2:
-                robot.desired_wl = 0
-                robot.desired_wr = 20
+                robot.motor_l.set_voltage(0)
+                robot.motor_r.set_voltage(20)
             else :
-                robot.desired_wl = 20
-                robot.desired_wr = 20
+                robot.motor_l.set_voltage(20)
+                robot.motor_r.set_voltage(20)
 
             robot.update(dt)
             
