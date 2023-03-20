@@ -35,22 +35,22 @@ class Game:
             pressed = pygame.key.get_pressed()
 
             # Rotations per second
-            car.desired_wl = 0
-            car.desired_wr = 0
+            car.motor_l.set_voltage(0)
+            car.motor_r.set_voltage(0)
             
             if pressed[pygame.K_UP]:
-                car.desired_wl = 100
-                car.desired_wr = 100
+                car.motor_l.set_voltage(100)
+                car.motor_r.set_voltage(100)
             elif pressed[pygame.K_DOWN]:
-                car.desired_wl = -100
-                car.desired_wr = -100
+                car.motor_l.set_voltage(-100)
+                car.motor_r.set_voltage(-100)
 
             if pressed[pygame.K_LEFT]:
-                car.desired_wl = -80
-                car.desired_wr = 80
+                car.motor_l.set_voltage(-80)
+                car.motor_r.set_voltage(80)
             elif pressed[pygame.K_RIGHT]:
-                car.desired_wl = 80
-                car.desired_wr = -80
+                car.motor_l.set_voltage(80)
+                car.motor_r.set_voltage(-80)
 
             car.update(dt)
             
