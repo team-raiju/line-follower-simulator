@@ -22,7 +22,7 @@ class Motor:
         self.efficency = 0.95
         self.mass = 0.12 # Kg
         self.atrict_coef = 1
-        self.normal_brushless = 3 # Newton
+        self.normal_brushless = 3 # Extra normal force caused by external brushless
         self.Ir = 2 * self.inercial_momentum * 1.1 # Total inercial moment (1.1 is estimation)
         self.move_resistance = self.normal_brushless + self.mass * 9.8 # Newton
 

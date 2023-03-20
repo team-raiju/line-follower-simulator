@@ -9,13 +9,10 @@ class Robot:
         y = self.centimeters_to_pixel(y_cm)
         self.wheel_radius_cm = 1.5
         self.position = Vector2(x, y)
-        self.wl = 0 #RPS
-        self.wr = 0 #RPS
         self.angle = angle
         self.velocity = Vector2(1, 0.0)
         self.angular_velocity = 0
         self.wheels_distance = self.centimeters_to_pixel(18)
-        self.wheel_radius = self.centimeters_to_pixel(self.wheel_radius_cm)
 
         self.motor_l = Motor(self.wheel_radius_cm)
         self.motor_r = Motor(self.wheel_radius_cm)
