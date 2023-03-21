@@ -32,7 +32,7 @@ class Game:
             dt = self.clock.get_time() / 1000
 
             # Line sensor
-            line_sensor = robot.get_line_sensor(self.screen)
+            line_sensor = robot.get_line_sensor(self.screen, 1280, 810)
             # print(line_sensor)
 
             kp = 6

@@ -49,17 +49,69 @@ class Robot:
         self.position += self.velocity.rotate(-self.angle) * dt
         self.angle += math.degrees((self.angular_velocity) * dt)
     
-    def get_line_sensor(self, screen: Surface):
+    def get_line_sensor(self, screen: Surface, max_x, max_y):
         
         sensor_val = []
 
         for pos_vector in self.line_sensor_pos:
             sensor_position = self.position + self.centimeters_to_pixel(pos_vector).rotate(-self.angle)
-            val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
+
+            if (int(sensor_position.x) <= 0 or int(sensor_position.x) >= max_x):
+                sensor_val.append(1)
+            elif (int(sensor_position.y) <= 0 or int(sensor_position.y) >= max_y):
+                sensor_val.append(1)
             
-            is_black = (val[0] != 255)
-            sensor_val.append(is_black)
+            else:
+                val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
+                
+                is_black = (val[0] != 255)
+                if is_black:
+                    sensor_val.append(1)
+                else:
+                    sensor_val.append(0)
+
 
         return sensor_val
+    
+    def out_of_line(self, screen: Surface, max_x, max_y):
+        corners = [Vector2(0, 0), Vector2(0, 0), Vector2(0, 0), Vector2(0, 0)]
+        robot_size_x_pixel = self.wheels_distance
+        robot_size_y_pixel = self.wheels_distance
+        corners[0] = self.position + (Vector2(robot_size_x_pixel / 2, robot_size_y_pixel / 2)).rotate(-self.angle)
+        corners[1] = self.position + (Vector2(robot_size_x_pixel / 2, -robot_size_y_pixel / 2)).rotate(-self.angle)
+        corners[2] = self.position + (Vector2(-robot_size_x_pixel / 2, -robot_size_y_pixel / 2)).rotate(-self.angle)
+        corners[3] = self.position + (Vector2(-robot_size_x_pixel / 2, robot_size_y_pixel / 2)).rotate(-self.angle)
 
+        # Check if out of screen
+        for corner in corners:
+            if (int(corner.x) <= 0 or int(corner.x) >= max_x):
+                return True
+            if (int(corner.y) <= 0 or int(corner.y) >= max_y):
+                return True
+
+        # Check if white line cross any of the borders
+        for i in range (0, int(self.wheels_distance), 3):
+            point = corners[0] + Vector2(i, 0).rotate(-self.angle-90)
+            color = screen.get_at((int(point.x), int(point.y)))
+            if (color[0] == 255):
+                return False
+
+        for i in range (0, int(self.wheels_distance), 3):
+            point = corners[1] + Vector2(i, 0).rotate(-self.angle-180)
+            color = screen.get_at((int(point.x), int(point.y)))
+            if (color[0] == 255):
+                return False
         
+        for i in range (0, int(self.wheels_distance), 3):
+            point = corners[2] + Vector2(i, 0).rotate(-self.angle-270)
+            color = screen.get_at((int(point.x), int(point.y)))
+            if (color[0] == 255):
+                return False
+        
+        for i in range (0, int(self.wheels_distance), 3):
+            point = corners[3] + Vector2(i, 0).rotate(-self.angle)
+            color = screen.get_at((int(point.x), int(point.y)))
+            if (color[0] == 255):
+                return False
+        
+        return True

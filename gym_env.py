@@ -2,24 +2,23 @@ from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
 import random
-from diff_drive import Car
+from robot import Robot
 import pygame
 import os
+from generate_track import Map
 
 
 
 class LineFollowerEnv(Env):
     def __init__(self):
-        # Actions we can take, down, stay, up
-        self.action_space = Discrete(3)
 
-        # Temperature array
-        self.observation_space = Box(low=np.array([0]), high=np.array([100]))
+        # Env
+        self.action_space = Box(low=-100, high=100, shape=(2, ), dtype=np.int16)
+        self.observation_space = Box(0, 1, shape=(6,), dtype=int)
 
-        self.car = Car(20, 10)
+        self.max_lenght = 60
 
-        # Set shower length
-        self.shower_length = 60
+        self.robot = Robot(20, 245, 90)
 
         # Render options
         pygame.init()
@@ -27,72 +26,54 @@ class LineFollowerEnv(Env):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "raiju.png")
         self.car_image = pygame.image.load(image_path)
-        self.screen = pygame.display.set_mode((1280, 720))
+        self.resized_image = pygame.transform.scale(self.car_image, (36, 36))
+        self.screen = pygame.display.set_mode((1280, 810))
         self.clock = pygame.time.Clock()
-        self.tick_period_ms = 0.05 
-        self.tick_rate = 1 / self.tick_period_ms
+        self.tick_rate = 60 # Hertz tick_rate = 1 / self.tick_period
+        self.tick_period = 1 / self.tick_rate
         
     def step(self, action):
-        # Apply action
-        # 0 -1 = -1 temperature
-        # 1 -1 = 0 
-        # 2 -1 = 1 temperature 
-
-        self.car.desired_wl = 0
-        self.car.desired_wr = 0
         
-        if action == 0:
-            self.car.desired_wl = 20
-            self.car.desired_wr = 20
-        elif action == 1:
-            self.car.desired_wl = -20
-            self.car.desired_wr = -20
+        # Action
+        mot_left, mot_right = action
+        self.robot.motor_l.set_voltage(mot_left)
+        self.robot.motor_r.set_voltage(mot_right)
+        self.robot.update(self.tick_period)
 
-        # if action == 2:
-        #     self.car.desired_wl = -20
-        #     self.car.desired_wr = 20
+        # Observation
+        line_sensor = self.robot.get_line_sensor(self.screen)
 
-        self.car.update(self.tick_period_ms)
+        # Reward
+        reward = 1 
 
-        # Reduce shower length by 1 second
-        self.shower_length -= 1 
-        
-        # Calculate reward
-        if self.car.desired_wl >=17 and self.car.desired_wl <=23: 
-            reward = 1 
-        else: 
-            reward = -1 
-        
-        # Check if shower is done
-        if self.shower_length <= 0: 
+        # Done
+        self.max_lenght -= 1 
+        if self.max_lenght <= 0: 
             done = True
         else:
             done = False
         
         info = {}
         
-        # Return step information
-        return self.car.desired_wl, reward, done, info
+        return line_sensor, reward, done, info
 
     def render(self):
-        # Implement viz
         self.screen.fill((0, 0, 0))
-        rotated = pygame.transform.rotate(self.car_image, self.car.angle)
+        map = Map(20, 245, 270, self.screen)
+        map.gen_default_track()
+
+        rotated = pygame.transform.rotate(self.resized_image, self.robot.angle)
         rect = rotated.get_rect()
-        ppu = 32
-        self.screen.blit(rotated, self.car.position * ppu - (rect.width / 2, rect.height / 2))
+        self.screen.blit(rotated, self.robot.position - (rect.width / 2, rect.height / 2))
         pygame.display.flip()
         self.clock.tick(self.tick_rate)
     
     def reset(self):
-        # Reset shower time
-        self.shower_length = 60 
-        self.car.desired_wl = 0
-        self.car.desired_wr = 0
-        return self.car.desired_wl
+        self.max_lenght = 60
+        motor = [0, 0]
+        return motor
 
 env = LineFollowerEnv()
-# print(env.observation_space.sample())
 
 episodes = 2
 for episode in range(1, episodes+1):
@@ -102,7 +83,6 @@ for episode in range(1, episodes+1):
     
     while not done:
         env.render()
-        print(env.car.desired_wl)
         action = env.action_space.sample()
         n_state, reward, done, info = env.step(action)
         score+=reward

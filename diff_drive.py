@@ -21,7 +21,7 @@ class Game:
         image_path = os.path.join(current_dir, "raiju.png")
         car_image = pygame.image.load(image_path)
         resized_image = pygame.transform.scale(car_image, (36, 36)) # 36pixels -> 18cm
-        car = Robot(200, 150, 0)
+        robot = Robot(20, 245, 90)
         ppu = 1
 
         while not self.exit:
@@ -35,33 +35,33 @@ class Game:
             pressed = pygame.key.get_pressed()
 
             # Rotations per second
-            car.motor_l.set_voltage(0)
-            car.motor_r.set_voltage(0)
+            robot.motor_l.set_voltage(0)
+            robot.motor_r.set_voltage(0)
             
             if pressed[pygame.K_UP]:
-                car.motor_l.set_voltage(100)
-                car.motor_r.set_voltage(100)
+                robot.motor_l.set_voltage(100)
+                robot.motor_r.set_voltage(100)
             elif pressed[pygame.K_DOWN]:
-                car.motor_l.set_voltage(-100)
-                car.motor_r.set_voltage(-100)
+                robot.motor_l.set_voltage(-100)
+                robot.motor_r.set_voltage(-100)
 
             if pressed[pygame.K_LEFT]:
-                car.motor_l.set_voltage(-80)
-                car.motor_r.set_voltage(80)
+                robot.motor_l.set_voltage(-80)
+                robot.motor_r.set_voltage(80)
             elif pressed[pygame.K_RIGHT]:
-                car.motor_l.set_voltage(80)
-                car.motor_r.set_voltage(-80)
+                robot.motor_l.set_voltage(80)
+                robot.motor_r.set_voltage(-80)
 
-            car.update(dt)
+            robot.update(dt)
             
             #Draw
             self.screen.fill((0, 0, 0))
             map = Map(20, 245, 270, self.screen)
             map.gen_default_track()
 
-            rotated = pygame.transform.rotate(resized_image, car.angle)
+            rotated = pygame.transform.rotate(resized_image, robot.angle)
             rect = rotated.get_rect()
-            self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
+            self.screen.blit(rotated, robot.position * ppu - (rect.width / 2, rect.height / 2))
             pygame.display.flip()
             self.clock.tick(self.ticks)
 
