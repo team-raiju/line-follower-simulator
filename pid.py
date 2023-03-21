@@ -14,6 +14,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.ticks = 60
         self.exit = False
+        self.last_error = 0
 
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,11 +35,16 @@ class Game:
             line_sensor = robot.get_line_sensor(self.screen)
             # print(line_sensor)
 
-            error = 3 * (line_sensor[5] - line_sensor[0]) + 2 * (line_sensor[4] -line_sensor[1]) + (line_sensor[3] - line_sensor[2])
             kp = 6
+            kd = 0.001
+            
+            error = 3 * (line_sensor[5] - line_sensor[0]) + 2 * (line_sensor[4] -line_sensor[1]) + (line_sensor[3] - line_sensor[2])
+            derivative = kd * (error - self.last_error)
 
-            robot.motor_l.set_voltage(42 - error * kp)
-            robot.motor_r.set_voltage(42 + error * kp)
+            robot.motor_l.set_voltage(42 - (error * kp + derivative * kd))
+            robot.motor_r.set_voltage(42 + (error * kp + derivative * kd))
+
+            self.last_error = error
             
 
             robot.update(dt)
