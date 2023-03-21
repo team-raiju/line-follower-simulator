@@ -1,4 +1,5 @@
 import math
+from pygame.surface import Surface
 from pygame.math import Vector2
 from motor import Motor
 
@@ -21,6 +22,16 @@ class Robot:
 
         self.mot_vel_l = 0.0
         self.mot_vel_r = 0.0
+
+        # Line sensor position in centimeters from robot center
+        self.line_sensor_pos = [
+            Vector2(20, -4),
+            Vector2(20, -3),
+            Vector2(20, -1),
+            Vector2(20,  1),
+            Vector2(20,  3),
+            Vector2(20,  4),
+        ]
     
     def centimeters_to_pixel(self, centimeters):
         return centimeters * 2
@@ -37,3 +48,18 @@ class Robot:
 
         self.position += self.velocity.rotate(-self.angle) * dt
         self.angle += math.degrees((self.angular_velocity) * dt)
+    
+    def get_line_sensor(self, screen: Surface):
+        
+        sensor_val = []
+
+        for pos_vector in self.line_sensor_pos:
+            sensor_position = self.position + self.centimeters_to_pixel(pos_vector).rotate(-self.angle)
+            val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
+            
+            is_black = (val[0] != 255)
+            sensor_val.append(is_black)
+
+        return sensor_val
+
+        
