@@ -119,7 +119,7 @@ class Motor:
         t = np.linspace(0, 2, 200)
         y =  np.array([])
         vel = 5.6
-        self.v_inf = -5.6
+        self.set_voltage(-100)
 
         for i in range(200):
             vel = self.velocity_after_interval(vel, 0.01)
@@ -135,6 +135,7 @@ class Motor:
 
 
 # mot = Motor(1.5)
+# mot.plot_break_time()
 # print(mot.time_constant)
 # print(mot.v_inf)
 # mot.set_voltage(0)
