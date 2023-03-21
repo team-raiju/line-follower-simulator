@@ -122,7 +122,7 @@ class Motor:
         self.v_inf = -5.6
 
         for i in range(200):
-            vel = self.velocity_after_interval_2(vel, 0.01)
+            vel = self.velocity_after_interval(vel, 0.01)
             y = np.append(y, vel)
         
         fig = plt.figure()

@@ -6,7 +6,7 @@ from robot import Robot
 import pygame
 import os
 from generate_track import Map
-
+from pygame.math import Vector2
 
 
 class LineFollowerEnv(Env):
@@ -16,7 +16,7 @@ class LineFollowerEnv(Env):
         self.action_space = Box(low=-100, high=100, shape=(2, ), dtype=np.int16)
         self.observation_space = Box(0, 1, shape=(6,), dtype=int)
 
-        self.max_lenght = 60
+        self.max_duration = 1000
 
         self.robot = Robot(20, 245, 90)
 
@@ -31,6 +31,11 @@ class LineFollowerEnv(Env):
         self.clock = pygame.time.Clock()
         self.tick_rate = 60 # Hertz tick_rate = 1 / self.tick_period
         self.tick_period = 1 / self.tick_rate
+
+        self.map = Map(20, 245, 270, self.screen)
+        self.map.gen_default_track()
+
+        self.waypoint_idx = 0
         
     def step(self, action):
         
@@ -41,17 +46,26 @@ class LineFollowerEnv(Env):
         self.robot.update(self.tick_period)
 
         # Observation
-        line_sensor = self.robot.get_line_sensor(self.screen)
+        line_sensor = self.robot.get_line_sensor(self.screen, 1280, 810)
 
         # Reward
-        reward = 1 
+        reward = -0.1
+
+        if (self.map.near_waypoint(self.robot.position, self.waypoint_idx)):
+                self.waypoint_idx += 1
+                reward = 1000 / 62 # 1000 / len(waypoints)
 
         # Done
-        self.max_lenght -= 1 
-        if self.max_lenght <= 0: 
+        done = False
+
+        if (self.robot.out_of_line(self.screen, 1280, 810)):
+            reward = -100
             done = True
-        else:
-            done = False
+
+        self.max_duration -= 1 
+        if self.max_duration <= 0: 
+            done = True
+        
         
         info = {}
         
@@ -69,21 +83,27 @@ class LineFollowerEnv(Env):
         self.clock.tick(self.tick_rate)
     
     def reset(self):
-        self.max_lenght = 60
+        self.max_duration = 1000
+        self.waypoint_idx = 0
         motor = [0, 0]
+        self.robot = Robot(20, 245, 90)
         return motor
 
-env = LineFollowerEnv()
 
-episodes = 2
-for episode in range(1, episodes+1):
-    state = env.reset()
-    done = False
-    score = 0 
-    
-    while not done:
-        env.render()
-        action = env.action_space.sample()
-        n_state, reward, done, info = env.step(action)
-        score+=reward
-    print('Episode:{} Score:{}'.format(episode, score))
+
+
+if __name__ == '__main__':
+    env = LineFollowerEnv()
+
+    episodes = 6
+    for episode in range(1, episodes+1):
+        state = env.reset()
+        done = False
+        score = 0 
+        
+        while not done:
+            env.render()
+            action = env.action_space.sample()
+            n_state, reward, done, info = env.step(action)
+            score+=reward
+        print('Episode:{} Score:{}'.format(episode, score))

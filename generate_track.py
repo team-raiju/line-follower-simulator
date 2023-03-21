@@ -13,6 +13,8 @@ class Map:
         self.screen = screen
         self.line_color = (255, 255, 255)
         self.line_width = self.centimeters_to_pixel(2)
+
+        self.waypoint = [self.last_point]
     
     def centimeters_to_pixel(self, centimeters):
         return centimeters * 2
@@ -28,6 +30,7 @@ class Map:
 
         pygame.draw.polygon(self.screen, self.line_color, (point1, point2, point3, point4))
         self.last_point = new_point
+        self.waypoint.append(new_point.copy())
 
         # pygame.draw.circle(self.screen, (255, 0, 255), (point1.x,point1.y), 2)
         # pygame.draw.circle(self.screen, (255, 0, 255), (point2.x,point2.y), 2)
@@ -56,6 +59,8 @@ class Map:
 
         # Draw end side line
         self.gen_marker('Left', self.last_point)
+        self.waypoint.append(self.last_point.copy())
+
 
 
     def gen_arc_left(self, radius_cm, arc_angle):
@@ -81,6 +86,7 @@ class Map:
 
         self.gen_marker('Left', self.last_point)
 
+        self.waypoint.append(self.last_point.copy())
 
         # pygame.draw.circle(self.screen, (255, 0, 255), (self.last_point.x,self.last_point.y), 2)
 
@@ -103,6 +109,13 @@ class Map:
         point4 = marker_1_end + Vector2((self.line_width / 2), 0.0).rotate(angle_to_rotate + 90)
 
         pygame.draw.polygon(self.screen, self.line_color, (point1, point2, point3, point4))
+    
+    def near_waypoint(self, point: Vector2, index):
+        distance = point.distance_to(self.waypoint[index])
+        max_dist_cm = 15
+        if (abs(distance) < self.centimeters_to_pixel(max_dist_cm)):
+            return True
+        return False
 
     def gen_default_track(self):
         self.gen_marker('Right', self.last_point)

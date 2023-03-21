@@ -22,6 +22,7 @@ class Game:
         robot_image = pygame.image.load(image_path)
         resized_image = pygame.transform.scale(robot_image, (36, 36))
         robot = Robot(20, 245, 90)
+        waypoint_idx = 0
 
         while not self.exit:
             # Event queue
@@ -35,14 +36,14 @@ class Game:
             line_sensor = robot.get_line_sensor(self.screen, 1280, 810)
             # print(line_sensor)
 
-            kp = 6
+            kp = 5
             kd = 0.001
             
             error = 3 * (line_sensor[5] - line_sensor[0]) + 2 * (line_sensor[4] -line_sensor[1]) + (line_sensor[3] - line_sensor[2])
             derivative = kd * (error - self.last_error)
 
-            robot.motor_l.set_voltage(42 - (error * kp + derivative * kd))
-            robot.motor_r.set_voltage(42 + (error * kp + derivative * kd))
+            robot.motor_l.set_voltage(40 - (error * kp + derivative * kd))
+            robot.motor_r.set_voltage(40 + (error * kp + derivative * kd))
 
             self.last_error = error
             
@@ -53,6 +54,10 @@ class Game:
             self.screen.fill((0, 0, 0))
             map = Map(20, 245, 270, self.screen)
             map.gen_default_track()
+            
+            # Update travalled distance
+            if (map.near_waypoint(robot.position, waypoint_idx)):
+                waypoint_idx += 1
 
             for sensor in robot.line_sensor_pos:
                 sensor_position = robot.position + robot.centimeters_to_pixel(sensor).rotate(-robot.angle)
