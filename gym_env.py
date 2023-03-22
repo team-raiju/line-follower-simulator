@@ -1,20 +1,24 @@
 from gym import Env
-from gym.spaces import Discrete, Box
+from gym.spaces import Box
 import numpy as np
-import random
 from robot import Robot
 import pygame
 import os
 from generate_track import Map
-from pygame.math import Vector2
+
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import VecFrameStack
+from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.env_checker import check_env
 
 
 class LineFollowerEnv(Env):
     def __init__(self):
 
         # Env
-        self.action_space = Box(low=-100, high=100, shape=(2, ), dtype=np.int16)
-        self.observation_space = Box(0, 1, shape=(6,), dtype=int)
+        self.action_space = Box(low=-1, high=1, shape=(2, ), dtype=np.float32)
+        self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0]), high=np.array([1, 1, 1, 1, 1, 1]), dtype=np.int32)
 
         self.max_duration = 1000
 
@@ -40,13 +44,15 @@ class LineFollowerEnv(Env):
     def step(self, action):
         
         # Action
-        mot_left, mot_right = action
+        mot_left = int(action[0] * 100)
+        mot_right = int(action[1] * 100)
         self.robot.motor_l.set_voltage(mot_left)
         self.robot.motor_r.set_voltage(mot_right)
         self.robot.update(self.tick_period)
 
         # Observation
         line_sensor = self.robot.get_line_sensor(self.screen, 1280, 810)
+        line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
 
         # Reward
         reward = -0.1
@@ -69,7 +75,7 @@ class LineFollowerEnv(Env):
         
         info = {}
         
-        return line_sensor, reward, done, info
+        return line_sensor_np, reward, done, info
 
     def render(self):
         self.screen.fill((0, 0, 0))
@@ -85,9 +91,10 @@ class LineFollowerEnv(Env):
     def reset(self):
         self.max_duration = 1000
         self.waypoint_idx = 0
-        motor = [0, 0]
         self.robot = Robot(20, 245, 90)
-        return motor
+        line_sensor = self.robot.get_line_sensor(self.screen, 1280, 810)
+        line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
+        return line_sensor_np
 
 
 
@@ -95,15 +102,28 @@ class LineFollowerEnv(Env):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
+    HOME_DIR = os.path.dirname(__file__)
+    PPO_Path = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_3')
+    model = PPO.load(PPO_Path, env=env)
+
+    # HOME_DIR = os.path.dirname(__file__)
+    # PPO_Path = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_3')
+    
+    # log_path = os.path.join(HOME_DIR, 'logs')
+    # model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
+    # model.learn(total_timesteps=200000)
+    # model.save(PPO_Path)
+
+
     episodes = 6
     for episode in range(1, episodes+1):
-        state = env.reset()
+        observation = env.reset()
         done = False
         score = 0 
         
         while not done:
             env.render()
-            action = env.action_space.sample()
-            n_state, reward, done, info = env.step(action)
+            action, _ = model.predict(observation)
+            observation, reward, done, info = env.step(action)
             score+=reward
         print('Episode:{} Score:{}'.format(episode, score))
