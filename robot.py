@@ -75,8 +75,8 @@ class Robot:
     
     def out_of_line(self, screen: Surface, max_x, max_y):
         corners = [Vector2(0, 0), Vector2(0, 0), Vector2(0, 0), Vector2(0, 0)]
-        robot_size_x_pixel = self.wheels_distance
-        robot_size_y_pixel = self.wheels_distance
+        robot_size_x_pixel = self.wheels_distance + 10
+        robot_size_y_pixel = self.wheels_distance + 10
         corners[0] = self.position + (Vector2(robot_size_x_pixel / 2, robot_size_y_pixel / 2)).rotate(-self.angle)
         corners[1] = self.position + (Vector2(robot_size_x_pixel / 2, -robot_size_y_pixel / 2)).rotate(-self.angle)
         corners[2] = self.position + (Vector2(-robot_size_x_pixel / 2, -robot_size_y_pixel / 2)).rotate(-self.angle)
@@ -90,25 +90,25 @@ class Robot:
                 return True
 
         # Check if white line cross any of the borders
-        for i in range (0, int(self.wheels_distance), 3):
+        for i in range (0, int(robot_size_x_pixel), 2):
             point = corners[0] + Vector2(i, 0).rotate(-self.angle-90)
             color = screen.get_at((int(point.x), int(point.y)))
             if (color[0] == 255):
                 return False
 
-        for i in range (0, int(self.wheels_distance), 3):
+        for i in range (0, int(robot_size_y_pixel), 2):
             point = corners[1] + Vector2(i, 0).rotate(-self.angle-180)
             color = screen.get_at((int(point.x), int(point.y)))
             if (color[0] == 255):
                 return False
         
-        for i in range (0, int(self.wheels_distance), 3):
+        for i in range (0, int(robot_size_x_pixel), 2):
             point = corners[2] + Vector2(i, 0).rotate(-self.angle-270)
             color = screen.get_at((int(point.x), int(point.y)))
             if (color[0] == 255):
                 return False
         
-        for i in range (0, int(self.wheels_distance), 3):
+        for i in range (0, int(robot_size_y_pixel), 2):
             point = corners[3] + Vector2(i, 0).rotate(-self.angle)
             color = screen.get_at((int(point.x), int(point.y)))
             if (color[0] == 255):

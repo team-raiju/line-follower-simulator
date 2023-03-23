@@ -20,7 +20,7 @@ class LineFollowerEnv(Env):
         self.action_space = Box(low=-1, high=1, shape=(2, ), dtype=np.float32)
         self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0]), high=np.array([1, 1, 1, 1, 1, 1]), dtype=np.int32)
 
-        self.max_duration = 1000
+        self.max_duration = 1500
 
         self.robot = Robot(20, 245, 90)
 
@@ -55,21 +55,29 @@ class LineFollowerEnv(Env):
         line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
 
         # Reward
-        reward = -0.1
+        reward = 0
 
         if (self.map.near_waypoint(self.robot.position, self.waypoint_idx)):
                 self.waypoint_idx += 1
-                reward = 1000 / 62 # 1000 / len(waypoints)
+                reward = 3000 / len(self.map.waypoint) # 1000 / len(waypoints)
 
         # Done
         done = False
+        if (self.waypoint_idx >= len(self.map.waypoint)):
+            reward = +100
+            done = True
+        
+        elif ((1500 - self.max_duration) > (1 + self.waypoint_idx) * 150):
+            reward = -100
+            done = True
 
-        if (self.robot.out_of_line(self.screen, 1280, 810)):
+        elif (self.robot.out_of_line(self.screen, 1280, 810)):
             reward = -100
             done = True
 
         self.max_duration -= 1 
-        if self.max_duration <= 0: 
+        if self.max_duration <= 0:
+            reward = -100 
             done = True
         
         
@@ -89,7 +97,7 @@ class LineFollowerEnv(Env):
         self.clock.tick(self.tick_rate)
     
     def reset(self):
-        self.max_duration = 1000
+        self.max_duration = 1500
         self.waypoint_idx = 0
         self.robot = Robot(20, 245, 90)
         line_sensor = self.robot.get_line_sensor(self.screen, 1280, 810)
@@ -103,15 +111,15 @@ if __name__ == '__main__':
     env = LineFollowerEnv()
 
     HOME_DIR = os.path.dirname(__file__)
-    PPO_Path = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_3')
-    model = PPO.load(PPO_Path, env=env)
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_500k')
+    model = PPO.load(PPO_Path_Init, env=env)
 
     # HOME_DIR = os.path.dirname(__file__)
-    # PPO_Path = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_3')
+    # PPO_Path = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_500k')
     
     # log_path = os.path.join(HOME_DIR, 'logs')
     # model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
-    # model.learn(total_timesteps=200000)
+    # model.learn(total_timesteps=500000)
     # model.save(PPO_Path)
 
 
