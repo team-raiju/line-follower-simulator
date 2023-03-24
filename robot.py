@@ -8,12 +8,12 @@ class Robot:
     def __init__(self, x_cm, y_cm, angle):
         x = self.centimeters_to_pixel(x_cm)
         y = self.centimeters_to_pixel(y_cm)
-        self.wheel_radius_cm = 1.5
+        self.wheel_radius_cm = 1.0
         self.position = Vector2(x, y)
         self.angle = angle
         self.velocity = Vector2(1, 0.0)
         self.angular_velocity = 0
-        self.wheels_distance = self.centimeters_to_pixel(18)
+        self.wheels_distance = self.centimeters_to_pixel(13)
 
         self.motor_l = Motor(self.wheel_radius_cm)
         self.motor_r = Motor(self.wheel_radius_cm)

@@ -117,30 +117,18 @@ class LineFollowerEnv(Env):
 
 
 def train_model(iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_2', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_3', name)
     log_path = os.path.join(HOME_DIR, 'logs')
     model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
     model.learn(total_timesteps=iterations)
     model.save(PPO_Path)
 
 def train_existing_model(model: PPO, iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_2', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_3', name)
     model.learn(total_timesteps=iterations)
     model.save(PPO_Path)
 
-
-
-if __name__ == '__main__':
-    env = LineFollowerEnv()
-
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_2', 'PPO_Model_Raijin_500k')
-    model = PPO.load(PPO_Path_Init, env=env)
-    
-    # train_existing_model(model, 400000, PPO_Model_Raijin_400k )
-    # train_model(400000, PPO_Model_Raijin_400k )
-
-
-    episodes = 6
+def run_simulation(model : PPO, episodes):
     for episode in range(1, episodes+1):
         observation = env.reset()
         done = False
@@ -152,3 +140,17 @@ if __name__ == '__main__':
             observation, reward, done, info = env.step(action)
             score+=reward
         print('Episode:{} Score:{}'.format(episode, score))
+
+if __name__ == '__main__':
+    env = LineFollowerEnv()
+
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_3', 'PPO_Model_Raijin_400k')
+    model = PPO.load(PPO_Path_Init, env=env)
+    
+    # train_existing_model(model, 400000, PPO_Model_Raijin_400k )
+    # train_model(400000, 'PPO_Model_Raijin_400k' )
+    
+    run_simulation(model, 6)
+
+
+    
