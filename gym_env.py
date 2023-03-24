@@ -12,6 +12,7 @@ from stable_baselines3.common.vec_env import VecFrameStack
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.env_checker import check_env
 
+HOME_DIR = os.path.dirname(__file__)
 
 class LineFollowerEnv(Env):
     def __init__(self):
@@ -59,10 +60,17 @@ class LineFollowerEnv(Env):
 
         if (self.map.near_waypoint(self.robot.position, self.waypoint_idx)):
                 self.waypoint_idx += 1
-                reward = 3000 / len(self.map.waypoint) # 1000 / len(waypoints)
+                reward = 3000 / len(self.map.waypoint)
+
 
         # Done
         done = False
+        if (self.waypoint_idx >= 2):
+            for i in range(self.waypoint_idx - 2):
+                if (self.map.near_waypoint(self.robot.position, i)):
+                    done = True
+                    reward = -150
+
         if (self.waypoint_idx >= len(self.map.waypoint)):
             reward = +100
             done = True
@@ -107,20 +115,29 @@ class LineFollowerEnv(Env):
 
 
 
+
+def train_model(iterations, name):
+    PPO_Path = os.path.join(HOME_DIR, 'Models_2', name)
+    log_path = os.path.join(HOME_DIR, 'logs')
+    model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
+    model.learn(total_timesteps=iterations)
+    model.save(PPO_Path)
+
+def train_existing_model(model: PPO, iterations, name):
+    PPO_Path = os.path.join(HOME_DIR, 'Models_2', name)
+    model.learn(total_timesteps=iterations)
+    model.save(PPO_Path)
+
+
+
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    HOME_DIR = os.path.dirname(__file__)
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_500k')
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_2', 'PPO_Model_Raijin_500k')
     model = PPO.load(PPO_Path_Init, env=env)
-
-    # HOME_DIR = os.path.dirname(__file__)
-    # PPO_Path = os.path.join(HOME_DIR, 'Models', 'PPO_Model_Raijin_500k')
     
-    # log_path = os.path.join(HOME_DIR, 'logs')
-    # model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
-    # model.learn(total_timesteps=500000)
-    # model.save(PPO_Path)
+    # train_existing_model(model, 400000, PPO_Model_Raijin_400k )
+    # train_model(400000, PPO_Model_Raijin_400k )
 
 
     episodes = 6
