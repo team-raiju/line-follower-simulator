@@ -16,7 +16,7 @@ class Robot:
         self.wheel_radius_cm = 1.0
         self.wheels_distance_cm = 12.0
         self.robot_size_x_cm = 12.0
-        self.robot_size_y_cm = 15.0 # Total robot size in centimeters (including line sensors)
+        self.robot_size_y_cm = 12.0 # Total robot size in centimeters (including line sensors)
         
         # Line sensor position in centimeters from robot center
         self.line_sensor_pos = [

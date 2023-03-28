@@ -26,13 +26,16 @@ class LineFollowerEnv(Env):
         self.robot = Robot(20, 245, 90)
 
         # Render options
+        self.screen_width = 1280
+        self.screen_height = 810
+
         pygame.init()
         pygame.display.set_caption("Raijin")
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "raiju.png")
         self.car_image = pygame.image.load(image_path)
-        self.resized_image = pygame.transform.scale(self.car_image, (36, 36))
-        self.screen = pygame.display.set_mode((1280, 810))
+        self.resized_image = pygame.transform.scale(self.car_image, (12, 24))
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.clock = pygame.time.Clock()
         self.tick_rate = 60 # Hertz tick_rate = 1 / self.tick_period
         self.tick_period = 1 / self.tick_rate
@@ -52,34 +55,35 @@ class LineFollowerEnv(Env):
         self.robot.update(self.tick_period)
 
         # Observation
-        line_sensor = self.robot.get_line_sensor(self.screen, 1280, 810)
+        line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width , self.screen_height)
         line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
 
         # Reward
         reward = 0
 
         if (self.map.near_waypoint(self.robot.position, self.waypoint_idx)):
+                multiplier = self.waypoint_idx
+                reward = 3000 / len(self.map.waypoint) + multiplier
                 self.waypoint_idx += 1
-                reward = 3000 / len(self.map.waypoint)
 
 
         # Done
         done = False
-        if (self.waypoint_idx >= 2):
-            for i in range(self.waypoint_idx - 2):
-                if (self.map.near_waypoint(self.robot.position, i)):
-                    done = True
-                    reward = -150
+        # if (self.waypoint_idx >= 2):
+        #     for i in range(self.waypoint_idx - 2):
+        #         if (self.map.near_waypoint(self.robot.position, i)):
+        #             done = True
+        #             reward = -150
 
         if (self.waypoint_idx >= len(self.map.waypoint)):
-            reward = +100
+            reward = +300
             done = True
         
-        elif ((1500 - self.max_duration) > (1 + self.waypoint_idx) * 150):
+        elif ((1500 - self.max_duration) > (1 + self.waypoint_idx) * 200):
             reward = -100
             done = True
 
-        elif (self.robot.out_of_line(self.screen, 1280, 810)):
+        elif (self.robot.out_of_line(self.screen, self.screen_width , self.screen_height)):
             reward = -100
             done = True
 
@@ -88,7 +92,7 @@ class LineFollowerEnv(Env):
             reward = -100 
             done = True
         
-        
+        print(1500 - self.max_duration)
         info = {}
         
         return line_sensor_np, reward, done, info
@@ -108,7 +112,7 @@ class LineFollowerEnv(Env):
         self.max_duration = 1500
         self.waypoint_idx = 0
         self.robot = Robot(20, 245, 90)
-        line_sensor = self.robot.get_line_sensor(self.screen, 1280, 810)
+        line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
         line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
         return line_sensor_np
 
@@ -117,7 +121,7 @@ class LineFollowerEnv(Env):
 
 
 def train_model(iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_3', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_4', name)
     log_path = os.path.join(HOME_DIR, 'logs')
     model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
     model.learn(total_timesteps=iterations)
@@ -144,11 +148,11 @@ def run_simulation(model : PPO, episodes):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_3', 'PPO_Model_Raijin_400k')
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_4', 'PPO_Model_Raijin_1M')
     model = PPO.load(PPO_Path_Init, env=env)
     
-    # train_existing_model(model, 400000, PPO_Model_Raijin_400k )
-    # train_model(400000, 'PPO_Model_Raijin_400k' )
+    # train_existing_model(model, 400000, 'PPO_Model_Raijin_1M400k' )
+    # train_model(1000000, 'PPO_Model_Raijin_1M' )
     
     run_simulation(model, 6)
 
