@@ -1,5 +1,5 @@
 from gym import Env
-from gym.spaces import Box
+from gym.spaces import Box, Dict
 import numpy as np
 from robot import Robot
 import pygame
@@ -19,7 +19,8 @@ class LineFollowerEnv(Env):
 
         # Env
         self.action_space = Box(low=-1, high=1, shape=(2, ), dtype=np.float32)
-        self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0]), high=np.array([1, 1, 1, 1, 1, 1]), dtype=np.int32)
+        self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1]), 
+                                     high=np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), dtype=np.float16)
 
         self.max_duration = 1500
 
@@ -48,6 +49,10 @@ class LineFollowerEnv(Env):
     def step(self, action):
         
         # Action
+
+        last_mot_vel_l = self.robot.mot_vel_l / 100.0
+        last_mot_vel_r = self.robot.mot_vel_r / 100.0
+
         mot_left = int(action[0] * 100)
         mot_right = int(action[1] * 100)
         self.robot.motor_l.set_voltage(mot_left)
@@ -56,7 +61,8 @@ class LineFollowerEnv(Env):
 
         # Observation
         line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width , self.screen_height)
-        line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
+        obs_np = np.asarray(line_sensor, dtype=np.float16)
+        obs_np = np.append(obs_np, [last_mot_vel_l, last_mot_vel_r])
 
         # Reward
         reward = 0
@@ -92,10 +98,9 @@ class LineFollowerEnv(Env):
             reward = -100 
             done = True
         
-        print(1500 - self.max_duration)
         info = {}
         
-        return line_sensor_np, reward, done, info
+        return obs_np, reward, done, info
 
     def render(self):
         self.screen.fill((0, 0, 0))
@@ -113,22 +118,24 @@ class LineFollowerEnv(Env):
         self.waypoint_idx = 0
         self.robot = Robot(20, 245, 90)
         line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
-        line_sensor_np = np.asarray(line_sensor, dtype=np.int32)
-        return line_sensor_np
+        obs_np = np.asarray(line_sensor, dtype=np.int32)
+        obs_np = np.append(obs_np, [0, 0])
+
+        return obs_np
 
 
 
 
 
 def train_model(iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_4', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_6', name)
     log_path = os.path.join(HOME_DIR, 'logs')
     model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
     model.learn(total_timesteps=iterations)
     model.save(PPO_Path)
 
 def train_existing_model(model: PPO, iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_3', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_6', name)
     model.learn(total_timesteps=iterations)
     model.save(PPO_Path)
 
@@ -148,13 +155,13 @@ def run_simulation(model : PPO, episodes):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_4', 'PPO_Model_Raijin_1M')
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_6', 'PPO_Model_Raijin_1M200k')
     model = PPO.load(PPO_Path_Init, env=env)
     
-    # train_existing_model(model, 400000, 'PPO_Model_Raijin_1M400k' )
-    # train_model(1000000, 'PPO_Model_Raijin_1M' )
+    # train_existing_model(model, 200000, 'PPO_Model_Raijin_1M200k' )
+    # train_model(200000, 'PPO_Model_Raijin_800k' )
     
-    run_simulation(model, 6)
+    run_simulation(model, 4)
 
 
     

@@ -42,7 +42,7 @@ class Game:
             kp = 5
             kd = 0.001
             
-            error = 3 * (line_sensor[5] - line_sensor[0]) + 2 * (line_sensor[4] -line_sensor[1]) + (line_sensor[3] - line_sensor[2])
+            error = 3 * (line_sensor[9] - line_sensor[2]) + 2 * (line_sensor[8] -line_sensor[3]) + (line_sensor[6] - line_sensor[5])
             derivative = kd * (error - self.last_error)
 
             robot.motor_l.set_voltage(40 - (error * kp + derivative * kd))

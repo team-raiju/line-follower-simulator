@@ -20,12 +20,18 @@ class Robot:
         
         # Line sensor position in centimeters from robot center
         self.line_sensor_pos = [
+            Vector2(12, -6),
+            Vector2(12, -5),
             Vector2(12, -4),
             Vector2(12, -3),
+            Vector2(12, -2),
             Vector2(12, -1),
             Vector2(12,  1),
+            Vector2(12,  2),
             Vector2(12,  3),
             Vector2(12,  4),
+            Vector2(12,  5),
+            Vector2(12,  6),
         ]
 
         self.wheels_distance_pixels = self.centimeters_to_pixel(self.wheels_distance_cm)
