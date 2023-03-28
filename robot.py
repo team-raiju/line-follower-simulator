@@ -5,15 +5,30 @@ from motor import Motor
 
 
 class Robot:
-    def __init__(self, x_cm, y_cm, angle):
-        x = self.centimeters_to_pixel(x_cm)
-        y = self.centimeters_to_pixel(y_cm)
-        self.wheel_radius_cm = 1.0
+    def __init__(self, pos_x_cm, pos_y_cm, angle):
+        #Robot position
+        x = self.centimeters_to_pixel(pos_x_cm)
+        y = self.centimeters_to_pixel(pos_y_cm)
         self.position = Vector2(x, y)
         self.angle = angle
-        self.velocity = Vector2(1, 0.0)
-        self.angular_velocity = 0
-        self.wheels_distance = self.centimeters_to_pixel(13)
+        
+        # Robot Params
+        self.wheel_radius_cm = 1.0
+        self.wheels_distance_cm = 12.0
+        self.robot_size_x_cm = 12.0
+        self.robot_size_y_cm = 15.0 # Total robot size in centimeters (including line sensors)
+        
+        # Line sensor position in centimeters from robot center
+        self.line_sensor_pos = [
+            Vector2(12, -4),
+            Vector2(12, -3),
+            Vector2(12, -1),
+            Vector2(12,  1),
+            Vector2(12,  3),
+            Vector2(12,  4),
+        ]
+
+        self.wheels_distance_pixels = self.centimeters_to_pixel(self.wheels_distance_cm)
 
         self.motor_l = Motor(self.wheel_radius_cm)
         self.motor_r = Motor(self.wheel_radius_cm)
@@ -23,15 +38,9 @@ class Robot:
         self.mot_vel_l = 0.0
         self.mot_vel_r = 0.0
 
-        # Line sensor position in centimeters from robot center
-        self.line_sensor_pos = [
-            Vector2(20, -4),
-            Vector2(20, -3),
-            Vector2(20, -1),
-            Vector2(20,  1),
-            Vector2(20,  3),
-            Vector2(20,  4),
-        ]
+        self.velocity = Vector2(1, 0.0)
+        self.angular_velocity = 0
+
     
     def centimeters_to_pixel(self, centimeters):
         return centimeters * 2
@@ -44,7 +53,8 @@ class Robot:
         self.mot_vel_r = self.motor_r.velocity_after_interval(self.mot_vel_r, dt) # m/s
         
         self.velocity.x = self.meters_to_pixel((self.mot_vel_l + self.mot_vel_r) / 2)    # Pixel per second
-        self.angular_velocity = self.meters_to_pixel((self.mot_vel_r - self.mot_vel_l)) / self.wheels_distance # Pixel per second / Pixel = rad/s
+
+        self.angular_velocity = self.meters_to_pixel((self.mot_vel_r - self.mot_vel_l)) / self.wheels_distance_pixels # Pixel per second / Pixel = rad/s
 
         self.position += self.velocity.rotate(-self.angle) * dt
         self.angle += math.degrees((self.angular_velocity) * dt)
@@ -75,8 +85,11 @@ class Robot:
     
     def out_of_line(self, screen: Surface, max_x, max_y):
         corners = [Vector2(0, 0), Vector2(0, 0), Vector2(0, 0), Vector2(0, 0)]
-        robot_size_x_pixel = self.wheels_distance + 10
-        robot_size_y_pixel = self.wheels_distance + 10
+
+        margin = 10
+        robot_size_x_pixel = self.centimeters_to_pixel(self.robot_size_x_cm) + margin
+        robot_size_y_pixel = self.centimeters_to_pixel(self.robot_size_y_cm) + margin
+
         corners[0] = self.position + (Vector2(robot_size_x_pixel / 2, robot_size_y_pixel / 2)).rotate(-self.angle)
         corners[1] = self.position + (Vector2(robot_size_x_pixel / 2, -robot_size_y_pixel / 2)).rotate(-self.angle)
         corners[2] = self.position + (Vector2(-robot_size_x_pixel / 2, -robot_size_y_pixel / 2)).rotate(-self.angle)

@@ -8,9 +8,9 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Line Follower")
-        width = 1280
-        height = 810
-        self.screen = pygame.display.set_mode((width, height))
+        self.screen_width = 1280
+        self.screen_height = 810
+        self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
         self.ticks = 60
         self.exit = False
@@ -20,8 +20,11 @@ class Game:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "raiju.png")
         robot_image = pygame.image.load(image_path)
-        resized_image = pygame.transform.scale(robot_image, (36, 36))
+
         robot = Robot(20, 245, 90)
+        robot_size_x_cm = 12
+        robot_size_y_cm = 6
+        resized_image = pygame.transform.scale(robot_image, (robot.centimeters_to_pixel(robot_size_y_cm), robot.centimeters_to_pixel(robot_size_x_cm)))
         waypoint_idx = 0
 
         while not self.exit:
@@ -33,7 +36,7 @@ class Game:
             dt = self.clock.get_time() / 1000
 
             # Line sensor
-            line_sensor = robot.get_line_sensor(self.screen, 1280, 810)
+            line_sensor = robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
             # print(line_sensor)
 
             kp = 5
@@ -59,6 +62,7 @@ class Game:
             if (map.near_waypoint(robot.position, waypoint_idx)):
                 waypoint_idx += 1
 
+            # Draw line sensor
             for sensor in robot.line_sensor_pos:
                 sensor_position = robot.position + robot.centimeters_to_pixel(sensor).rotate(-robot.angle)
                 line_sensor_draw = sensor_position + Vector2(3, 0).rotate(-robot.angle)
