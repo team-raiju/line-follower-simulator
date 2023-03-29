@@ -39,18 +39,44 @@ class Game:
             line_sensor = robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
             # print(line_sensor)
 
-            kp = 5
-            kd = 0.001
+            error = 1.5 * (line_sensor[7] - line_sensor[4]) + 3 * (line_sensor[9] - line_sensor[2]) + 2 * (line_sensor[8] -line_sensor[3]) + (line_sensor[6] - line_sensor[5])
             
-            error = 3 * (line_sensor[9] - line_sensor[2]) + 2 * (line_sensor[8] -line_sensor[3]) + (line_sensor[6] - line_sensor[5])
-            derivative = kd * (error - self.last_error)
+            if (waypoint_idx >= 62):
+                
+                robot.motor_l.set_voltage(15)
+                robot.motor_r.set_voltage(15)
 
-            robot.motor_l.set_voltage(40 - (error * kp + derivative * kd))
-            robot.motor_r.set_voltage(40 + (error * kp + derivative * kd))
+            elif (waypoint_idx < 37):
+                kp = 5
+                kd = 0.001
+                
+                derivative = kd * (error - self.last_error)
+                robot.motor_l.set_voltage(42 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(42 + (error * kp + derivative * kd))
+            elif waypoint_idx < 51:
+                kp = 3.3
+                kd = 0.001
+                
+                derivative = kd * (error - self.last_error)
+                robot.motor_l.set_voltage(30 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(30 + (error * kp + derivative * kd))
+            elif waypoint_idx < 61:
+                kp = 5.8
+                kd = 0.00
+                
+                derivative = kd * (error - self.last_error)
+                robot.motor_l.set_voltage(26 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(26 + (error * kp + derivative * kd))
+
+            else:
+                kp = 5
+                kd = 0.001
+                derivative = kd * (error - self.last_error)
+                robot.motor_l.set_voltage(55 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(55 + (error * kp + derivative * kd))
+
 
             self.last_error = error
-            
-
             robot.update(dt)
             
             #Draw
@@ -59,8 +85,10 @@ class Game:
             map.gen_default_track()
             
             # Update travalled distance
-            if (map.near_waypoint(robot.position, waypoint_idx)):
-                waypoint_idx += 1
+            if (waypoint_idx < len(map.waypoint)):
+                if (map.near_waypoint(robot.position, waypoint_idx)):
+                    waypoint_idx += 1
+                    print(waypoint_idx)
 
             # Draw line sensor
             for sensor in robot.line_sensor_pos:
