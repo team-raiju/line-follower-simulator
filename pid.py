@@ -26,6 +26,7 @@ class Game:
         robot_size_y_cm = 6
         resized_image = pygame.transform.scale(robot_image, (robot.centimeters_to_pixel(robot_size_y_cm), robot.centimeters_to_pixel(robot_size_x_cm)))
         waypoint_idx = 0
+        finished_counter = 0
 
         while not self.exit:
             # Event queue
@@ -42,38 +43,46 @@ class Game:
             error = 1.5 * (line_sensor[7] - line_sensor[4]) + 3 * (line_sensor[9] - line_sensor[2]) + 2 * (line_sensor[8] -line_sensor[3]) + (line_sensor[6] - line_sensor[5])
             
             if (waypoint_idx >= 62):
-                
-                robot.motor_l.set_voltage(15)
-                robot.motor_r.set_voltage(15)
+                finished_counter += 1
+                if (finished_counter > 50):
+                    robot.motor_l.set_voltage(0)
+                    robot.motor_r.set_voltage(0)
+                else:
+                    kp = 3.3
+                    kd = 0.001
+                    
+                    derivative = kd * (error - self.last_error)
+                    robot.motor_l.set_voltage(30 - (error * kp + derivative * kd))
+                    robot.motor_r.set_voltage(30 + (error * kp + derivative * kd))
 
             elif (waypoint_idx < 37):
                 kp = 5
                 kd = 0.001
                 
                 derivative = kd * (error - self.last_error)
-                robot.motor_l.set_voltage(42 - (error * kp + derivative * kd))
-                robot.motor_r.set_voltage(42 + (error * kp + derivative * kd))
+                robot.motor_l.set_voltage(41 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(41 + (error * kp + derivative * kd))
             elif waypoint_idx < 51:
-                kp = 3.3
+                kp = 3.4
                 kd = 0.001
                 
                 derivative = kd * (error - self.last_error)
                 robot.motor_l.set_voltage(30 - (error * kp + derivative * kd))
                 robot.motor_r.set_voltage(30 + (error * kp + derivative * kd))
             elif waypoint_idx < 61:
-                kp = 5.8
-                kd = 0.00
+                kp = 7.2
+                kd = 0.04
                 
                 derivative = kd * (error - self.last_error)
-                robot.motor_l.set_voltage(26 - (error * kp + derivative * kd))
-                robot.motor_r.set_voltage(26 + (error * kp + derivative * kd))
+                robot.motor_l.set_voltage(27 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(27 + (error * kp + derivative * kd))
 
             else:
                 kp = 5
                 kd = 0.001
                 derivative = kd * (error - self.last_error)
-                robot.motor_l.set_voltage(55 - (error * kp + derivative * kd))
-                robot.motor_r.set_voltage(55 + (error * kp + derivative * kd))
+                robot.motor_l.set_voltage(42 - (error * kp + derivative * kd))
+                robot.motor_r.set_voltage(42 + (error * kp + derivative * kd))
 
 
             self.last_error = error
