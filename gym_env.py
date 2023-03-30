@@ -19,8 +19,8 @@ class LineFollowerEnv(Env):
 
         # Env
         self.action_space = Box(low=-1, high=1, shape=(2, ), dtype=np.float32)
-        self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1]), 
-                                     high=np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), dtype=np.float16)
+        self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 
+                                     high=np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), dtype=np.int32)
 
         self.max_duration = 1500
 
@@ -52,17 +52,21 @@ class LineFollowerEnv(Env):
 
         last_mot_vel_l = self.robot.mot_vel_l / 100.0
         last_mot_vel_r = self.robot.mot_vel_r / 100.0
+        last_line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width , self.screen_height)
 
         mot_left = int(action[0] * 100)
         mot_right = int(action[1] * 100)
         self.robot.motor_l.set_voltage(mot_left)
         self.robot.motor_r.set_voltage(mot_right)
+        
         self.robot.update(self.tick_period)
+        line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width , self.screen_height)
+
 
         # Observation
-        line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width , self.screen_height)
-        obs_np = np.asarray(line_sensor, dtype=np.float16)
-        obs_np = np.append(obs_np, [last_mot_vel_l, last_mot_vel_r])
+        obs_np_1 = np.asarray(last_line_sensor, dtype=np.int32)
+        obs_np_2 = np.asarray(line_sensor, dtype=np.int32)
+        obs_np = np.append(obs_np_1, obs_np_2)
 
         # Reward
         reward = 0
@@ -119,7 +123,9 @@ class LineFollowerEnv(Env):
         self.robot = Robot(20, 245, 90)
         line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
         obs_np = np.asarray(line_sensor, dtype=np.int32)
-        obs_np = np.append(obs_np, [0, 0])
+        # obs_np = np.append(obs_np, [0, 0])
+        obs_np = np.append(obs_np, obs_np)
+
 
         return obs_np
 
@@ -128,14 +134,14 @@ class LineFollowerEnv(Env):
 
 
 def train_model(iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_6', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_7', name)
     log_path = os.path.join(HOME_DIR, 'logs')
     model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
     model.learn(total_timesteps=iterations)
     model.save(PPO_Path)
 
 def train_existing_model(model: PPO, iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_6', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_7', name)
     model.learn(total_timesteps=iterations)
     model.save(PPO_Path)
 
@@ -155,11 +161,11 @@ def run_simulation(model : PPO, episodes):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_6', 'PPO_Model_Raijin_1M200k')
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_7', 'PPO_Model_Raijin_920k')
     model = PPO.load(PPO_Path_Init, env=env)
     
     # train_existing_model(model, 200000, 'PPO_Model_Raijin_1M200k' )
-    # train_model(200000, 'PPO_Model_Raijin_800k' )
+    # train_model(920000, 'PPO_Model_Raijin_920k' )
     
     run_simulation(model, 4)
 
