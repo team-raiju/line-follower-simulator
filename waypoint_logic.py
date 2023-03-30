@@ -46,7 +46,7 @@ class Game:
         robot_size_x_cm = 12
         robot_size_y_cm = 6
         resized_image = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(robot_size_y_cm), self.robot.centimeters_to_pixel(robot_size_x_cm)))
-        waypoint_idx = 1
+        waypoint_idx = 0
         finished_counter = 0
 
         while not self.exit:
@@ -62,14 +62,21 @@ class Game:
             map = Map(20, 245, 270, self.screen)
             map.gen_default_track()
 
-            (dist, angleDiff) = self.trackGoal(self.robot.position, map.waypoint[waypoint_idx], self.robot.angle)
+            if (len(map.waypoint) > waypoint_idx):
+                (dist, angleDiff) = self.trackGoal(self.robot.position, map.waypoint[waypoint_idx], self.robot.angle)
 
-            vel = 30
-            w = -angleDiff * 0.1
-            print(angleDiff)
+                vel = 50
+                w = -angleDiff * 0.35
+                # print(angleDiff)
 
-            self.set_motors_voltage(vel, w)
-            # print(self.robot.angle)
+                self.set_motors_voltage(vel, w)
+            else:
+                (dist, angleDiff) = self.trackGoal(self.robot.position, Vector2(20, 320), self.robot.angle)
+                if dist < 0:
+                    dist = 0
+                self.robot.motor_l.set_voltage(dist/5)
+                self.robot.motor_r.set_voltage(dist/5)
+
 
             self.robot.update(dt)
 
