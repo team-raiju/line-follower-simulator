@@ -2,7 +2,7 @@ import pygame
 import math
 import random
 from pygame.math import Vector2
-
+import os
 
 class Map:
     def __init__(self, x_cm, y_cm, angle, screen):
@@ -211,6 +211,14 @@ class Map:
         #manual adjust of angle to compasete for errors
         self.last_angle = 270
         self.gen_line(130)
+
+
+    def load_map_from_file(self):
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            my_path = os.path.join(current_dir, "map1.png")
+            my_map = pygame.image.load(my_path)
+            resized_my_map = pygame.transform.scale(my_map, (480, 810)) # 36pixels -> 18cm
+            self.screen.blit(resized_my_map, (45, 30))
 
 
 def main():
