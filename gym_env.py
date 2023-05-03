@@ -11,6 +11,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.vec_env import VecFrameStack
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.env_checker import check_env
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 
 HOME_DIR = os.path.dirname(__file__)
 
@@ -86,7 +87,7 @@ class LineFollowerEnv(Env):
         #             reward = -150
 
         if (self.waypoint_idx >= len(self.map.waypoint)):
-            reward = +300
+            reward = +1000
             done = True
         
         elif ((2000 - self.max_duration) > (1 + self.waypoint_idx) * 200):
@@ -99,7 +100,6 @@ class LineFollowerEnv(Env):
 
         self.max_duration -= 1 
         if self.max_duration <= 0:
-            reward = -100 
             done = True
         
         info = {}
@@ -134,11 +134,16 @@ class LineFollowerEnv(Env):
 
 
 def train_model(iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_7', name)
+    PPO_Path = os.path.join(HOME_DIR, 'Models_Best', name)
     log_path = os.path.join(HOME_DIR, 'logs')
+
+    stop_callback = StopTrainingOnRewardThreshold(reward_threshold=5850, verbose = 1)
+    eval_callback = EvalCallback(env, callback_on_new_best=stop_callback, eval_freq=10000, verbose=1 , best_model_save_path=PPO_Path)
+
     model = PPO('MlpPolicy', env, verbose = 1, tensorboard_log=log_path)
-    model.learn(total_timesteps=iterations)
-    model.save(PPO_Path)
+    model.learn(total_timesteps=iterations, callback=eval_callback)
+
+
 
 def train_existing_model(model: PPO, iterations, name):
     PPO_Path = os.path.join(HOME_DIR, 'Models_7', name)
@@ -161,13 +166,14 @@ def run_simulation(model : PPO, episodes):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_7', 'PPO_Model_Raijin_4M')
-    model = PPO.load(PPO_Path_Init, env=env)
+    # PPO_Path_Init = os.path.join(HOME_DIR, 'Models_7', 'PPO_Model_Raijin_Callback')
+    # model = PPO.load(PPO_Path_Init, env=env)
+
     
     # train_existing_model(model, 200000, 'PPO_Model_Raijin_1M200k' )
-    # train_model(4000000, 'PPO_Model_Raijin_4M' )
+    train_model(8000000, 'PPO_Model_Raijin_Callback' )
     
-    run_simulation(model, 4)
+    # run_simulation(model, 4)
 
 
     
