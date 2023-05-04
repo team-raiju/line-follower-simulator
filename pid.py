@@ -8,8 +8,8 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Line Follower")
-        self.screen_width = 1280
-        self.screen_height = 810
+        self.screen_width = 560
+        self.screen_height = 890
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
         self.ticks = 60
@@ -21,7 +21,7 @@ class Game:
         image_path = os.path.join(current_dir, "raiju.png")
         robot_image = pygame.image.load(image_path)
 
-        robot = Robot(20, 245, 90)
+        robot = Robot(36, 200, 90)
         robot_size_x_cm = 12
         robot_size_y_cm = 6
         resized_image = pygame.transform.scale(robot_image, (robot.centimeters_to_pixel(robot_size_y_cm), robot.centimeters_to_pixel(robot_size_x_cm)))
@@ -91,11 +91,11 @@ class Game:
             #Draw
             self.screen.fill((0, 0, 0))
             map = Map(20, 245, 270, self.screen)
-            map.gen_default_track()
+            map.load_map_from_file()
             
             # Update travalled distance
             if (waypoint_idx < len(map.waypoint)):
-                if (map.near_waypoint(robot.position, waypoint_idx)):
+                if (map.near_waypoint(robot.position, map.waypoint[waypoint_idx])):
                     waypoint_idx += 1
                     print(waypoint_idx)
 

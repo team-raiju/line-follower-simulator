@@ -5,6 +5,7 @@ from robot import Robot
 import pygame
 import os
 from generate_track import Map
+from pygame.math import Vector2
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
@@ -25,11 +26,11 @@ class LineFollowerEnv(Env):
 
         self.max_duration = 2000
 
-        self.robot = Robot(20, 245, 90)
+        self.robot = Robot(36, 200, 90)
 
         # Render options
-        self.screen_width = 1280
-        self.screen_height = 810
+        self.screen_width = 560
+        self.screen_height = 890
 
         pygame.init()
         pygame.display.set_caption("Raijin")
@@ -43,9 +44,17 @@ class LineFollowerEnv(Env):
         self.tick_period = 1 / self.tick_rate
 
         self.map = Map(20, 245, 270, self.screen)
-        self.map.gen_default_track()
+        self.map.load_map_from_file()
 
         self.waypoint_idx = 0
+
+        self.waypoint_list = []
+        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", "waypoints.txt")
+
+        with open(waypoint_list_path, "r") as f:
+            for line in f:
+                x, y = line.strip().split(",")
+                self.waypoint_list.append((int(x), int(y)))
         
     def step(self, action):
         
@@ -72,21 +81,18 @@ class LineFollowerEnv(Env):
         # Reward
         reward = -0.05
 
-        if (self.map.near_waypoint(self.robot.position, self.waypoint_idx)):
+        current_point = Vector2(self.waypoint_list[self.waypoint_idx][0], self.waypoint_list[self.waypoint_idx][1])
+        if (self.map.near_waypoint(self.robot.position, current_point)):
                 multiplier = self.waypoint_idx
-                reward = 3000 / len(self.map.waypoint) + multiplier
+                reward = 3000 / len(self.waypoint_list) + multiplier
                 self.waypoint_idx += 1
+                
 
 
         # Done
         done = False
-        # if (self.waypoint_idx >= 2):
-        #     for i in range(self.waypoint_idx - 2):
-        #         if (self.map.near_waypoint(self.robot.position, i)):
-        #             done = True
-        #             reward = -150
 
-        if (self.waypoint_idx >= len(self.map.waypoint)):
+        if (self.waypoint_idx >= len(self.waypoint_list)):
             reward = +1000
             done = True
         
@@ -109,7 +115,7 @@ class LineFollowerEnv(Env):
     def render(self):
         self.screen.fill((0, 0, 0))
         map = Map(20, 245, 270, self.screen)
-        map.gen_default_track()
+        map.load_map_from_file()
 
         rotated = pygame.transform.rotate(self.resized_image, self.robot.angle)
         rect = rotated.get_rect()
@@ -120,7 +126,7 @@ class LineFollowerEnv(Env):
     def reset(self):
         self.max_duration = 2000
         self.waypoint_idx = 0
-        self.robot = Robot(20, 245, 90)
+        self.robot = Robot(36, 200, 90)
         line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
         obs_np = np.asarray(line_sensor, dtype=np.int32)
         # obs_np = np.append(obs_np, [0, 0])
@@ -134,7 +140,7 @@ class LineFollowerEnv(Env):
 
 
 def train_model(iterations, name):
-    PPO_Path = os.path.join(HOME_DIR, 'Models_Best', name)
+    PPO_Path = os.path.join(HOME_DIR, 'New_Map_Model_1', name)
     log_path = os.path.join(HOME_DIR, 'logs')
 
     stop_callback = StopTrainingOnRewardThreshold(reward_threshold=5850, verbose = 1)
@@ -166,14 +172,13 @@ def run_simulation(model : PPO, episodes):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    # PPO_Path_Init = os.path.join(HOME_DIR, 'Models_7', 'PPO_Model_Raijin_Callback')
-    # model = PPO.load(PPO_Path_Init, env=env)
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_Best', 'PPO_Model_Raijin_Callback', 'best_model')
+    model = PPO.load(PPO_Path_Init, env=env)
 
-    
     # train_existing_model(model, 200000, 'PPO_Model_Raijin_1M200k' )
-    train_model(8000000, 'PPO_Model_Raijin_Callback' )
+    # train_model(400000, 'PPO_Model_400k' )
     
-    # run_simulation(model, 4)
+    run_simulation(model, 4)
 
 
     
