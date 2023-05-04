@@ -110,8 +110,8 @@ class Map:
 
         pygame.draw.polygon(self.screen, self.line_color, (point1, point2, point3, point4))
     
-    def near_waypoint(self, point: Vector2, index):
-        distance = point.distance_to(self.waypoint[index])
+    def near_waypoint(self, point: Vector2, point_2: Vector2):
+        distance = point.distance_to(point_2)
         max_dist_cm = 15
         if (abs(distance) < self.centimeters_to_pixel(max_dist_cm)):
             return True
@@ -217,8 +217,8 @@ class Map:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             map_path = os.path.join(current_dir, "map1.png")
             custom_map = pygame.image.load(map_path)
-            resized_custom_map = pygame.transform.scale(custom_map, (480, 810)) # 36pixels -> 18cm
-            self.screen.blit(resized_custom_map, (45, 30))
+            resized_custom_map = pygame.transform.scale(custom_map, (460, 790)) # 36pixels -> 18cm
+            self.screen.blit(resized_custom_map, (50, 50))
 
 
 def main():
