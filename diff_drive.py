@@ -18,7 +18,7 @@ class Game:
 
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "media, "raiju.png")
+        image_path = os.path.join(current_dir, "media", "raiju.png")
         car_image = pygame.image.load(image_path)
         resized_image = pygame.transform.scale(car_image, (36, 36)) # 36pixels -> 18cm
         robot = Robot(20, 245, 90)

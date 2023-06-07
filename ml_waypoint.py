@@ -36,7 +36,7 @@ class LineFollowerEnv(Env):
         pygame.init()
         pygame.display.set_caption("Raijin")
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "media, "raiju.png")
+        image_path = os.path.join(current_dir, "media", "raiju.png")
         self.car_image = pygame.image.load(image_path)
         self.resized_image = pygame.transform.scale(self.car_image, (12, 24))
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
