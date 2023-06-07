@@ -5,11 +5,9 @@ from pygame.math import Vector2
 import os
 
 class Map:
-    def __init__(self, x_cm, y_cm, angle, screen):
-        x = self.centimeters_to_pixel(x_cm)
-        y = self.centimeters_to_pixel(y_cm)
-        self.last_point = Vector2(x, y)
-        self.last_angle = angle
+    def __init__(self, screen):
+        self.last_point = Vector2(0, 0)
+        self.last_angle = 0
         self.screen = screen
         self.line_color = (255, 255, 255)
         self.line_width = self.centimeters_to_pixel(2)
@@ -117,7 +115,12 @@ class Map:
             return True
         return False
 
-    def gen_default_track(self):
+    def gen_default_track(self, x_cm, y_cm, angle ):
+        x = self.centimeters_to_pixel(x_cm)
+        y = self.centimeters_to_pixel(y_cm)
+        self.last_point = Vector2(x, y)
+        self.last_angle = angle
+    
         self.gen_marker('Right', self.last_point)
         self.gen_line(100)
         self.gen_marker('Right', self.last_point)
@@ -213,12 +216,13 @@ class Map:
         self.gen_line(130)
 
 
-    def load_map_from_file(self):
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            map_path = os.path.join(current_dir, "maps" , "map1.png")
-            custom_map = pygame.image.load(map_path)
-            resized_custom_map = pygame.transform.scale(custom_map, (460, 790)) # 36pixels -> 18cm
-            self.screen.blit(resized_custom_map, (50, 50))
+    def load_map_from_file(self, file_name, margin_size, width, height):
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        map_path = os.path.join(current_dir, "maps" , file_name)
+        custom_map = pygame.image.load(map_path)
+        resized_custom_map = pygame.transform.scale(custom_map, (width, height))
+        self.screen.blit(resized_custom_map, (margin_size, margin_size))
 
 
 def main():
@@ -227,8 +231,8 @@ def main():
 
     # Set up the display window
     screen = pygame.display.set_mode((1280, 810))
-    map = Map(20, 245, 270, screen)
-    map.gen_default_track()
+    map = Map(screen)
+    map.gen_default_track(20, 245, 270)
 
     # Update the display
     pygame.display.update()

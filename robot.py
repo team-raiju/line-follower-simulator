@@ -79,8 +79,7 @@ class Robot:
             
             else:
                 val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
-                
-                is_black = (val[0] != 255)
+                is_black = (val[0] < 200)
                 if is_black:
                     sensor_val.append(1)
                 else:
