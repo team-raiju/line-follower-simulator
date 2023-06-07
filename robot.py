@@ -5,8 +5,9 @@ from motor import Motor
 
 
 class Robot:
-    def __init__(self, pos_x_cm, pos_y_cm, angle):
+    def __init__(self, cm_per_pixel, pos_x_cm, pos_y_cm, angle):
         #Robot position
+        self.cm_per_pixel = cm_per_pixel
         x = self.centimeters_to_pixel(pos_x_cm)
         y = self.centimeters_to_pixel(pos_y_cm)
         self.position = Vector2(x, y)
@@ -49,7 +50,7 @@ class Robot:
 
     
     def centimeters_to_pixel(self, centimeters):
-        return centimeters * 2
+        return centimeters * self.cm_per_pixel 
     
     def meters_to_pixel(self, meters):
         return meters * 200

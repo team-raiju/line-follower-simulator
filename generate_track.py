@@ -5,7 +5,8 @@ from pygame.math import Vector2
 import os
 
 class Map:
-    def __init__(self, screen):
+    def __init__(self, screen, cm_per_pixel):
+        self.cm_per_pixel = cm_per_pixel
         self.last_point = Vector2(0, 0)
         self.last_angle = 0
         self.screen = screen
@@ -15,7 +16,7 @@ class Map:
         self.waypoint = [self.last_point]
     
     def centimeters_to_pixel(self, centimeters):
-        return centimeters * 2
+        return centimeters * self.cm_per_pixel
         
     def gen_line(self, lenght_cm):
         lenght = self.centimeters_to_pixel(lenght_cm)

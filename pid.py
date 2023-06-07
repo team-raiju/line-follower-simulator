@@ -13,10 +13,11 @@ class Game:
 
         self.map_width_cm = 545
         self.map_height_cm = 595
+        self.cm_per_pixel = 1.5
 
-        self.map_width_pixels = self.map_width_cm * 2
-        self.map_height_pixels = self.map_height_cm * 2
-        self.margin_pixels = 50
+        self.map_width_pixels = self.map_width_cm * self.cm_per_pixel
+        self.map_height_pixels = self.map_height_cm * self.cm_per_pixel
+        self.margin_pixels = 40
 
         self.screen_width = self.map_width_pixels + (2 * self.margin_pixels)
         self.screen_height = self.map_height_pixels + (2 * self.margin_pixels)
@@ -33,10 +34,10 @@ class Game:
         robot_size_x_cm = 12
         robot_size_y_cm = 6
         robot_init_x_cm = 200
-        robot_init_y_cm = 35
+        robot_init_y_cm = 40
         robot_init_angle = 0
 
-        self.robot = Robot(robot_init_x_cm, robot_init_y_cm, robot_init_angle)
+        self.robot = Robot(self.cm_per_pixel, robot_init_x_cm, robot_init_y_cm, robot_init_angle)
         self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(robot_size_y_cm), self.robot.centimeters_to_pixel(robot_size_x_cm)))
     
     def draw_line_sensor(self):
@@ -51,7 +52,7 @@ class Game:
             self.screen.blit(rotated, self.robot.position- (rect.width / 2, rect.height / 2))
 
     def draw_map(self):
-        map = Map(self.screen)
+        map = Map(self.screen, self.cm_per_pixel)
         map.load_map_from_file("map3.png", self.margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
     def run(self):
@@ -67,9 +68,9 @@ class Game:
             # print(line_sensor)
             error = 1.5 * (line_sensor[7] - line_sensor[4]) + 3 * (line_sensor[9] - line_sensor[2]) + 2 * (line_sensor[8] -line_sensor[3]) + (line_sensor[6] - line_sensor[5])
             
-            kp = 5
+            kp = 4.5
             kd = 0.001
-            base_speed = 41
+            base_speed = 38
             
             derivative = kd * (error - self.last_error)
             self.robot.motor_l.set_voltage(base_speed - (error * kp + derivative * kd))

@@ -7,6 +7,7 @@ WAYPOINT_LIST_NAME = "waypoints.txt"
 
 MAP_X_SIZE_CM = 230
 MAP_Y_SIZE_CM = 395
+CENTIMETERS_PER_PIXEL = 2
 
 
 class Game:
@@ -17,14 +18,14 @@ class Game:
         self.map_x_size = self.centimeters_to_pixel(MAP_X_SIZE_CM)
         self.map_y_size = self.centimeters_to_pixel(MAP_Y_SIZE_CM)
 
-        self.margin = 100 # pixels
-        width = self.map_x_size + self.margin
-        height = self.map_y_size + self.margin
+        self.margin = 50 # pixels
+        width = self.map_x_size + self.margin * 2
+        height = self.map_y_size + self.margin * 2
         self.screen = pygame.display.set_mode((width, height))
         self.waypoint_list = []
 
     def centimeters_to_pixel(self, centimeters):
-        return centimeters * 2
+        return centimeters * CENTIMETERS_PER_PIXEL
     
     def save_waypoint_list(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -40,7 +41,7 @@ class Game:
         map_path = os.path.join(current_dir, "img_filtered", INPUT_MAP_NAME)
         custom_map = pygame.image.load(map_path)
         resized_custom_map = pygame.transform.scale(custom_map, (self.map_x_size, self.map_y_size))
-        self.screen.blit(resized_custom_map, (self.margin / 2, self.margin / 2))
+        self.screen.blit(resized_custom_map, (self.margin, self.margin))
         pygame.display.flip()
 
         while not self.exit:
@@ -59,14 +60,14 @@ class Game:
                     print("Backspace key pressed")
                     if (len(self.waypoint_list) > 0):
                         self.screen.fill((0, 0, 0))
-                        self.screen.blit(resized_custom_map, (self.margin / 2, self.margin / 2))
+                        self.screen.blit(resized_custom_map, (self.margin, self.margin))
                         self.waypoint_list.pop()
 
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
                     print("Delete key pressed")
                     if (len(self.waypoint_list) > 0):
                         self.screen.fill((0, 0, 0))
-                        self.screen.blit(resized_custom_map, (self.margin / 2, self.margin / 2))
+                        self.screen.blit(resized_custom_map, (self.margin, self.margin))
                         self.waypoint_list.pop()
                 
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
