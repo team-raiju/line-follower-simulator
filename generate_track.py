@@ -215,7 +215,7 @@ class Map:
 
     def load_map_from_file(self):
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            map_path = os.path.join(current_dir, "map1.png")
+            map_path = os.path.join(current_dir, "maps" , "map1.png")
             custom_map = pygame.image.load(map_path)
             resized_custom_map = pygame.transform.scale(custom_map, (460, 790)) # 36pixels -> 18cm
             self.screen.blit(resized_custom_map, (50, 50))

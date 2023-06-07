@@ -18,7 +18,7 @@ class Game:
 
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "raiju.png")
+        image_path = os.path.join(current_dir, "media" , "raiju.png")
         robot_image = pygame.image.load(image_path)
 
         robot = Robot(36, 200, 90)
