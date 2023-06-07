@@ -217,22 +217,13 @@ class Map:
         self.gen_line(130)
 
 
-    def load_map_from_file(self, file_name, margin_size, width, height):
-
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        map_path = os.path.join(current_dir, "maps" , file_name)
-        custom_map = pygame.image.load(map_path)
-        resized_custom_map = pygame.transform.scale(custom_map, (width, height))
-        self.screen.blit(resized_custom_map, (margin_size, margin_size))
-
-
 def main():
     # Initialize Pygame
     pygame.init()
 
     # Set up the display window
     screen = pygame.display.set_mode((1280, 810))
-    map = Map(screen)
+    map = Map(screen, 2)
     map.gen_default_track(20, 245, 270)
 
     # Update the display

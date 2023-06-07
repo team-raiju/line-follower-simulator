@@ -2,6 +2,7 @@ import os
 import pygame
 from pygame.math import Vector2
 from generate_track import Map
+from load_track import LoadMap
 from robot import Robot
 
 class Game:
@@ -39,6 +40,10 @@ class Game:
 
         self.robot = Robot(self.cm_per_pixel, robot_init_x_cm, robot_init_y_cm, robot_init_angle)
         self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(robot_size_y_cm), self.robot.centimeters_to_pixel(robot_size_x_cm)))
+
+        self.map = LoadMap(self.screen)
+        self.map.load_map_from_file("map3.png", self.margin_pixels, self.map_width_pixels, self.map_height_pixels)
+
     
     def draw_line_sensor(self):
         for sensor in self.robot.line_sensor_pos:
@@ -47,13 +52,12 @@ class Game:
                 pygame.draw.circle(self.screen, (255, 0, 255), (line_sensor_draw.x, line_sensor_draw.y), 1)
 
     def draw_robot(self):
-            rotated = pygame.transform.rotate(self.resized_robot_img, self.robot.angle)
-            rect = rotated.get_rect()
-            self.screen.blit(rotated, self.robot.position- (rect.width / 2, rect.height / 2))
+        rotated = pygame.transform.rotate(self.resized_robot_img, self.robot.angle)
+        rect = rotated.get_rect()
+        self.screen.blit(rotated, self.robot.position - (rect.width / 2, rect.height / 2))
 
     def draw_map(self):
-        map = Map(self.screen, self.cm_per_pixel)
-        map.load_map_from_file("map3.png", self.margin_pixels, self.map_width_pixels, self.map_height_pixels)
+        self.map.draw_loaded_map()
 
     def run(self):
 
