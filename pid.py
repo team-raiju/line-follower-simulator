@@ -5,16 +5,16 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map3.png"
+MAP_FILE_NAME = "map3_545_x_595.png"
 MAP_WIDTH_CM = 545
 MAP_HEIGHT_CM = 595
+MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 1.5
-MAP_MARGIN_PIXELS = 40
 
 ROBOT_SIZE_X_CM = 12
 ROBOT_SIZE_Y_CM = 6
 ROBOT_INIT_POS_X_CM = 200 
-ROBOT_INIT_POS_Y_CM = 40
+ROBOT_INIT_POS_Y_CM = 37
 ROBOT_INIT_ANGLE = 0
 
 
@@ -26,8 +26,9 @@ class Game:
         self.map_width_pixels = MAP_WIDTH_CM * MAP_CM_PER_PIXELS
         self.map_height_pixels = MAP_HEIGHT_CM * MAP_CM_PER_PIXELS
 
-        self.screen_width = self.map_width_pixels + (2 * MAP_MARGIN_PIXELS)
-        self.screen_height = self.map_height_pixels + (2 * MAP_MARGIN_PIXELS)
+        margin_pixels = MAP_MARGIN_CM * MAP_CM_PER_PIXELS
+        self.screen_width = self.map_width_pixels + (2 * margin_pixels)
+        self.screen_height = self.map_height_pixels + (2 * margin_pixels)
 
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
@@ -43,7 +44,7 @@ class Game:
         self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(ROBOT_SIZE_Y_CM), self.robot.centimeters_to_pixel(ROBOT_SIZE_X_CM)))
 
         self.map = LoadMap(self.screen)
-        self.map.load_map_from_file(MAP_FILE_NAME, MAP_MARGIN_PIXELS, self.map_width_pixels, self.map_height_pixels)
+        self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
     
     def draw_line_sensor(self):
@@ -75,7 +76,7 @@ class Game:
             
             kp = 2
             kd = 0.001
-            base_speed = 28
+            base_speed = 33
             
             derivative = kd * (error - self.last_error)
             self.robot.motor_l.set_voltage(base_speed - (error * kp + derivative * kd))

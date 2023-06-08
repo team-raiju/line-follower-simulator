@@ -53,7 +53,7 @@ class Robot:
         return centimeters * self.cm_per_pixel 
     
     def meters_to_pixel(self, meters):
-        return meters * 200
+        return meters * self.cm_per_pixel  * 100
 
     def update(self, dt):
         self.mot_vel_l = self.motor_l.velocity_after_interval(self.mot_vel_l, dt) # m/s
