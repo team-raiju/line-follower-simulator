@@ -18,17 +18,19 @@ from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewar
 
 HOME_DIR = os.path.dirname(__file__)
 
-MAP_FILE_NAME = "map1.png"
-MAP_WIDTH_CM = 230
-MAP_HEIGHT_CM = 395
-MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_FILE_NAME = "map3.png"
+MAP_WIDTH_CM = 545
+MAP_HEIGHT_CM = 595
+MAP_MARGIN_CM = (50/1.5)
+MAP_CM_PER_PIXELS = 1.5
 
 ROBOT_SIZE_X_CM = 12
 ROBOT_SIZE_Y_CM = 6
-ROBOT_INIT_POS_X_CM = 36 
-ROBOT_INIT_POS_Y_CM = 150
-ROBOT_INIT_ANGLE = 90
+ROBOT_INIT_POS_X_CM = 230
+ROBOT_INIT_POS_Y_CM = 44
+ROBOT_INIT_ANGLE = 0
+
+WAYPOINT_LIST_NAME = "waypoints_map3.txt"
 
 class LineFollowerEnv(Env):
     def __init__(self):
@@ -73,7 +75,7 @@ class LineFollowerEnv(Env):
     def load_waypoint_list(self):
         self.waypoint_list = []
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", "waypoints_map1.txt")
+        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", WAYPOINT_LIST_NAME)
 
         with open(waypoint_list_path, "r") as f:
             for line in f:

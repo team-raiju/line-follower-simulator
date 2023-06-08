@@ -6,17 +6,19 @@ from load_track import LoadMap
 from robot import Robot
 import math
 
-MAP_FILE_NAME = "map1.png"
-MAP_WIDTH_CM = 230
-MAP_HEIGHT_CM = 395
-MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_FILE_NAME = "map3.png"
+MAP_WIDTH_CM = 545
+MAP_HEIGHT_CM = 595
+MAP_MARGIN_CM = (50/1.5)
+MAP_CM_PER_PIXELS = 1.5
 
 ROBOT_SIZE_X_CM = 12
 ROBOT_SIZE_Y_CM = 6
-ROBOT_INIT_POS_X_CM = 36 
-ROBOT_INIT_POS_Y_CM = 150
-ROBOT_INIT_ANGLE = 90
+ROBOT_INIT_POS_X_CM = 200 
+ROBOT_INIT_POS_Y_CM = 37
+ROBOT_INIT_ANGLE = 0
+
+WAYPOINT_LIST = "waypoints_map3.txt"
 
 class Game:
     def __init__(self):
@@ -52,7 +54,7 @@ class Game:
 
         self.waypoint_list = []
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", "waypoints_map1.txt")
+        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", WAYPOINT_LIST)
 
         with open(waypoint_list_path, "r") as f:
             for line in f:
@@ -118,7 +120,7 @@ class Game:
 
                 self.set_motors_voltage(vel, w)
             else:
-                (dist, angleDiff) = self.trackGoal(self.robot.position, Vector2(20, 320), self.robot.angle)
+                (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[0], self.robot.angle)
                 if dist < 0:
                     dist = 0
                 self.robot.motor_l.set_voltage(dist/5)

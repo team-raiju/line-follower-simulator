@@ -80,7 +80,7 @@ class Robot:
             
             else:
                 val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
-                is_black = (val[0] < 200)
+                is_black = (val[0] < 150)
                 if is_black:
                     sensor_val.append(1)
                 else:
@@ -112,25 +112,25 @@ class Robot:
         for i in range (0, int(robot_size_x_pixel), 2):
             point = corners[0] + Vector2(i, 0).rotate(-self.angle-90)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] == 255):
+            if (color[0] > 150):
                 return False
 
         for i in range (0, int(robot_size_y_pixel), 2):
             point = corners[1] + Vector2(i, 0).rotate(-self.angle-180)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] == 255):
+            if (color[0] > 150):
                 return False
         
         for i in range (0, int(robot_size_x_pixel), 2):
             point = corners[2] + Vector2(i, 0).rotate(-self.angle-270)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] == 255):
+            if (color[0] > 150):
                 return False
         
         for i in range (0, int(robot_size_y_pixel), 2):
             point = corners[3] + Vector2(i, 0).rotate(-self.angle)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] == 255):
+            if (color[0] > 150):
                 return False
         
         return True
