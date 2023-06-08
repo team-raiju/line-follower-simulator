@@ -10,18 +10,18 @@ MAP_FILE_NAME = "map2.png"
 MAP_WIDTH_CM = 186
 MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_CM_PER_PIXELS = 6
 
 ROBOT_INIT_POS_X_CM = 202 
 ROBOT_INIT_POS_Y_CM = 100
 ROBOT_INIT_ANGLE = 270
 
+ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
 ROBOT_SIZE_Y_CM = 14.0 # Height
 ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
-ROBOT_IMAGE = "robot-img.png"
 
 class Game:
     def __init__(self):
@@ -70,25 +70,30 @@ class Game:
             self.robot.motor_r.set_voltage(0)
             
             if pressed[pygame.K_UP]:
-                self.robot.motor_l.set_voltage(80)
-                self.robot.motor_r.set_voltage(80)
+                self.robot.motor_l.set_voltage(40)
+                self.robot.motor_r.set_voltage(40)
             elif pressed[pygame.K_DOWN]:
-                self.robot.motor_l.set_voltage(-80)
-                self.robot.motor_r.set_voltage(-80)
+                self.robot.motor_l.set_voltage(-40)
+                self.robot.motor_r.set_voltage(-40)
 
             if pressed[pygame.K_LEFT]:
-                self.robot.motor_l.set_voltage(-35)
-                self.robot.motor_r.set_voltage(35)
+                self.robot.motor_l.set_voltage(-30)
+                self.robot.motor_r.set_voltage(30)
             elif pressed[pygame.K_RIGHT]:
-                self.robot.motor_l.set_voltage(35)
-                self.robot.motor_r.set_voltage(-35)
+                self.robot.motor_l.set_voltage(30)
+                self.robot.motor_r.set_voltage(-30)
 
             self.robot.update(dt)
             
             #Draw
             self.screen.fill((0, 0, 0))
             self.draw_map()
+            # line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
+            # print(line_sensor)
+
             self.robot.display(self.screen)
+            self.robot.display_line_sensor(self.screen)
+
 
             pygame.display.flip()
             self.clock.tick(self.ticks)

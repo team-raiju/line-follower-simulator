@@ -94,7 +94,8 @@ class Robot:
         sensor_val = []
 
         for pos_vector in self.line_sensor_pos:
-            sensor_position = self.position + self.centimeters_to_pixel(pos_vector).rotate(-self.angle)
+            offset = Vector2(self.centimeters_to_pixel(self.rot_center_offset_cm), 0)
+            sensor_position = self.position + self.centimeters_to_pixel(pos_vector).rotate(-self.angle) + offset.rotate(-self.angle)
 
             if (int(sensor_position.x) <= 0 or int(sensor_position.x) >= max_x):
                 sensor_val.append(1)
@@ -169,6 +170,12 @@ class Robot:
         offset = Vector2(self.centimeters_to_pixel(self.rot_center_offset_cm), 0)
         rotated_image, rect = self.rotate_image(-self.angle, robot_center, offset)
         screen.blit(rotated_image, rect)  # Blit the rotated image.
-        pygame.draw.circle(screen, (30, 250, 70), robot_center, 3)  # Pivot point.
-        pygame.draw.rect(screen, (30, 250, 70), rect, 1)  # The rect.
-        pygame.display.flip()
+        # pygame.draw.circle(screen, (30, 250, 70), robot_center, 3)  # Pivot point.
+        # pygame.draw.rect(screen, (30, 250, 70), rect, 1)  # The rect.
+    
+    def display_line_sensor(self, screen: Surface):
+        for sensor in self.line_sensor_pos:
+                offset = Vector2(self.centimeters_to_pixel(self.rot_center_offset_cm), 0)
+                sensor_position = self.position + self.centimeters_to_pixel(sensor).rotate(-self.angle) + offset.rotate(-self.angle)
+                line_sensor_draw = sensor_position
+                pygame.draw.circle(screen, (255, 0, 255), (line_sensor_draw.x, line_sensor_draw.y), 2)

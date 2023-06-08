@@ -5,19 +5,22 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map4.png"
-MAP_WIDTH_CM = 478
-MAP_HEIGHT_CM = 310
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2.5
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_SIZE_X_CM = 12
-ROBOT_SIZE_Y_CM = 6
-ROBOT_INIT_POS_X_CM = 33 
-ROBOT_INIT_POS_Y_CM = 180
-ROBOT_INIT_ANGLE = 90
+ROBOT_INIT_POS_X_CM = 202 
+ROBOT_INIT_POS_Y_CM = 100
+ROBOT_INIT_ANGLE = 270
 
-
+ROBOT_IMAGE = "robot-img.png"
+ROBOT_SIZE_X_CM = 14.0 # Width
+ROBOT_SIZE_Y_CM = 14.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 4.73
+WHEELS_DIST_CM = 14.0
+WHEELS_RADIUS_CM = 1.0
 class Game:
     def __init__(self):
         pygame.init()
@@ -36,30 +39,20 @@ class Game:
         self.exit = False
         self.last_error = 0
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        robot_image_path = os.path.join(current_dir, "media" , "raiju.png")
-        robot_image = pygame.image.load(robot_image_path)
-
-        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM, ROBOT_INIT_ANGLE)
-        self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(ROBOT_SIZE_Y_CM), self.robot.centimeters_to_pixel(ROBOT_SIZE_X_CM)))
+        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
+                        ROBOT_SIZE_Y_CM, ROTATION_OFFSET_FROM_CENTER_CM, \
+                        WHEELS_DIST_CM, WHEELS_RADIUS_CM,                \
+                        ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM,        \
+                        ROBOT_INIT_ANGLE, ROBOT_IMAGE)
+    
 
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
     
-    def draw_line_sensor(self):
-        for sensor in self.robot.line_sensor_pos:
-                sensor_position = self.robot.position + self.robot.centimeters_to_pixel(sensor).rotate(-self.robot.angle)
-                line_sensor_draw = sensor_position + Vector2(3, 0).rotate(-self.robot.angle)
-                pygame.draw.circle(self.screen, (255, 0, 255), (line_sensor_draw.x, line_sensor_draw.y), 1)
-
-    def draw_robot(self):
-        rotated = pygame.transform.rotate(self.resized_robot_img, self.robot.angle)
-        rect = rotated.get_rect()
-        self.screen.blit(rotated, self.robot.position - (rect.width / 2, rect.height / 2))
-
     def draw_map(self):
         self.map.draw_loaded_map()
+    
 
     def run(self):
 
@@ -70,15 +63,25 @@ class Game:
 
             dt = self.clock.get_time() / 1000
 
+            self.screen.fill((0, 0, 0))
+            self.draw_map()
+
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
             # print(line_sensor)
-            error = 1.5 * (line_sensor[7] - line_sensor[4]) + 3 * (line_sensor[9] - line_sensor[2]) + 2 * (line_sensor[8] -line_sensor[3]) + (line_sensor[6] - line_sensor[5])
+            error = 2.50 * (line_sensor[15] - line_sensor[0]) + \
+                    2.25 * (line_sensor[14] - line_sensor[1]) + \
+                    2.00 * (line_sensor[13] - line_sensor[2]) + \
+                    1.75 * (line_sensor[12] - line_sensor[3]) + \
+                    1.50 * (line_sensor[11] - line_sensor[4]) + \
+                    1.25 * (line_sensor[10] - line_sensor[5]) + \
+                    1.00 * (line_sensor[9] - line_sensor[6])  + \
+                    0.75 * (line_sensor[8] - line_sensor[7])
             
-            kp = 2
-            kd = 0.001
-            base_speed = 33
+            kp = 3
+            kd = 2.5
+            base_speed = 45
             
-            derivative = kd * (error - self.last_error)
+            derivative = (error - self.last_error)
             self.robot.motor_l.set_voltage(base_speed - (error * kp + derivative * kd))
             self.robot.motor_r.set_voltage(base_speed + (error * kp + derivative * kd))
             
@@ -86,11 +89,8 @@ class Game:
             self.robot.update(dt)
             
             #Draw
-            self.screen.fill((0, 0, 0))
-
-            self.draw_map()
-            self.draw_line_sensor()
-            self.draw_robot()
+            self.robot.display(self.screen)
+            # self.robot.display_line_sensor(self.screen)
             pygame.display.flip()
 
             self.clock.tick(self.ticks)
