@@ -49,6 +49,9 @@ class Game:
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
+        self.left_marker_counter = 0
+        self.right_marker_counter = 0
+        self.base_speed = 50
     
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -77,16 +80,32 @@ class Game:
                     1.00 * (line_sensor[9] - line_sensor[6])  + \
                     0.75 * (line_sensor[8] - line_sensor[7])
             
-            kp = 3
+            kp = 6
             kd = 2.5
-            base_speed = 45
             
             derivative = (error - self.last_error)
-            self.robot.motor_l.set_voltage(base_speed - (error * kp + derivative * kd))
-            self.robot.motor_r.set_voltage(base_speed + (error * kp + derivative * kd))
+            self.robot.motor_l.set_voltage(self.base_speed - (error * kp + derivative * kd))
+            self.robot.motor_r.set_voltage(self.base_speed + (error * kp + derivative * kd))
             
             self.last_error = error
             self.robot.update(dt)
+
+            # Count markers
+            left_marker = line_sensor[16] == 0 or line_sensor[17] == 0
+            right_marker = line_sensor[18] == 0 or line_sensor[19] == 0
+            if (left_marker and not self.last_left_marker):
+                self.left_marker_counter += 1
+                print("Left marker - " + str(self.left_marker_counter))
+
+            elif (right_marker and not self.last_right_marker):
+                print("Right marker")
+                self.right_marker_counter += 1
+                if (self.right_marker_counter > 1):
+                    self.base_speed = 20
+
+
+            self.last_left_marker = left_marker
+            self.last_right_marker = right_marker
             
             #Draw
             self.robot.display(self.screen)

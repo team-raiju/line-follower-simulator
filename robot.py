@@ -44,11 +44,12 @@ class Robot:
             Vector2(4.22, 4.56),
 
 
+            Vector2(-0.3,  -7.2),
+            Vector2(-0.6,  -6.5),
+            
             Vector2(-0.3,  7.2),
             Vector2(-0.6,  6.5),
 
-            Vector2(-0.3,  -7.2),
-            Vector2(-0.6,  -6.5),
 
         ]
 
