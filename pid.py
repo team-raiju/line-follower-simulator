@@ -5,16 +5,16 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map3.png"
-MAP_WIDTH_CM = 545
-MAP_HEIGHT_CM = 595
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 1.5
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 225
-ROBOT_INIT_POS_Y_CM = 37
+ROBOT_INIT_POS_X_CM = 150 
+ROBOT_INIT_POS_Y_CM = 334
 ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 40
+MIN_LEFT_MARKER_COUNTER = 30
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -38,7 +38,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
-        self.ticks = 60
+        self.ticks = 150
         self.exit = False
         self.last_error = 0
 
@@ -54,25 +54,36 @@ class Game:
 
         self.left_marker_counter = 0
         self.right_marker_counter = 0
-        self.base_speed = 43
+        self.base_speed = 80
+        self.kp = 28
+        self.kd = 15 
     
     def draw_map(self):
         self.map.draw_loaded_map()
     
 
     def run(self):
-
+        time = 0
         while not self.exit:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.exit = True
 
             dt = self.clock.get_time() / 1000
+            time += dt 
 
             self.screen.fill((0, 0, 0))
             self.draw_map()
 
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
+
+            # filter line
+            if (line_sensor[7] == 0 or line_sensor[8] == 0 or line_sensor[6] == 0 or line_sensor[9] == 0):
+                line_sensor[15] = 0
+                line_sensor[14] = 0
+                line_sensor[0] = 0
+                line_sensor[1] = 0
+
             # print(line_sensor)
             error = 2.50 * (line_sensor[15] - line_sensor[0]) + \
                     2.25 * (line_sensor[14] - line_sensor[1]) + \
@@ -83,12 +94,11 @@ class Game:
                     1.00 * (line_sensor[9] - line_sensor[6])  + \
                     0.75 * (line_sensor[8] - line_sensor[7])
             
-            kp = 6.5
-            kd = 2.5
+            
             
             derivative = (error - self.last_error)
-            self.robot.motor_l.set_voltage(self.base_speed - (error * kp + derivative * kd))
-            self.robot.motor_r.set_voltage(self.base_speed + (error * kp + derivative * kd))
+            self.robot.motor_l.set_voltage(self.base_speed - (error * self.kp + derivative * self.kd))
+            self.robot.motor_r.set_voltage(self.base_speed + (error * self.kp + derivative * self.kd))
             
             self.last_error = error
             self.robot.update(dt)
@@ -103,8 +113,17 @@ class Game:
             if (right_marker and not self.last_right_marker):
                 self.right_marker_counter += 1
                 print("Right marker - " + str(self.right_marker_counter))
+
+                if (self.right_marker_counter == 1):
+                    time = 0
+
                 if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
+                    print("Total time: " + str(round(time, 4)) + "s")
+
                     self.base_speed = 15
+                    self.kd = 0
+                    self.kp = 0
+
 
 
             self.last_left_marker = left_marker
