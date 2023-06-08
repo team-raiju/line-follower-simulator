@@ -5,15 +5,16 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map2.png"
-MAP_WIDTH_CM = 186
-MAP_HEIGHT_CM = 354
+MAP_FILE_NAME = "map3.png"
+MAP_WIDTH_CM = 545
+MAP_HEIGHT_CM = 595
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_CM_PER_PIXELS = 1.5
 
-ROBOT_INIT_POS_X_CM = 202 
-ROBOT_INIT_POS_Y_CM = 100
-ROBOT_INIT_ANGLE = 270
+ROBOT_INIT_POS_X_CM = 225
+ROBOT_INIT_POS_Y_CM = 37
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 40
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -21,6 +22,8 @@ ROBOT_SIZE_Y_CM = 14.0 # Height
 ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
+
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -51,7 +54,7 @@ class Game:
 
         self.left_marker_counter = 0
         self.right_marker_counter = 0
-        self.base_speed = 50
+        self.base_speed = 43
     
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -80,7 +83,7 @@ class Game:
                     1.00 * (line_sensor[9] - line_sensor[6])  + \
                     0.75 * (line_sensor[8] - line_sensor[7])
             
-            kp = 6
+            kp = 6.5
             kd = 2.5
             
             derivative = (error - self.last_error)
@@ -97,11 +100,11 @@ class Game:
                 self.left_marker_counter += 1
                 print("Left marker - " + str(self.left_marker_counter))
 
-            elif (right_marker and not self.last_right_marker):
-                print("Right marker")
+            if (right_marker and not self.last_right_marker):
                 self.right_marker_counter += 1
-                if (self.right_marker_counter > 1):
-                    self.base_speed = 20
+                print("Right marker - " + str(self.right_marker_counter))
+                if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
+                    self.base_speed = 15
 
 
             self.last_left_marker = left_marker

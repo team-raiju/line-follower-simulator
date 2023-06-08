@@ -13,7 +13,8 @@ MAP_CM_PER_PIXELS = 2
 
 ROBOT_INIT_POS_X_CM = 36 
 ROBOT_INIT_POS_Y_CM = 150
-ROBOT_INIT_ANGLE = 90
+ROBOT_INIT_ANGLE = 
+MIN_LEFT_MARKER_COUNTER = 30
 ---------------------------
 ---------------------------
 MAP_FILE_NAME = "map2.png"
@@ -35,7 +36,8 @@ MAP_CM_PER_PIXELS = 1.5
 
 ROBOT_INIT_POS_X_CM = 200
 ROBOT_INIT_POS_Y_CM = 37
-ROBOT_INIT_ANGLE = 0
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 40
 ---------------------------
 ---------------------------
 MAP_FILE_NAME = "map4.png"
