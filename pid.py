@@ -5,17 +5,17 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map3_545_x_595.png"
-MAP_WIDTH_CM = 545
-MAP_HEIGHT_CM = 595
+MAP_FILE_NAME = "map4.png"
+MAP_WIDTH_CM = 478
+MAP_HEIGHT_CM = 310
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 1.5
+MAP_CM_PER_PIXELS = 2.5
 
 ROBOT_SIZE_X_CM = 12
 ROBOT_SIZE_Y_CM = 6
-ROBOT_INIT_POS_X_CM = 200 
-ROBOT_INIT_POS_Y_CM = 37
-ROBOT_INIT_ANGLE = 0
+ROBOT_INIT_POS_X_CM = 33 
+ROBOT_INIT_POS_Y_CM = 180
+ROBOT_INIT_ANGLE = 90
 
 
 class Game:
