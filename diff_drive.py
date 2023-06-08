@@ -11,13 +11,17 @@ MAP_WIDTH_CM = 186
 MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
-ROBOT_SIZE_X_CM = 14 # Width
-ROBOT_SIZE_Y_CM = 14 # Height
+
 ROBOT_INIT_POS_X_CM = 202 
 ROBOT_INIT_POS_Y_CM = 100
 ROBOT_INIT_ANGLE = 270
 
+ROBOT_SIZE_X_CM = 14.0 # Width
+ROBOT_SIZE_Y_CM = 14.0 # Height
 ROTATION_OFFSET_FROM_CENTER_CM = 4.73
+WHEELS_DIST_CM = 14.0
+WHEELS_RADIUS_CM = 1.0
+ROBOT_IMAGE = "robot-img.png"
 
 class Game:
     def __init__(self):
@@ -37,30 +41,15 @@ class Game:
         self.exit = False
         self.last_error = 0
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        robot_image_path = os.path.join(current_dir, "media" , "robot-img.png")
-        robot_image = pygame.image.load(robot_image_path)
-
-        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM, ROBOT_INIT_ANGLE)
-        self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(ROBOT_SIZE_Y_CM), self.robot.centimeters_to_pixel(ROBOT_SIZE_X_CM)))
-
+        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
+                        ROBOT_SIZE_Y_CM, ROTATION_OFFSET_FROM_CENTER_CM, \
+                        WHEELS_DIST_CM, WHEELS_RADIUS_CM,                \
+                        ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM,        \
+                        ROBOT_INIT_ANGLE, ROBOT_IMAGE)
+    
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
-    def rotate(self, angle, pivot, offset):
-        rotated_image = pygame.transform.rotozoom(self.resized_robot_img, -angle, 1)  
-        rotated_offset = offset.rotate(angle)  
-        rect = rotated_image.get_rect(center = pivot + rotated_offset)
-        return rotated_image, rect 
-
-    def draw_robot(self):
-        robot_center = self.robot.position
-        offset = Vector2(ROTATION_OFFSET_FROM_CENTER_CM * MAP_CM_PER_PIXELS, 0)
-        rotated_image, rect = self.rotate(-self.robot.angle, robot_center, offset)
-        self.screen.blit(rotated_image, rect)  # Blit the rotated image.
-        pygame.draw.circle(self.screen, (30, 250, 70), robot_center, 3)  # Pivot point.
-        pygame.draw.rect(self.screen, (30, 250, 70), rect, 1)  # The rect.
-        pygame.display.flip()
 
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -88,18 +77,18 @@ class Game:
                 self.robot.motor_r.set_voltage(-80)
 
             if pressed[pygame.K_LEFT]:
-                self.robot.motor_l.set_voltage(-60)
-                self.robot.motor_r.set_voltage(60)
+                self.robot.motor_l.set_voltage(-35)
+                self.robot.motor_r.set_voltage(35)
             elif pressed[pygame.K_RIGHT]:
-                self.robot.motor_l.set_voltage(60)
-                self.robot.motor_r.set_voltage(-60)
+                self.robot.motor_l.set_voltage(35)
+                self.robot.motor_r.set_voltage(-35)
 
             self.robot.update(dt)
             
             #Draw
             self.screen.fill((0, 0, 0))
             self.draw_map()
-            self.draw_robot()
+            self.robot.display(self.screen)
 
             pygame.display.flip()
             self.clock.tick(self.ticks)

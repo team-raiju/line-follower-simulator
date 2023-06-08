@@ -1,11 +1,14 @@
 import math
+import pygame
 from pygame.surface import Surface
 from pygame.math import Vector2
 from motor import Motor
+import os
 
+LINE_COLOR_THRESHOLD = 150
 
 class Robot:
-    def __init__(self, cm_per_pixel, pos_x_cm, pos_y_cm, angle):
+    def __init__(self, cm_per_pixel, size_x_cm, size_y_cm, rot_center_offset_cm, wheels_dist_cm, wheel_radius_cm, pos_x_cm, pos_y_cm, angle, image):
         #Robot position
         self.cm_per_pixel = cm_per_pixel
         x = self.centimeters_to_pixel(pos_x_cm)
@@ -14,25 +17,39 @@ class Robot:
         self.angle = angle
         
         # Robot Params
-        self.wheel_radius_cm = 1.0
-        self.wheels_distance_cm = 12.0
-        self.robot_size_x_cm = 12.0
-        self.robot_size_y_cm = 12.0 # Total robot size in centimeters (including line sensors)
+        self.wheel_radius_cm = wheel_radius_cm
+        self.wheels_distance_cm = wheels_dist_cm
+        self.robot_size_x_cm = size_x_cm
+        self.robot_size_y_cm = size_y_cm
+        self.rot_center_offset_cm = rot_center_offset_cm
         
         # Line sensor position in centimeters from robot center
         self.line_sensor_pos = [
-            Vector2(12, -6),
-            Vector2(12, -5),
-            Vector2(12, -4),
-            Vector2(12, -3),
-            Vector2(12, -2),
-            Vector2(12, -1),
-            Vector2(12,  1),
-            Vector2(12,  2),
-            Vector2(12,  3),
-            Vector2(12,  4),
-            Vector2(12,  5),
-            Vector2(12,  6),
+            Vector2(4.22, -4.56),
+            Vector2(4.62, -3.98),
+            Vector2(5.10, -3.4),
+            Vector2(5.44, -2.82),
+            Vector2(5.84, -2.24),
+            Vector2(6.18, -1.66),
+            Vector2(6.38, -1.08),
+            Vector2(6.66, -0.50),
+
+            Vector2(6.66, 0.50),
+            Vector2(6.38, 1.08),
+            Vector2(6.18, 1.66),
+            Vector2(5.84, 2.24),
+            Vector2(5.44, 2.82),
+            Vector2(5.10, 3.4),
+            Vector2(4.62, 3.98),
+            Vector2(4.22, 4.56),
+
+
+            Vector2(-0.3,  7.2),
+            Vector2(-0.6,  6.5),
+
+            Vector2(-0.3,  -7.2),
+            Vector2(-0.6,  -6.5),
+
         ]
 
         self.wheels_distance_pixels = self.centimeters_to_pixel(self.wheels_distance_cm)
@@ -47,6 +64,12 @@ class Robot:
 
         self.velocity = Vector2(1, 0.0)
         self.angular_velocity = 0
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        robot_image_path = os.path.join(current_dir, "media" , image)
+        robot_image = pygame.image.load(robot_image_path)
+
+        self.resized_robot_img = pygame.transform.scale(robot_image, (self.centimeters_to_pixel(self.robot_size_y_cm), self.centimeters_to_pixel(self.robot_size_x_cm)))
 
     
     def centimeters_to_pixel(self, centimeters):
@@ -80,7 +103,7 @@ class Robot:
             
             else:
                 val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
-                is_black = (val[0] < 150)
+                is_black = (val[0] < LINE_COLOR_THRESHOLD)
                 if is_black:
                     sensor_val.append(1)
                 else:
@@ -112,25 +135,40 @@ class Robot:
         for i in range (0, int(robot_size_x_pixel), 2):
             point = corners[0] + Vector2(i, 0).rotate(-self.angle-90)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] > 150):
+            if (color[0] > LINE_COLOR_THRESHOLD):
                 return False
 
         for i in range (0, int(robot_size_y_pixel), 2):
             point = corners[1] + Vector2(i, 0).rotate(-self.angle-180)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] > 150):
+            if (color[0] > LINE_COLOR_THRESHOLD):
                 return False
         
         for i in range (0, int(robot_size_x_pixel), 2):
             point = corners[2] + Vector2(i, 0).rotate(-self.angle-270)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] > 150):
+            if (color[0] > LINE_COLOR_THRESHOLD):
                 return False
         
         for i in range (0, int(robot_size_y_pixel), 2):
             point = corners[3] + Vector2(i, 0).rotate(-self.angle)
             color = screen.get_at((int(point.x), int(point.y)))
-            if (color[0] > 150):
+            if (color[0] > LINE_COLOR_THRESHOLD):
                 return False
         
         return True
+
+    def rotate_image(self, angle, pivot, offset):
+        rotated_image = pygame.transform.rotozoom(self.resized_robot_img, -angle, 1)  
+        rotated_offset = offset.rotate(angle)  
+        rect = rotated_image.get_rect(center = pivot + rotated_offset)
+        return rotated_image, rect 
+
+    def display(self, screen: Surface):
+        robot_center = self.position
+        offset = Vector2(self.centimeters_to_pixel(self.rot_center_offset_cm), 0)
+        rotated_image, rect = self.rotate_image(-self.angle, robot_center, offset)
+        screen.blit(rotated_image, rect)  # Blit the rotated image.
+        pygame.draw.circle(screen, (30, 250, 70), robot_center, 3)  # Pivot point.
+        pygame.draw.rect(screen, (30, 250, 70), rect, 1)  # The rect.
+        pygame.display.flip()

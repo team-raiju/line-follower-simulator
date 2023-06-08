@@ -3,3 +3,55 @@ map1;230;395;2;36;150;90
 map2;186;354;2;203;100;270
 map3;545;595;1.5;200;37;0
 map4;478;310;2.5;33;180;90
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map1.png"
+MAP_WIDTH_CM = 230
+MAP_HEIGHT_CM = 395
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
+
+ROBOT_INIT_POS_X_CM = 36 
+ROBOT_INIT_POS_Y_CM = 150
+ROBOT_INIT_ANGLE = 90
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
+
+ROBOT_INIT_POS_X_CM = 203 
+ROBOT_INIT_POS_Y_CM = 100
+ROBOT_INIT_ANGLE = 270
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map3.png"
+MAP_WIDTH_CM = 545
+MAP_HEIGHT_CM = 595
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 1.5
+
+ROBOT_INIT_POS_X_CM = 200
+ROBOT_INIT_POS_Y_CM = 37
+ROBOT_INIT_ANGLE = 0
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map4.png"
+MAP_WIDTH_CM = 478
+MAP_HEIGHT_CM = 310
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2.5
+
+ROBOT_INIT_POS_X_CM = 33 
+ROBOT_INIT_POS_Y_CM = 180
+ROBOT_INIT_ANGLE = 90
+---------------------------
+
+ROBOT_SIZE_X_CM = 14.0 # Width
+ROBOT_SIZE_Y_CM = 14.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 4.73
+WHEELS_DIST_CM = 14.0
+WHEELS_RADIUS_CM = 1.0
+ROBOT_IMAGE = "robot-img.png"
