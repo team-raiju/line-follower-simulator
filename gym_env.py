@@ -6,6 +6,8 @@ import pygame
 import os
 from generate_track import Map
 from pygame.math import Vector2
+from load_track import LoadMap
+
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
@@ -16,6 +18,18 @@ from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewar
 
 HOME_DIR = os.path.dirname(__file__)
 
+MAP_FILE_NAME = "map1.png"
+MAP_WIDTH_CM = 230
+MAP_HEIGHT_CM = 395
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
+
+ROBOT_SIZE_X_CM = 12
+ROBOT_SIZE_Y_CM = 6
+ROBOT_INIT_POS_X_CM = 36 
+ROBOT_INIT_POS_Y_CM = 150
+ROBOT_INIT_ANGLE = 90
+
 class LineFollowerEnv(Env):
     def __init__(self):
 
@@ -24,44 +38,70 @@ class LineFollowerEnv(Env):
         self.observation_space = Box(low=np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 
                                      high=np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), dtype=np.int32)
 
-        self.max_duration = 2000
-
-        self.robot = Robot(36, 200, 90)
-
-        # Render options
-        self.screen_width = 560
-        self.screen_height = 890
-
         pygame.init()
-        pygame.display.set_caption("Raijin")
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "media", "raiju.png")
-        self.car_image = pygame.image.load(image_path)
-        self.resized_image = pygame.transform.scale(self.car_image, (12, 24))
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        self.clock = pygame.time.Clock()
+        pygame.display.set_caption("Line Follower")
+
+        self.max_duration = 2000
         self.tick_rate = 60 # Hertz tick_rate = 1 / self.tick_period
         self.tick_period = 1 / self.tick_rate
 
-        self.map = Map(20, 245, 270, self.screen)
-        self.map.load_map_from_file()
+        self.map_width_pixels = MAP_WIDTH_CM * MAP_CM_PER_PIXELS
+        self.map_height_pixels = MAP_HEIGHT_CM * MAP_CM_PER_PIXELS
 
-        self.waypoint_idx = 0
+        margin_pixels = MAP_MARGIN_CM * MAP_CM_PER_PIXELS
+        self.screen_width = self.map_width_pixels + (2 * margin_pixels)
+        self.screen_height = self.map_height_pixels + (2 * margin_pixels)
 
+        self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
+        self.clock = pygame.time.Clock()
+        self.exit = False
+        self.last_error = 0
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        robot_image_path = os.path.join(current_dir, "media" , "raiju.png")
+        robot_image = pygame.image.load(robot_image_path)
+
+        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM, ROBOT_INIT_ANGLE)
+        self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(ROBOT_SIZE_Y_CM), self.robot.centimeters_to_pixel(ROBOT_SIZE_X_CM)))
+
+        self.map = LoadMap(self.screen)
+        self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
+
+        self.load_waypoint_list()
+        
+
+    def load_waypoint_list(self):
         self.waypoint_list = []
-        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", "waypoints.txt")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", "waypoints_map1.txt")
 
         with open(waypoint_list_path, "r") as f:
             for line in f:
                 x, y = line.strip().split(",")
-                self.waypoint_list.append((int(x), int(y)))
-        
+                point = Vector2(int(x), int(y))
+                self.waypoint_list.append(point)
+
+    def draw_robot(self):
+        rotated = pygame.transform.rotate(self.resized_robot_img, self.robot.angle)
+        rect = rotated.get_rect()
+        self.screen.blit(rotated, self.robot.position - (rect.width / 2, rect.height / 2))
+
+    def draw_map(self):
+        self.map.draw_loaded_map()
+    
+    def near_waypoint(self, point: Vector2, point_2: Vector2):
+        distance = point.distance_to(point_2)
+        max_dist_cm = 15
+        if (abs(distance) < max_dist_cm * MAP_CM_PER_PIXELS):
+            return True
+        return False
+
     def step(self, action):
         
         # Action
 
-        last_mot_vel_l = self.robot.mot_vel_l / 100.0
-        last_mot_vel_r = self.robot.mot_vel_r / 100.0
+        # last_mot_vel_l = self.robot.mot_vel_l / 100.0
+        # last_mot_vel_r = self.robot.mot_vel_r / 100.0
         last_line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width , self.screen_height)
 
         mot_left = int(action[0] * 100)
@@ -81,13 +121,11 @@ class LineFollowerEnv(Env):
         # Reward
         reward = -0.05
 
-        current_point = Vector2(self.waypoint_list[self.waypoint_idx][0], self.waypoint_list[self.waypoint_idx][1])
-        if (self.map.near_waypoint(self.robot.position, current_point)):
+        current_point = self.waypoint_list[self.waypoint_idx]
+        if (self.near_waypoint(self.robot.position, current_point)):
                 multiplier = self.waypoint_idx
                 reward = 3000 / len(self.waypoint_list) + multiplier
                 self.waypoint_idx += 1
-                
-
 
         # Done
         done = False
@@ -114,19 +152,16 @@ class LineFollowerEnv(Env):
 
     def render(self):
         self.screen.fill((0, 0, 0))
-        map = Map(20, 245, 270, self.screen)
-        map.load_map_from_file()
-
-        rotated = pygame.transform.rotate(self.resized_image, self.robot.angle)
-        rect = rotated.get_rect()
-        self.screen.blit(rotated, self.robot.position - (rect.width / 2, rect.height / 2))
+        self.draw_map()
+        self.draw_robot()
+        
         pygame.display.flip()
         self.clock.tick(self.tick_rate)
     
     def reset(self):
         self.max_duration = 2000
         self.waypoint_idx = 0
-        self.robot = Robot(36, 200, 90)
+        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM, ROBOT_INIT_ANGLE)
         line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
         obs_np = np.asarray(line_sensor, dtype=np.int32)
         # obs_np = np.append(obs_np, [0, 0])
@@ -136,7 +171,7 @@ class LineFollowerEnv(Env):
         return obs_np
 
 
-
+#######################################################################
 
 
 def train_model(iterations, name):
@@ -172,7 +207,7 @@ def run_simulation(model : PPO, episodes):
 if __name__ == '__main__':
     env = LineFollowerEnv()
 
-    PPO_Path_Init = os.path.join(HOME_DIR, 'Models_Best', 'PPO_Model_Raijin_Callback', 'best_model')
+    PPO_Path_Init = os.path.join(HOME_DIR, 'Models', 'Models_Best','PPO_Model_Raijin_Callback', 'best_model')
     model = PPO.load(PPO_Path_Init, env=env)
 
     # train_existing_model(model, 200000, 'PPO_Model_Raijin_1M200k' )
