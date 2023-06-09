@@ -40,7 +40,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.ticks = 150
         self.exit = False
-        self.last_error = 0
 
         self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
                         ROBOT_SIZE_Y_CM, ROTATION_OFFSET_FROM_CENTER_CM, \
@@ -55,6 +54,7 @@ class Game:
         self.left_marker_counter = 0
         self.right_marker_counter = 0
         self.base_speed = 80
+        self.last_error = 0
         self.kp = 28
         self.kd = 15 
     

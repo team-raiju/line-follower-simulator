@@ -6,19 +6,24 @@ from load_track import LoadMap
 from robot import Robot
 import math
 
-MAP_FILE_NAME = "map3.png"
-MAP_WIDTH_CM = 545
-MAP_HEIGHT_CM = 595
-MAP_MARGIN_CM = (50/1.5)
-MAP_CM_PER_PIXELS = 1.5
+MAP_FILE_NAME = "map1.png"
+MAP_WIDTH_CM = 230
+MAP_HEIGHT_CM = 395
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_SIZE_X_CM = 12
-ROBOT_SIZE_Y_CM = 6
-ROBOT_INIT_POS_X_CM = 200 
-ROBOT_INIT_POS_Y_CM = 37
-ROBOT_INIT_ANGLE = 0
+ROBOT_INIT_POS_X_CM = 36 
+ROBOT_INIT_POS_Y_CM = 150
+ROBOT_INIT_ANGLE = 90
 
-WAYPOINT_LIST = "waypoints_map3.txt"
+ROBOT_IMAGE = "robot-img.png"
+ROBOT_SIZE_X_CM = 14.0 # Width
+ROBOT_SIZE_Y_CM = 14.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 4.73
+WHEELS_DIST_CM = 14.0
+WHEELS_RADIUS_CM = 1.0
+
+WAYPOINT_LIST = "waypoints_map1.txt"
 
 class Game:
     def __init__(self):
@@ -34,21 +39,25 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
-        self.ticks = 60
+        self.ticks = 150
         self.exit = False
-        self.last_error = 0
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        robot_image_path = os.path.join(current_dir, "media" , "raiju.png")
-        robot_image = pygame.image.load(robot_image_path)
-
-        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM, ROBOT_INIT_ANGLE)
-        self.resized_robot_img = pygame.transform.scale(robot_image, (self.robot.centimeters_to_pixel(ROBOT_SIZE_Y_CM), self.robot.centimeters_to_pixel(ROBOT_SIZE_X_CM)))
+        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
+                        ROBOT_SIZE_Y_CM, ROTATION_OFFSET_FROM_CENTER_CM, \
+                        WHEELS_DIST_CM, WHEELS_RADIUS_CM,                \
+                        ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM,        \
+                        ROBOT_INIT_ANGLE, ROBOT_IMAGE)
+    
 
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
         self.load_waypoint_list()
+
+        self.last_error = 0
+        self.base_speed = 60
+        self.kp = 1.1
+        self.kd = 5
 
     def load_waypoint_list(self):
 
@@ -88,11 +97,6 @@ class Game:
         self.robot.motor_l.set_voltage((2*vel - w) / 2) # w*d actually
         self.robot.motor_r.set_voltage((2*vel + w) / 2) # w*d actually
 
-    def draw_robot(self):
-        rotated = pygame.transform.rotate(self.resized_robot_img, self.robot.angle)
-        rect = rotated.get_rect()
-        self.screen.blit(rotated, self.robot.position - (rect.width / 2, rect.height / 2))
-
     def draw_map(self):
         self.map.draw_loaded_map()
 
@@ -114,11 +118,14 @@ class Game:
             if (len(self.waypoint_list) > waypoint_idx):
                 (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[waypoint_idx], self.robot.angle)
 
-                vel = 50
-                w = -angleDiff * 0.35
+                derivative = (angleDiff - self.last_error)
+                # print(angleDiff)
+                w = - (angleDiff * self.kp + derivative * self.kd)
+
+                self.last_error = angleDiff
                 # print(angleDiff)
 
-                self.set_motors_voltage(vel, w)
+                self.set_motors_voltage(self.base_speed, w)
             else:
                 (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[0], self.robot.angle)
                 if dist < 0:
@@ -139,7 +146,7 @@ class Game:
             # print(self.waypoint_list[1])
             # print(self.robot.position)
 
-            self.draw_robot()
+            self.robot.display(self.screen)
 
             pygame.display.flip()
             self.clock.tick(self.ticks)
