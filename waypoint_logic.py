@@ -6,15 +6,15 @@ from load_track import LoadMap
 from robot import Robot
 import math
 
-MAP_FILE_NAME = "map3.png"
-MAP_WIDTH_CM = 545
-MAP_HEIGHT_CM = 595
-MAP_MARGIN_CM = (50/1.5)
-MAP_CM_PER_PIXELS = 1.5
+MAP_FILE_NAME = "map4.png"
+MAP_WIDTH_CM = 600
+MAP_HEIGHT_CM = 378
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 200
-ROBOT_INIT_POS_Y_CM = 37
-ROBOT_INIT_ANGLE = 180
+ROBOT_INIT_POS_X_CM = 34 
+ROBOT_INIT_POS_Y_CM = 180
+ROBOT_INIT_ANGLE = 90
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -23,7 +23,7 @@ ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
 
-WAYPOINT_LIST = "waypoints_map3.txt"
+WAYPOINT_LIST = "waypoints_map4.txt"
 
 class Game:
     def __init__(self):
@@ -55,9 +55,9 @@ class Game:
         self.load_waypoint_list()
 
         self.last_error = 0
-        self.base_speed = 80
-        self.kp = 3
-        self.kd = 10
+        self.base_speed = 100
+        self.kp = 5
+        self.kd = 15
 
     def load_waypoint_list(self):
 
@@ -137,8 +137,8 @@ class Game:
                     finished = True
                 if dist < 0:
                     dist = 0
-                self.robot.motor_l.set_voltage(dist/5)
-                self.robot.motor_r.set_voltage(dist/5)
+                self.robot.motor_l.set_voltage(dist/15)
+                self.robot.motor_r.set_voltage(dist/15)
 
 
             self.robot.update(dt)
@@ -150,6 +150,7 @@ class Game:
                     print(waypoint_idx)
 
             # print("")
+            
             # print(self.waypoint_list[1])
             # print(self.robot.position)
 

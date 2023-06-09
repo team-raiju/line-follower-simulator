@@ -2,12 +2,12 @@ import os
 import pygame
 
 
-INPUT_MAP_NAME = "rc-2023-filter.png"
-WAYPOINT_LIST_NAME = "waypoints_map3.txt"
+INPUT_MAP_NAME = "map4.png"
+WAYPOINT_LIST_NAME = "waypoints_map4.txt"
 
-MAP_X_SIZE_CM = 545
-MAP_Y_SIZE_CM = 595
-CENTIMETERS_PER_PIXEL = 1.5
+MAP_X_SIZE_CM = 600
+MAP_Y_SIZE_CM = 378
+CENTIMETERS_PER_PIXEL = 2
 MAP_MARGIN_CM = 25
 
 
