@@ -99,6 +99,10 @@ class Game:
 
     def draw_map(self):
         self.map.draw_loaded_map()
+    
+    def draw_timer(self, time):
+        text_surface = pygame.font.Font(None, 36).render("Time: " + "{:.3f}s".format(time), True, (255, 0, 0))
+        self.screen.blit(text_surface, (10, 10))
 
     def run(self):
         waypoint_idx = 0
@@ -112,12 +116,14 @@ class Game:
                     self.exit = True
 
             dt = self.clock.get_time() / 1000
-            time += dt 
+            if (not finished):
+                time += dt 
 
             
             #Draw
             self.screen.fill((0, 0, 0))
             self.draw_map()
+            self.draw_timer(time)
 
             if (len(self.waypoint_list) > waypoint_idx):
                 (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[waypoint_idx], self.robot.angle)

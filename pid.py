@@ -61,19 +61,26 @@ class Game:
     def draw_map(self):
         self.map.draw_loaded_map()
     
+    def draw_timer(self, time):
+        text_surface = pygame.font.Font(None, 36).render("Time: " + "{:.3f}s".format(time), True, (255, 0, 0))
+        self.screen.blit(text_surface, (10, 10))
 
     def run(self):
         time = 0
+        finished = False
         while not self.exit:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.exit = True
 
             dt = self.clock.get_time() / 1000
-            time += dt 
+            if (not finished):
+                time += dt 
 
             self.screen.fill((0, 0, 0))
             self.draw_map()
+            self.draw_timer(time)
+
 
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
 
@@ -119,6 +126,7 @@ class Game:
 
                 if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
                     print("Total time: " + str(round(time, 4)) + "s")
+                    finished = True
 
                     self.base_speed = 15
                     self.kd = 0
