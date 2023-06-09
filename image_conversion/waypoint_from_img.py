@@ -2,13 +2,13 @@ import os
 import pygame
 
 
-INPUT_MAP_NAME = "map4.png"
-WAYPOINT_LIST_NAME = "waypoints_map4.txt"
+INPUT_MAP_NAME = "map5.png"
+WAYPOINT_LIST_NAME = "waypoints_map5.txt"
 
-MAP_X_SIZE_CM = 600
-MAP_Y_SIZE_CM = 378
-CENTIMETERS_PER_PIXEL = 2
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
 
 
 class Game:
@@ -16,17 +16,17 @@ class Game:
         pygame.init()
         pygame.display.set_caption("Waypoint Generator")
         self.exit = False
-        self.map_x_size = self.centimeters_to_pixel(MAP_X_SIZE_CM)
-        self.map_y_size = self.centimeters_to_pixel(MAP_Y_SIZE_CM)
+        self.map_x_size = self.centimeters_to_pixel(MAP_WIDTH_CM)
+        self.map_y_size = self.centimeters_to_pixel(MAP_HEIGHT_CM)
 
-        self.margin_pixels = MAP_MARGIN_CM * CENTIMETERS_PER_PIXEL
+        self.margin_pixels = MAP_MARGIN_CM * MAP_CM_PER_PIXELS
         width = self.map_x_size + self.margin_pixels * 2
         height = self.map_y_size + self.margin_pixels * 2
         self.screen = pygame.display.set_mode((width, height))
         self.waypoint_list = []
 
     def centimeters_to_pixel(self, centimeters):
-        return centimeters * CENTIMETERS_PER_PIXEL
+        return centimeters * MAP_CM_PER_PIXELS
     
     def save_waypoint_list(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))

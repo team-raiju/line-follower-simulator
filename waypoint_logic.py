@@ -6,15 +6,15 @@ from load_track import LoadMap
 from robot import Robot
 import math
 
-MAP_FILE_NAME = "map4.png"
-MAP_WIDTH_CM = 600
-MAP_HEIGHT_CM = 378
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 34 
-ROBOT_INIT_POS_Y_CM = 180
-ROBOT_INIT_ANGLE = 90
+ROBOT_INIT_POS_X_CM = 150 
+ROBOT_INIT_POS_Y_CM = 334
+ROBOT_INIT_ANGLE = 180
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -23,7 +23,7 @@ ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
 
-WAYPOINT_LIST = "waypoints_map4.txt"
+WAYPOINT_LIST = "waypoints_map5.txt"
 
 class Game:
     def __init__(self):
