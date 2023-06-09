@@ -6,15 +6,15 @@ from load_track import LoadMap
 from robot import Robot
 import math
 
-MAP_FILE_NAME = "map1.png"
-MAP_WIDTH_CM = 230
-MAP_HEIGHT_CM = 395
-MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_FILE_NAME = "map3.png"
+MAP_WIDTH_CM = 545
+MAP_HEIGHT_CM = 595
+MAP_MARGIN_CM = (50/1.5)
+MAP_CM_PER_PIXELS = 1.5
 
-ROBOT_INIT_POS_X_CM = 36 
-ROBOT_INIT_POS_Y_CM = 150
-ROBOT_INIT_ANGLE = 90
+ROBOT_INIT_POS_X_CM = 200
+ROBOT_INIT_POS_Y_CM = 37
+ROBOT_INIT_ANGLE = 180
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -23,7 +23,7 @@ ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
 
-WAYPOINT_LIST = "waypoints_map1.txt"
+WAYPOINT_LIST = "waypoints_map3.txt"
 
 class Game:
     def __init__(self):
@@ -55,9 +55,9 @@ class Game:
         self.load_waypoint_list()
 
         self.last_error = 0
-        self.base_speed = 60
-        self.kp = 1.1
-        self.kd = 5
+        self.base_speed = 80
+        self.kp = 3
+        self.kd = 10
 
     def load_waypoint_list(self):
 
@@ -102,6 +102,8 @@ class Game:
 
     def run(self):
         waypoint_idx = 0
+        time = 0
+        finished = False
 
         while not self.exit:
             # Event queue
@@ -110,6 +112,8 @@ class Game:
                     self.exit = True
 
             dt = self.clock.get_time() / 1000
+            time += dt 
+
             
             #Draw
             self.screen.fill((0, 0, 0))
@@ -128,6 +132,9 @@ class Game:
                 self.set_motors_voltage(self.base_speed, w)
             else:
                 (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[0], self.robot.angle)
+                if (not finished):
+                    print("Total time: " + str(round(time, 4)) + "s")
+                    finished = True
                 if dist < 0:
                     dist = 0
                 self.robot.motor_l.set_voltage(dist/5)
