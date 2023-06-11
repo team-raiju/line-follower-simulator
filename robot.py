@@ -99,17 +99,17 @@ class Robot:
             sensor_position = self.position + self.centimeters_to_pixel(pos_vector).rotate(-self.angle) + offset.rotate(-self.angle)
 
             if (int(sensor_position.x) <= 0 or int(sensor_position.x) >= max_x):
-                sensor_val.append(1)
+                sensor_val.append(0)
             elif (int(sensor_position.y) <= 0 or int(sensor_position.y) >= max_y):
-                sensor_val.append(1)
+                sensor_val.append(0)
             
             else:
                 val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
                 is_black = (val[0] < LINE_COLOR_THRESHOLD)
                 if is_black:
-                    sensor_val.append(1)
-                else:
                     sensor_val.append(0)
+                else:
+                    sensor_val.append(1)
 
 
         return sensor_val

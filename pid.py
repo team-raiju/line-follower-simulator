@@ -5,16 +5,16 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map5.png"
-MAP_WIDTH_CM = 651
-MAP_HEIGHT_CM = 317
+MAP_FILE_NAME = "map1.png"
+MAP_WIDTH_CM = 230
+MAP_HEIGHT_CM = 395
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 150 
-ROBOT_INIT_POS_Y_CM = 334
-ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 30
+ROBOT_INIT_POS_X_CM = 36 
+ROBOT_INIT_POS_Y_CM = 150
+ROBOT_INIT_ANGLE = 90
+MIN_LEFT_MARKER_COUNTER = 20
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -38,7 +38,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
-        self.ticks = 150
+        self.ticks = 180
         self.exit = False
 
         self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
@@ -53,10 +53,13 @@ class Game:
 
         self.left_marker_counter = 0
         self.right_marker_counter = 0
-        self.base_speed = 80
+        self.last_left_marker = False
+        self.last_right_marker = False
         self.last_error = 0
-        self.kp = 28
-        self.kd = 15 
+        
+        self.base_speed = 100
+        self.kp = 43
+        self.kd = 60
     
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -64,6 +67,29 @@ class Game:
     def draw_timer(self, time):
         text_surface = pygame.font.Font(None, 36).render("Time: " + "{:.3f}s".format(time), True, (255, 0, 0))
         self.screen.blit(text_surface, (10, 10))
+
+    def calc_error(self, line_sensor_val: list):
+        # Similar to center of mass calculation
+        num_half_sensors = int(8)
+        count_left = 0
+        count_right = 0
+        sum_left = 0
+        sum_right = 0
+        for i in range (num_half_sensors):
+            count_left += line_sensor_val[i]
+            count_right += line_sensor_val[num_half_sensors + i]
+
+            sum_left += i * line_sensor_val[num_half_sensors - 1 - i]
+            sum_right += i * line_sensor_val[num_half_sensors + i]
+
+        if count_left == 0:
+            count_left = 1
+        if count_right == 0:
+            count_right = 1
+        pos_left = sum_left / count_left
+        pos_right = sum_right / count_right
+
+        return (pos_left - pos_right)
 
     def run(self):
         time = 0
@@ -92,20 +118,13 @@ class Game:
                 line_sensor[1] = 0
 
             # print(line_sensor)
-            error = 2.50 * (line_sensor[15] - line_sensor[0]) + \
-                    2.25 * (line_sensor[14] - line_sensor[1]) + \
-                    2.00 * (line_sensor[13] - line_sensor[2]) + \
-                    1.75 * (line_sensor[12] - line_sensor[3]) + \
-                    1.50 * (line_sensor[11] - line_sensor[4]) + \
-                    1.25 * (line_sensor[10] - line_sensor[5]) + \
-                    1.00 * (line_sensor[9] - line_sensor[6])  + \
-                    0.75 * (line_sensor[8] - line_sensor[7])
-            
-            
+            error = self.calc_error(line_sensor)
             
             derivative = (error - self.last_error)
-            self.robot.motor_l.set_voltage(self.base_speed - (error * self.kp + derivative * self.kd))
-            self.robot.motor_r.set_voltage(self.base_speed + (error * self.kp + derivative * self.kd))
+            l_speed = self.base_speed - (error * self.kp + derivative * self.kd)
+            r_speed = self.base_speed + (error * self.kp + derivative * self.kd)
+            self.robot.motor_l.set_voltage(l_speed)
+            self.robot.motor_r.set_voltage(r_speed)
             
             self.last_error = error
             self.robot.update(dt)
