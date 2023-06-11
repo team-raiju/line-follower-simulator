@@ -5,16 +5,16 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map1.png"
-MAP_WIDTH_CM = 230
-MAP_HEIGHT_CM = 395
+MAP_FILE_NAME = "map6.png"
+MAP_WIDTH_CM = 303
+MAP_HEIGHT_CM = 227
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_CM_PER_PIXELS = 3
 
-ROBOT_INIT_POS_X_CM = 36 
-ROBOT_INIT_POS_Y_CM = 150
+ROBOT_INIT_POS_X_CM = 34 
+ROBOT_INIT_POS_Y_CM = 160
 ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 20
+MIN_LEFT_MARKER_COUNTER = 54
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -38,7 +38,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
-        self.ticks = 180
+        self.ticks = 150
         self.exit = False
 
         self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
@@ -111,11 +111,12 @@ class Game:
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
 
             # filter line
-            if (line_sensor[7] == 0 or line_sensor[8] == 0 or line_sensor[6] == 0 or line_sensor[9] == 0):
-                line_sensor[15] = 0
-                line_sensor[14] = 0
-                line_sensor[0] = 0
-                line_sensor[1] = 0
+            if (line_sensor[0] or line_sensor[1] or line_sensor[14] or line_sensor[15]):
+                if (line_sensor[7] == 1 or line_sensor[8] == 1 or line_sensor[6] == 1 or line_sensor[9] == 1):
+                    line_sensor[0] = 0
+                    line_sensor[1] = 0
+                    line_sensor[15] = 0
+                    line_sensor[14] = 0
 
             # print(line_sensor)
             error = self.calc_error(line_sensor)
@@ -130,8 +131,8 @@ class Game:
             self.robot.update(dt)
 
             # Count markers
-            left_marker = line_sensor[16] == 0 or line_sensor[17] == 0
-            right_marker = line_sensor[18] == 0 or line_sensor[19] == 0
+            left_marker = line_sensor[16] == 1 or line_sensor[17] == 1
+            right_marker = line_sensor[18] == 1 or line_sensor[19] == 1
             if (left_marker and not self.last_left_marker):
                 self.left_marker_counter += 1
                 print("Left marker - " + str(self.left_marker_counter))
@@ -140,7 +141,7 @@ class Game:
                 self.right_marker_counter += 1
                 print("Right marker - " + str(self.right_marker_counter))
 
-                if (self.right_marker_counter == 1):
+                if (self.right_marker_counter == 1 and self.left_marker_counter < 2):
                     time = 0
 
                 if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
