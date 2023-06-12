@@ -6,6 +6,7 @@ from motor import Motor
 import os
 
 LINE_COLOR_THRESHOLD = 150
+ENCODER_PPR = 7
 
 class Robot:
     def __init__(self, cm_per_pixel, size_x_cm, size_y_cm, rot_center_offset_cm, wheels_dist_cm, wheel_radius_cm, pos_x_cm, pos_y_cm, angle, image):
@@ -15,6 +16,9 @@ class Robot:
         y = self.centimeters_to_pixel(pos_y_cm)
         self.position = Vector2(x, y)
         self.angle = angle
+        self.estimated_position = Vector2(x, y)
+        self.estimated_angle = angle
+
         
         # Robot Params
         self.wheel_radius_cm = wheel_radius_cm
@@ -72,16 +76,60 @@ class Robot:
 
         self.resized_robot_img = pygame.transform.scale(robot_image, (self.centimeters_to_pixel(self.robot_size_y_cm), self.centimeters_to_pixel(self.robot_size_x_cm)))
 
+        self.left_encoder = 0
+        self.right_encoder = 0
+        self.left_encoder_last = 0
+        self.right_encoder_last = 0
+        self.left_encoder_raw = 0
+        self.right_encoder_raw = 0
+        
     
     def centimeters_to_pixel(self, centimeters):
         return centimeters * self.cm_per_pixel 
     
     def meters_to_pixel(self, meters):
         return meters * self.cm_per_pixel  * 100
+    
+    def update_estimated_pos(self, mot_vel_l, mot_vel_r, dt):
+        wheel_perimeter_cm = 2 * math.pi * self.wheel_radius_cm
+
+        # simulate encoder values
+        num_of_rot_l = ((mot_vel_l * 100) * dt) / (wheel_perimeter_cm) # cm/s
+        num_of_rot_r = ((mot_vel_r * 100) * dt) / (wheel_perimeter_cm) # cm/s
+        self.left_encoder_raw += ENCODER_PPR * num_of_rot_l
+        self.right_encoder_raw += ENCODER_PPR * num_of_rot_r
+        self.left_encoder = math.floor(self.left_encoder_raw)
+        self.right_encoder = math.floor(self.right_encoder_raw)
+
+        #estimate velocity based on encoder value
+        estimated_delta_l_cm = 0
+        estimated_delta_r_cm = 0
+        changed = False
+        if (self.left_encoder_last != self.left_encoder):
+            estimated_delta_l_cm = ((self.left_encoder - self.left_encoder_last) * wheel_perimeter_cm) / ENCODER_PPR
+            self.left_encoder_last = int(self.left_encoder)
+            changed = True
+
+        if (self.right_encoder_last != self.right_encoder):
+            estimated_delta_r_cm = ((self.right_encoder - self.right_encoder_last) * wheel_perimeter_cm) / ENCODER_PPR
+            self.right_encoder_last = int(self.right_encoder)
+            changed = True
+
+        if (changed):
+            estimated_delta = Vector2(1, 0.0)
+            estimated_delta.x = self.centimeters_to_pixel((estimated_delta_l_cm + estimated_delta_r_cm) / 2)
+            estimated_delta_angle = self.centimeters_to_pixel((estimated_delta_r_cm - estimated_delta_l_cm)) / self.wheels_distance_pixels
+
+            self.estimated_position += estimated_delta.rotate(-self.estimated_angle)
+            self.estimated_angle += math.degrees((estimated_delta_angle))
+
+
 
     def update(self, dt):
         self.mot_vel_l = self.motor_l.velocity_after_interval(self.mot_vel_l, dt) # m/s
         self.mot_vel_r = self.motor_r.velocity_after_interval(self.mot_vel_r, dt) # m/s
+
+        self.update_estimated_pos(self.mot_vel_l, self.mot_vel_r, dt)
         
         self.velocity.x = self.meters_to_pixel((self.mot_vel_l + self.mot_vel_r) / 2)    # Pixel per second
 
