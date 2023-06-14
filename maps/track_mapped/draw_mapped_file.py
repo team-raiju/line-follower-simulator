@@ -1,13 +1,19 @@
 from PIL import Image, ImageDraw
 import os
 
+
+INPUT_MAP_TRACK_FILE = "map5_track.txt"
+OUPUT_FILE_NAME = "out.png"
+
+
 # Read the points from the text file
 points = []
+markers = []
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(current_dir, "map6_track.txt")
+file_path = os.path.join(current_dir, INPUT_MAP_TRACK_FILE)
 
-out_path = os.path.join(current_dir, "out.png")
+out_path = os.path.join(current_dir, OUPUT_FILE_NAME)
 
 with open(file_path, "r") as file:
     for line in file:
@@ -53,5 +59,26 @@ for i in range(1, len(points)):
     x2 = int(points[i][0]) + x_offset
     y2 = int(points[i][1]) + y_offset
     draw.line([(x1, y1), (x2, y2)], fill="white", width=1)
+
+
+
+# # Draw markers
+# file_path = os.path.join(current_dir, "markers.txt")
+# with open(file_path, "r") as file:
+#     for line in file:
+#         x, y = line.strip().split(",")
+#         markers.append((float(x), float(y)))
+
+
+# # Calculate the offset for placing the points with margins
+# x_offset = margin - int(min_x)
+# y_offset = margin - int(min_y)
+
+# # Draw larger white points on the image with margins
+# for marker in markers:
+#     x = int(marker[0]) + x_offset
+#     y = int(marker[1]) + y_offset
+#     draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="blue")
+
 # Save the image
 image.save(out_path)

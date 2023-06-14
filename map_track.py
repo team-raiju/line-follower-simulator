@@ -5,18 +5,18 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAPPED_NAME = "map6_track.txt"
+MAPPED_NAME = "map5_track.txt"
 
-MAP_FILE_NAME = "map6.png"
-MAP_WIDTH_CM = 303
-MAP_HEIGHT_CM = 227
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 3
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 34 
-ROBOT_INIT_POS_Y_CM = 160
-ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 54
+ROBOT_INIT_POS_X_CM = 150 
+ROBOT_INIT_POS_Y_CM = 334
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 40
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -59,11 +59,13 @@ class Game:
         self.last_right_marker = False
         self.last_error = 0
         
-        self.base_speed = 43
-        self.kp = 10
-        self.kd = 5
+        self.base_speed = 33
+        self.kp = 6.5
+        self.kd = 2.5
 
         self.track_points = []
+        self.track_markers = []
+        self.points_between_markers = []
 
     
     def save_track_mapped(self):
@@ -73,6 +75,18 @@ class Game:
         with open(file_path, "w") as f:
             for point in self.track_points:
                 f.write(f"{point[0]},{point[1]}\n")
+        
+        file_path = os.path.join(current_dir, "maps", "track_mapped", "markers.txt")
+        with open(file_path, "w") as f:
+            for point in self.track_markers:
+                f.write(f"{point[0]},{point[1]}\n")
+
+        file_path = os.path.join(current_dir, "maps", "track_mapped", "samples.txt")
+        with open(file_path, "w") as f:
+            for num in self.points_between_markers:
+                f.write(f"{num}\n")
+
+
     
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -147,7 +161,9 @@ class Game:
             loop_cnt += 1
             if (loop_cnt >= 15 and not finished):
                 loop_cnt = 0
-                self.track_points.append(self.robot.estimated_position.copy())
+                offset = Vector2(self.robot.centimeters_to_pixel(self.robot.rot_center_offset_cm), 0)
+                sensor_position = self.robot.estimated_position + self.robot.centimeters_to_pixel(self.robot.line_sensor_pos[7]).rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
+                self.track_points.append(sensor_position)
 
 
             # Count markers
@@ -156,6 +172,11 @@ class Game:
             if (left_marker and not self.last_left_marker):
                 self.left_marker_counter += 1
                 print("Left marker - " + str(self.left_marker_counter))
+
+                offset = Vector2(self.robot.centimeters_to_pixel(self.robot.rot_center_offset_cm), 0)
+                sensor_position = self.robot.estimated_position + self.robot.centimeters_to_pixel(self.robot.line_sensor_pos[0]).rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
+                self.track_markers.append(sensor_position)
+                self.points_between_markers.append(int(len(self.track_points)))
 
             if (right_marker and not self.last_right_marker):
                 self.right_marker_counter += 1
