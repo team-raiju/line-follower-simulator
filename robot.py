@@ -82,7 +82,7 @@ class Robot:
         self.right_encoder_last = 0
         self.left_encoder_raw = 0
         self.right_encoder_raw = 0
-        
+        self.estimated_total_dist_cm = 0
     
     def centimeters_to_pixel(self, centimeters):
         return centimeters * self.cm_per_pixel 
@@ -117,9 +117,10 @@ class Robot:
 
         if (changed):
             estimated_delta = Vector2(1, 0.0)
-            estimated_delta.x = self.centimeters_to_pixel((estimated_delta_l_cm + estimated_delta_r_cm) / 2)
-            estimated_delta_angle = self.centimeters_to_pixel((estimated_delta_r_cm - estimated_delta_l_cm)) / self.wheels_distance_pixels
+            estimated_delta.x = (estimated_delta_l_cm + estimated_delta_r_cm) / 2
+            estimated_delta_angle = (estimated_delta_r_cm - estimated_delta_l_cm) / self.wheels_distance_cm
 
+            self.estimated_total_dist_cm += estimated_delta.x
             self.estimated_position += estimated_delta.rotate(-self.estimated_angle)
             self.estimated_angle += math.degrees((estimated_delta_angle))
 

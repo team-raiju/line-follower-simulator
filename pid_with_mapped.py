@@ -6,8 +6,6 @@ from load_track import LoadMap
 from robot import Robot
 import math
 
-MAPPED_NAME = "map5_track.txt"
-
 MAP_FILE_NAME = "map5.png"
 MAP_WIDTH_CM = 651
 MAP_HEIGHT_CM = 317
@@ -17,7 +15,7 @@ MAP_CM_PER_PIXELS = 2
 ROBOT_INIT_POS_X_CM = 150 
 ROBOT_INIT_POS_Y_CM = 334
 ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 35
+MIN_LEFT_MARKER_COUNTER = 37
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -25,6 +23,8 @@ ROBOT_SIZE_Y_CM = 14.0 # Height
 ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
+
+radius_list = [5000, 5000, 5000, 5000, 53.66666666666662, 53.66666666666651, 53.66666666666655, 53.66666666666662, 53.66666666666655, 32.19999999999985, 83.99999999999949, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 53.66666666666656, 5000, 53.66666666666568, 53.66666666666597, 53.66666666666568, 53.66666666666508, 53.666666666664824, 5000, 53.666666666666615, 32.199999999999086, 53.66666666666484, 41.99999999999967, 32.199999999999065, 53.66666666666568, 32.199999999999584, 10.733333333333086, 32.19999999999953, 83.99999999999825, 32.19999999999953, 32.19999999999923, 32.199999999998695, 32.199999999998695, 27.999999999998867, 32.199999999998695, 83.99999999999667, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 53.66666666666455, 53.66666666666455, 53.66666666666455, 53.66666666666455, 83.99999999999667, 53.66666666666453, 53.66666666666449, 53.66666666666449, 32, 32.199999999998695, 12.384615384614895, 17.888888888888236, 5000, 5000, 5000, 5000, 10.733333333332935, 7.666666666666358, 6.999999999999725, 10.733333333332904, 53.66666666666449, 22.99999999999907, 14.636363636363049, 11.999999999999526, 14.636363636363045, 53.66666666666449, 53.66666666666449, 53.66666666666449, 53.66666666666449, 32.199999999998745, 41.99999999999846, 53.6666666666647, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 53.6666666666647, 53.6666666666647, 32.199999999998795, 53.66666666666449, 41.9999999999983, 32.199999999998695, 32.199999999998695, 53.66666666666449, 32.199999999998695, 32.19999999999873, 53.66666666666455, 53.66666666666455, 5000, 83.99999999999667, 53.66666666666455, 5000, 53.66666666666455, 32.19999999999873, 5000, 53.66666666666455, 53.66666666666455, 5000, 83.99999999999667, 41.99999999999834, 41.99999999999834, 5000, 53.66666666666453, 41.99999999999834, 53.66666666666455, 53.66666666666455, 53.66666666666455, 53.66666666666455, 83.9999999999966, 5000, 83.9999999999966, 53.66666666666453, 53.66666666666455, 5000, 5000, 53.66666666666455, 53.66666666666449, 53.66666666666449, 83.9999999999966, 53.66666666666449, 83.99999999999665, 5000, 5000, 53.66666666666451, 53.66666666666449, 53.66666666666449, 5000, 5000, 53.66666666666449, 5000, 5000, 53.66666666666449, 5000, 53.66666666666449, 5000, 5000, 5000, 5000, 5000, 53.66666666666449, 53.66666666666449, 22.99999999999907, 12.384615384614913, 32.199999999998816, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 53.6666666666647, 32.199999999998816, 17.888888888888236, 17.888888888888236, 17.888888888888236, 14.636363636363102, 22.999999999999158, 14.636363636363102, 32.199999999998816]
 
 
 class Game:
@@ -41,7 +41,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_width , self.screen_height))
         self.clock = pygame.time.Clock()
-        self.ticks = 150
+        self.ticks = 180
         self.exit = False
 
         self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
@@ -60,43 +60,9 @@ class Game:
         self.last_right_marker = False
         self.last_error = 0
         
-        self.base_speed = 33
-        self.kp = 6.5
-        self.kd = 2.5
-
-        self.track_points = []
-        self.track_markers = []
-        self.points_between_markers = []
-        self.track_total_dist = []
-        self.track_thetas = []
-        self.radius_list = []
-
-    
-    def save_track_mapped(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(current_dir, "maps", "track_mapped", MAPPED_NAME)
-
-        with open(file_path, "w") as f:
-            for point in self.track_points:
-                f.write(f"{point[0]},{point[1]}\n")
-        
-        file_path = os.path.join(current_dir, "maps", "track_mapped", "total_dist.txt")
-        with open(file_path, "w") as f:
-            for num in self.track_total_dist:
-                f.write(f"{num}\n")
-
-
-        file_path = os.path.join(current_dir, "maps", "track_mapped", "thetas.txt")
-        with open(file_path, "w") as f:
-            for theta in self.track_thetas:
-                f.write(f"{theta}\n")
-        
-        file_path = os.path.join(current_dir, "maps", "track_mapped", "radius.txt")
-        with open(file_path, "w") as f:
-            for radius in self.radius_list:
-                f.write(f"{radius}\n")
-
-
+        self.base_speed = 80
+        self.kp = 28
+        self.kd = 15 
     
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -104,6 +70,21 @@ class Game:
     def draw_timer(self, time):
         text_surface = pygame.font.Font(None, 36).render("Time: " + "{:.3f}s".format(time), True, (255, 0, 0))
         self.screen.blit(text_surface, (10, 10))
+    
+    def trackGoal(self, currentPos: Vector2, goal: Vector2, robot_angle):
+        dist = currentPos.distance_to(goal)
+
+        dx = goal.x - currentPos.x
+        dy = goal.y - currentPos.y
+
+        # calculate the angle in radians and convert to degrees
+        angleDiffRaw = (math.atan2(dy, dx) * 180 / math.pi)
+
+        angleDiff = angleDiffRaw - (-robot_angle % 360)
+        if (angleDiff <= -180):
+            angleDiff += 360
+        
+        return (dist, angleDiff)
 
     def calc_error(self, line_sensor_val: list):
         # Similar to center of mass calculation
@@ -132,7 +113,8 @@ class Game:
         time = 0
         finished = False
         last_dist_saved = 0
-        last_theta = 0
+        radius_index = 0
+
         while not self.exit:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -157,6 +139,7 @@ class Game:
                     line_sensor[15] = 0
                     line_sensor[14] = 0
 
+            # print(line_sensor)
             error = self.calc_error(line_sensor)
             
             derivative = (error - self.last_error)
@@ -168,41 +151,28 @@ class Game:
             self.last_error = error
             self.robot.update(dt)
 
-
-            # Append point every 10 cm
             total_dist = float(self.robot.estimated_total_dist_cm)
             if (total_dist > (last_dist_saved + 10)):
-                offset = Vector2(self.robot.centimeters_to_pixel(self.robot.rot_center_offset_cm), 0)
-                sensor_position = self.robot.estimated_position + self.robot.centimeters_to_pixel(self.robot.line_sensor_pos[7]).rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
-                self.track_points.append(sensor_position)
-
-                self.track_total_dist.append(total_dist)
-                self.track_thetas.append(float(self.robot.estimated_angle))
-
-                delta_theta = self.robot.estimated_angle - last_theta
-                radius = 5000
-                if delta_theta != 0:
-                    theta_rad = math.radians(delta_theta)
-                    radius = abs((total_dist - last_dist_saved) / theta_rad)
-                
-                print(radius)
-                self.radius_list.append(radius)
-
+                radius_index += 1
                 last_dist_saved = total_dist
-                last_theta = float(self.robot.estimated_angle)
 
-        
+                if (radius_list[radius_index] > 1000):
+                    self.base_speed = 100
+                    self.kp = 40
+                    self.kd = 30 
+                else:
+                    self.base_speed = 60
+                    self.kp = 28
+                    self.kd = 15
+
+
+
             # Count markers
             left_marker = line_sensor[16] == 1 or line_sensor[17] == 1
             right_marker = line_sensor[18] == 1 or line_sensor[19] == 1
-            if (left_marker and not self.last_left_marker):
+            if (left_marker and not self.last_left_marker and not right_marker):
                 self.left_marker_counter += 1
                 print("Left marker - " + str(self.left_marker_counter))
-
-                offset = Vector2(self.robot.centimeters_to_pixel(self.robot.rot_center_offset_cm), 0)
-                sensor_position = self.robot.estimated_position + self.robot.centimeters_to_pixel(self.robot.line_sensor_pos[0]).rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
-                self.track_markers.append(sensor_position)
-                self.points_between_markers.append(int(len(self.track_points)))
 
             if (right_marker and not self.last_right_marker):
                 self.right_marker_counter += 1
@@ -213,7 +183,6 @@ class Game:
 
                 if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
                     print("Total time: " + str(round(time, 4)) + "s")
-                    self.save_track_mapped()
                     finished = True
 
                     self.base_speed = 15
