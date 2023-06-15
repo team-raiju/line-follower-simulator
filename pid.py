@@ -68,6 +68,31 @@ class Game:
         text_surface = pygame.font.Font(None, 36).render("Time: " + "{:.3f}s".format(time), True, (255, 0, 0))
         self.screen.blit(text_surface, (10, 10))
 
+    def filter_line(self, line_sensor: list):
+        if (line_sensor[0] == self.robot.white_val or line_sensor[1] == self.robot.white_val or line_sensor[14] == self.robot.white_val or line_sensor[15] == self.robot.white_val):
+                if (line_sensor[7] == self.robot.white_val or line_sensor[8] == self.robot.white_val or line_sensor[6] == self.robot.white_val or line_sensor[9] == self.robot.white_val):
+                    line_sensor[0] = self.robot.black_val
+                    line_sensor[1] = self.robot.black_val
+                    line_sensor[15] = self.robot.black_val
+                    line_sensor[14] = self.robot.black_val
+        return line_sensor
+
+    def count_markers(self, line_sensor: list):
+        right_counter_increased = False
+        left_marker = line_sensor[16] == self.robot.white_val or line_sensor[17] == self.robot.white_val
+        right_marker = line_sensor[18] == self.robot.white_val or line_sensor[19] == self.robot.white_val
+        if (left_marker and not self.last_left_marker):
+                self.left_marker_counter += 1
+                print("Left marker - " + str(self.left_marker_counter))
+        if (right_marker and not self.last_right_marker):
+                self.right_marker_counter += 1
+                print("Right marker - " + str(self.right_marker_counter))
+                right_counter_increased = True
+        self.last_left_marker = left_marker
+        self.last_right_marker = right_marker
+        return right_counter_increased
+        
+
     def calc_error(self, line_sensor_val: list):
         # Similar to center of mass calculation
         num_half_sensors = int(8)
@@ -91,6 +116,18 @@ class Game:
 
         return (pos_left - pos_right)
 
+    def process_simple_pid(self, line_sensor_values: list):
+
+
+        error = self.calc_error(line_sensor_values)    
+        derivative = (error - self.last_error)
+        l_speed = self.base_speed - (error * self.kp + derivative * self.kd)
+        r_speed = self.base_speed + (error * self.kp + derivative * self.kd)
+        self.last_error = error
+
+        return l_speed, r_speed
+    
+
     def run(self):
         time = 0
         finished = False
@@ -107,42 +144,21 @@ class Game:
             self.draw_map()
             self.draw_timer(time)
 
-
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
-
-            # filter line
-            if (line_sensor[0] or line_sensor[1] or line_sensor[14] or line_sensor[15]):
-                if (line_sensor[7] == 1 or line_sensor[8] == 1 or line_sensor[6] == 1 or line_sensor[9] == 1):
-                    line_sensor[0] = 0
-                    line_sensor[1] = 0
-                    line_sensor[15] = 0
-                    line_sensor[14] = 0
-
-            # print(line_sensor)
-            error = self.calc_error(line_sensor)
+            line_sensor = self.filter_line(line_sensor)
             
-            derivative = (error - self.last_error)
-            l_speed = self.base_speed - (error * self.kp + derivative * self.kd)
-            r_speed = self.base_speed + (error * self.kp + derivative * self.kd)
+            l_speed, r_speed = self.process_simple_pid(line_sensor)
             self.robot.motor_l.set_voltage(l_speed)
             self.robot.motor_r.set_voltage(r_speed)
             
-            self.last_error = error
             self.robot.update(dt)
 
-            # Count markers
-            left_marker = line_sensor[16] == 1 or line_sensor[17] == 1
-            right_marker = line_sensor[18] == 1 or line_sensor[19] == 1
-            if (left_marker and not self.last_left_marker):
-                self.left_marker_counter += 1
-                print("Left marker - " + str(self.left_marker_counter))
-
-            if (right_marker and not self.last_right_marker):
-                self.right_marker_counter += 1
-                print("Right marker - " + str(self.right_marker_counter))
-
-                if (self.right_marker_counter == 1 and self.left_marker_counter < 2):
+            right_counter_changed = self.count_markers(line_sensor)
+        
+            if (right_counter_changed):
+                if (self.right_marker_counter == 1 and self.left_marker_counter < 1):
                     time = 0
+                    print("time = 0")
 
                 if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
                     print("Total time: " + str(round(time, 4)) + "s")
@@ -152,14 +168,7 @@ class Game:
                     self.kd = 0
                     self.kp = 0
 
-
-
-            self.last_left_marker = left_marker
-            self.last_right_marker = right_marker
-            
-            #Draw
             self.robot.display(self.screen)
-            # self.robot.display_line_sensor(self.screen)
             pygame.display.flip()
 
             self.clock.tick(self.ticks)
