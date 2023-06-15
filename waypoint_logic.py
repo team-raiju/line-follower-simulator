@@ -56,8 +56,8 @@ class Game:
 
         self.last_error = 0
         self.base_speed = 100
-        self.kp = 5
-        self.kd = 15
+        self.kp = 0.357 # 5 / wheels_dist
+        self.kd = 1.07  # 10 / wheels_dist
 
     def load_waypoint_list(self):
 
@@ -92,10 +92,6 @@ class Game:
             angleDiff += 360
         
         return (dist, angleDiff)
-    
-    def set_motors_voltage(self, vel, w):
-        self.robot.motor_l.set_voltage((2*vel - w) / 2) # w*d actually
-        self.robot.motor_r.set_voltage((2*vel + w) / 2) # w*d actually
 
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -135,7 +131,7 @@ class Game:
                 self.last_error = angleDiff
                 # print(angleDiff)
 
-                self.set_motors_voltage(self.base_speed, w)
+                self.robot.set_motors_voltage_vel_w(self.base_speed, w)
             else:
                 (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[0], self.robot.angle)
                 if (not finished):

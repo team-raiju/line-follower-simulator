@@ -8,6 +8,9 @@ import os
 LINE_COLOR_THRESHOLD = 150
 ENCODER_PPR = 7
 
+BLACK_VAL = 0
+WHITE_VAL = 1
+
 class Robot:
     def __init__(self, cm_per_pixel, size_x_cm, size_y_cm, rot_center_offset_cm, wheels_dist_cm, wheel_radius_cm, pos_x_cm, pos_y_cm, angle, image):
         #Robot position
@@ -28,6 +31,8 @@ class Robot:
         self.rot_center_offset_cm = rot_center_offset_cm
         
         # Line sensor position in centimeters from robot center
+        self.white_val = WHITE_VAL
+        self.black_val = BLACK_VAL
         self.line_sensor_pos = [
             Vector2(4.22, -4.56),
             Vector2(4.62, -3.98),
@@ -148,17 +153,17 @@ class Robot:
             sensor_position = self.position + self.centimeters_to_pixel(pos_vector).rotate(-self.angle) + offset.rotate(-self.angle)
 
             if (int(sensor_position.x) <= 0 or int(sensor_position.x) >= max_x):
-                sensor_val.append(0)
+                sensor_val.append(self.black_val)
             elif (int(sensor_position.y) <= 0 or int(sensor_position.y) >= max_y):
-                sensor_val.append(0)
+                sensor_val.append(self.black_val)
             
             else:
                 val = screen.get_at((int(sensor_position.x), int(sensor_position.y)))
                 is_black = (val[0] < LINE_COLOR_THRESHOLD)
                 if is_black:
-                    sensor_val.append(0)
+                    sensor_val.append(self.black_val)
                 else:
-                    sensor_val.append(1)
+                    sensor_val.append(self.white_val)
 
 
         return sensor_val
@@ -229,3 +234,12 @@ class Robot:
                 sensor_position = self.position + self.centimeters_to_pixel(sensor).rotate(-self.angle) + offset.rotate(-self.angle)
                 line_sensor_draw = sensor_position
                 pygame.draw.circle(screen, (255, 0, 255), (line_sensor_draw.x, line_sensor_draw.y), 2)
+    
+    # Voltage is proportional to a linear and angular velocity, but is not in a standard unit (such as m/s or rad/s)
+    def set_motors_voltage_vel_w(self, vel, w):
+        self.motor_l.set_voltage((2 * vel - (w * self.wheels_distance_cm)) / 2)
+        self.motor_r.set_voltage((2 * vel + (w * self.wheels_distance_cm)) / 2) 
+    
+    def set_motors_voltage(self, l_speed, r_speed):
+        self.motor_l.set_voltage(l_speed)
+        self.motor_r.set_voltage(r_speed)

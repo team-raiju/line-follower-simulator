@@ -69,6 +69,9 @@ class Game:
         self.kp = 43
         self.kd = 60
 
+        self.kp_w = 6
+        self.kd_w = 8
+
     def draw_map(self):
         self.map.draw_loaded_map()
 
@@ -149,6 +152,17 @@ class Game:
         self.last_error = error
 
         return l_speed, r_speed
+    
+    def process_angle_pid(self, line_sensor_values: list):
+        omega_error = self.calc_error(line_sensor_values)
+
+        derivative = (omega_error - self.last_error)
+        w = (omega_error * self.kp_w + derivative * self.kd_w)
+
+        self.last_error = omega_error
+        return w
+
+
 
     def run(self):
         time = 0
@@ -172,8 +186,10 @@ class Game:
             line_sensor = self.filter_line(line_sensor)
 
             l_speed, r_speed = self.process_simple_pid(line_sensor)
-            self.robot.motor_l.set_voltage(l_speed)
-            self.robot.motor_r.set_voltage(r_speed)
+            self.robot.set_motors_voltage(l_speed, r_speed)
+
+            # w = self.process_angle_pid(line_sensor)
+            # self.robot.set_motors_voltage_vel_w(self.base_speed, w)
 
             self.robot.update(dt)
 
@@ -182,15 +198,13 @@ class Game:
             if right_counter_changed:
                 if self.right_marker_counter == 1 and self.left_marker_counter < 1:
                     time = 0
-                    print("time = 0")
 
-                if self.left_marker_counter > MIN_LEFT_MARKER_COUNTER:
+                elif self.left_marker_counter > MIN_LEFT_MARKER_COUNTER:
                     print("Total time: " + str(round(time, 4)) + "s")
                     finished = True
 
                     self.base_speed = 15
-                    self.kd = 0
-                    self.kp = 0
+                    self.kd = self.kp = self.kp_w = self.kd_w = 0
 
             self.robot.display(self.screen)
             pygame.display.flip()
