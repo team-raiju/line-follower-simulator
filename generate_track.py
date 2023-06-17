@@ -4,6 +4,15 @@ import random
 from pygame.math import Vector2
 import os
 
+MAP_WIDTH_CM = 600
+MAP_HEIGHT_CM = 378
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
+
+DRAW_INIT_POS_X_CM = 40
+DRAW_INIT_POS_Y_CM = 255
+DRAW_INIT_ANGLE = 270
+
 class Map:
     def __init__(self, screen, cm_per_pixel):
         self.cm_per_pixel = cm_per_pixel
@@ -221,10 +230,18 @@ def main():
     # Initialize Pygame
     pygame.init()
 
+    map_width_pixels = MAP_WIDTH_CM * MAP_CM_PER_PIXELS
+    map_height_pixels = MAP_HEIGHT_CM * MAP_CM_PER_PIXELS
+    margin_pixels = MAP_MARGIN_CM * MAP_CM_PER_PIXELS
+
+    screen_width = map_width_pixels + (2 * margin_pixels)
+    screen_height = map_height_pixels + (2 * margin_pixels)
+
+
     # Set up the display window
-    screen = pygame.display.set_mode((1280, 810))
-    map = Map(screen, 2)
-    map.gen_default_track(20, 245, 270)
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    map = Map(screen, MAP_CM_PER_PIXELS)
+    map.gen_default_track(DRAW_INIT_POS_X_CM, DRAW_INIT_POS_Y_CM, DRAW_INIT_ANGLE)
 
     # Update the display
     pygame.display.update()
