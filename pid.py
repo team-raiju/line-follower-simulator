@@ -69,8 +69,8 @@ class Game:
         self.kp = 43
         self.kd = 60
 
-        self.kp_w = 6
-        self.kd_w = 8
+        self.kp_w = 7
+        self.kd_w = 10
 
     def draw_map(self):
         self.map.draw_loaded_map()
@@ -124,6 +124,12 @@ class Game:
     def calc_error(self, line_sensor_val: list):
         # Similar to center of mass calculation
         num_half_sensors = int(8)
+
+        # Weight list is based on the distance to center of each line sensor
+        weight_list = []
+        for idx in range(num_half_sensors):
+            weight_list.append(self.robot.line_sensor_pos[num_half_sensors + idx].y)
+
         count_left = 0
         count_right = 0
         sum_left = 0
@@ -132,8 +138,8 @@ class Game:
             count_left += line_sensor_val[i]
             count_right += line_sensor_val[num_half_sensors + i]
 
-            sum_left += i * line_sensor_val[num_half_sensors - 1 - i]
-            sum_right += i * line_sensor_val[num_half_sensors + i]
+            sum_left += weight_list[i] * line_sensor_val[num_half_sensors - 1 - i]
+            sum_right += weight_list[i] * line_sensor_val[num_half_sensors + i]
 
         if count_left == 0:
             count_left = 1
@@ -185,11 +191,11 @@ class Game:
             )
             line_sensor = self.filter_line(line_sensor)
 
-            l_speed, r_speed = self.process_simple_pid(line_sensor)
-            self.robot.set_motors_voltage(l_speed, r_speed)
+            # l_speed, r_speed = self.process_simple_pid(line_sensor)
+            # self.robot.set_motors_voltage(l_speed, r_speed)
 
-            # w = self.process_angle_pid(line_sensor)
-            # self.robot.set_motors_voltage_vel_w(self.base_speed, w)
+            w = self.process_angle_pid(line_sensor)
+            self.robot.set_motors_voltage_vel_w(self.base_speed, w)
 
             self.robot.update(dt)
 
