@@ -4,13 +4,13 @@ import random
 from pygame.math import Vector2
 import os
 
-MAP_WIDTH_CM = 600
-MAP_HEIGHT_CM = 378
-MAP_MARGIN_CM = 25
+MAP_WIDTH_CM = 100
+MAP_HEIGHT_CM = 300
+MAP_MARGIN_CM = 0
 MAP_CM_PER_PIXELS = 2
 
-DRAW_INIT_POS_X_CM = 40
-DRAW_INIT_POS_Y_CM = 255
+DRAW_INIT_POS_X_CM = 10
+DRAW_INIT_POS_Y_CM = 230
 DRAW_INIT_ANGLE = 270
 
 class Map:
@@ -132,98 +132,60 @@ class Map:
         self.last_angle = angle
     
         self.gen_marker('Right', self.last_point)
-        self.gen_line(100)
+        self.gen_line(60)
         self.gen_marker('Right', self.last_point)
+        self.gen_line(140)
 
-        self.gen_line(110)
-        self.gen_arc_right(15, 90)
         
-        self.gen_line(240)
+        self.gen_arc_right(15,180)
 
-        self.gen_arc_right(50, 16)
-        self.gen_arc_left(60, 32)
-        self.gen_arc_right(50, 16)
+        self.gen_line(20)
 
+        self.gen_arc_left(15,180)
 
-        self.gen_line(190)
+        self.gen_line(20)
 
-        self.gen_arc_right(50, 90)
-        self.gen_arc_right(40, 90)
-        self.gen_arc_right(10, 90)
+        self.gen_arc_right(10,270)
 
-        self.gen_line(10)
-        self.gen_arc_left(40, 260)
+        self.gen_line(47)
 
-        self.gen_line(80)
+        self.gen_arc_left(10,120)
 
-        self.gen_arc_right(25, 175)
-
-        self.gen_line(330)
-
-        self.gen_arc_left(10, 80)
-
-        self.gen_line(135)
-
-        self.gen_arc_left(40, 90)
-
-        self.gen_arc_left(800, 10)
-        self.gen_arc_left(600, 15)
-        self.gen_arc_left(400, 15)
-
-        self.gen_arc_left(10, 180)
-        self.gen_line(25)
-
-        self.gen_arc_right(25, 60)
-        self.gen_arc_left(25, 65)
-        self.gen_arc_right(25, 65)
-        self.gen_arc_left(25, 70)
-        self.gen_arc_right(25, 70)
-        self.gen_arc_left(25, 70)
-        self.gen_arc_right(25, 70)
-        self.gen_arc_left(25, 70)
-        self.gen_arc_right(25, 70)
-        self.gen_arc_left(25, 65)
-        self.gen_arc_right(25, 125)
-
-        self.gen_line(220)
-
-        self.gen_arc_right(10, 180)
-        self.gen_line(40)
-        self.gen_arc_left(10, 180)
         self.gen_line(40)
 
-        self.gen_arc_right(15, 110)
-        self.gen_arc_left(30, 40)
-        self.gen_arc_right(30, 110)
-        self.gen_arc_right(10, 90)
+        self.gen_arc_right(15,90)
 
-        self.gen_line(220)
+        self.gen_arc_left(15,105)
 
-        self.gen_arc_left(50, 90)
-        self.gen_arc_left(10, 90)
-        self.gen_line(10)
-        self.gen_arc_right(25, 85)
+        self.gen_arc_right(15,90)
 
-        self.gen_line(168)
+        self.gen_arc_left(15,105)
 
-        self.gen_arc_right(40, 90)
-        self.gen_arc_right(10, 206.4)
-        self.gen_arc_left(10, 264.6)
-        self.gen_arc_right(10, 180)
+        self.gen_arc_right(15,90)
 
-        self.gen_arc_left(10, 243.3)
-
-        self.gen_arc_right(10, 180)
-        self.gen_arc_left(10, 264.6)
-        self.gen_arc_right(10, 206.4)
+        self.gen_arc_left(15,30)
 
 
-        self.gen_line(28)
-        self.gen_arc_right(10, 90)
+        self.gen_line(50)
 
-        #manual adjust of angle to compasete for errors
-        self.last_angle = 270
-        self.gen_line(130)
+        self.gen_arc_left(11,180)
+
+        self.gen_line(150)
+
+        self.gen_arc_right(11,180)
+
+        self.gen_line(150)
+
+        self.gen_arc_right(30,90)
+
+        self.gen_line(36)
+
+        self.gen_arc_right(10,90)
+
+        self.gen_line(46)
+
+
+
 
 
 def main():
@@ -242,6 +204,8 @@ def main():
     screen = pygame.display.set_mode((screen_width, screen_height))
     map = Map(screen, MAP_CM_PER_PIXELS)
     map.gen_default_track(DRAW_INIT_POS_X_CM, DRAW_INIT_POS_Y_CM, DRAW_INIT_ANGLE)
+
+    # pygame.image.save(screen, "image.png")
 
     # Update the display
     pygame.display.update()

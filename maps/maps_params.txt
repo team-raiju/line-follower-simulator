@@ -10,6 +10,21 @@ self.kp = 10
 self.kd = 5 
 ---------------------------
 ---------------------------
+MAP_FILE_NAME = "map0.png"
+MAP_WIDTH_CM = 100
+MAP_HEIGHT_CM = 300
+MAP_MARGIN_CM = 10
+MAP_CM_PER_PIXELS = 2
+
+ROBOT_INIT_POS_X_CM = 20
+ROBOT_INIT_POS_Y_CM = 220
+ROBOT_INIT_ANGLE = 90
+MIN_LEFT_MARKER_COUNTER = 22
+self.base_speed = 33
+self.kp = 6.5
+self.kd = 2.5
+---------------------------
+---------------------------
 MAP_FILE_NAME = "map1.png"
 MAP_WIDTH_CM = 230
 MAP_HEIGHT_CM = 395
@@ -81,7 +96,7 @@ MAP_CM_PER_PIXELS = 2
 ROBOT_INIT_POS_X_CM = 150 
 ROBOT_INIT_POS_Y_CM = 334
 ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 40
+MIN_LEFT_MARKER_COUNTER = 35
 
 self.base_speed = 80
 self.kp = 28
@@ -102,6 +117,9 @@ MIN_LEFT_MARKER_COUNTER = 54
 self.base_speed = 100
 self.kp = 43
 self.kd = 60
+
+self.kp_w = 8.5
+self.kd_w = 8.5
 ---------------------------
 ---------------------------
 MAP_FILE_NAME = "map7.png"
