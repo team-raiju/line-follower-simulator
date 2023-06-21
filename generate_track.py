@@ -9,8 +9,8 @@ MAP_HEIGHT_CM = 300
 MAP_MARGIN_CM = 0
 MAP_CM_PER_PIXELS = 2
 
-DRAW_INIT_POS_X_CM = 10
-DRAW_INIT_POS_Y_CM = 230
+DRAW_INIT_POS_X_CM = 14
+DRAW_INIT_POS_Y_CM = 224
 DRAW_INIT_ANGLE = 270
 
 class Map:
@@ -168,21 +168,21 @@ class Map:
 
         self.gen_line(50)
 
-        self.gen_arc_left(11,180)
+        self.gen_arc_left(10,180)
 
         self.gen_line(150)
 
-        self.gen_arc_right(11,180)
+        self.gen_arc_right(10,180)
 
-        self.gen_line(150)
+        self.gen_line(158)
 
         self.gen_arc_right(30,90)
 
-        self.gen_line(36)
+        self.gen_line(32)
 
         self.gen_arc_right(10,90)
 
-        self.gen_line(46)
+        self.gen_line(54)
 
 
 
@@ -205,7 +205,7 @@ def main():
     map = Map(screen, MAP_CM_PER_PIXELS)
     map.gen_default_track(DRAW_INIT_POS_X_CM, DRAW_INIT_POS_Y_CM, DRAW_INIT_ANGLE)
 
-    # pygame.image.save(screen, "image.png")
+    pygame.image.save(screen, "image.png")
 
     # Update the display
     pygame.display.update()
