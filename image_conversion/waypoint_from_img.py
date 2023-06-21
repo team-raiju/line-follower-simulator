@@ -2,13 +2,13 @@ import os
 import pygame
 
 
-INPUT_MAP_NAME = "map5.png"
-WAYPOINT_LIST_NAME = "waypoints_map5.txt"
+INPUT_MAP_NAME = "map0.png"
+WAYPOINT_LIST_NAME = "waypoints_map0.txt"
 
-MAP_WIDTH_CM = 651
-MAP_HEIGHT_CM = 317
-MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_WIDTH_CM = 100
+MAP_HEIGHT_CM = 300
+MAP_MARGIN_CM = 10
+MAP_CM_PER_PIXELS = 3
 
 
 class Game:
@@ -54,8 +54,11 @@ class Game:
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    print(f"Mouse clicked at ({pos[0]}, {pos[1]})")
-                    self.waypoint_list.append(pos)
+                    x_val_cm = (pos[0] / MAP_CM_PER_PIXELS) - MAP_MARGIN_CM
+                    y_val_cm = (pos[1] / MAP_CM_PER_PIXELS) - MAP_MARGIN_CM
+                    coord = (x_val_cm, y_val_cm)
+                    print(f"Mouse clicked at ({coord[0]}, {coord[1]})")
+                    self.waypoint_list.append(coord)
                     
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
                     print("Backspace key pressed")
@@ -76,7 +79,9 @@ class Game:
                     self.save_waypoint_list()
                     
             for waypoint in self.waypoint_list:
-                pygame.draw.circle(self.screen, (255, 0, 255), (waypoint[0], waypoint[1]), 3)
+                x_val_pixel = (waypoint[0] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
+                y_val_pixel = (waypoint[1] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
+                pygame.draw.circle(self.screen, (255, 0, 255), (x_val_pixel, y_val_pixel), 3)
 
             pygame.display.flip()
 
