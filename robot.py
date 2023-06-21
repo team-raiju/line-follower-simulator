@@ -36,7 +36,7 @@ class Robot:
         self.line_sensor_pos = [
             Vector2(4.22, -4.56),
             Vector2(4.62, -3.98),
-            Vector2(5.10, -3.4),
+            Vector2(5.10, -3.40),
             Vector2(5.44, -2.82),
             Vector2(5.84, -2.24),
             Vector2(6.18, -1.66),
@@ -48,7 +48,7 @@ class Robot:
             Vector2(6.18, 1.66),
             Vector2(5.84, 2.24),
             Vector2(5.44, 2.82),
-            Vector2(5.10, 3.4),
+            Vector2(5.10, 3.40),
             Vector2(4.62, 3.98),
             Vector2(4.22, 4.56),
 
