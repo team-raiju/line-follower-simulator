@@ -48,8 +48,8 @@ class Game:
             ROTATION_OFFSET_FROM_CENTER_CM,
             WHEELS_DIST_CM,
             WHEELS_RADIUS_CM,
-            ROBOT_INIT_POS_X_CM,
-            ROBOT_INIT_POS_Y_CM,
+            ROBOT_INIT_POS_X_CM + MAP_MARGIN_CM,
+            ROBOT_INIT_POS_Y_CM + MAP_MARGIN_CM,
             ROBOT_INIT_ANGLE,
             ROBOT_IMAGE,
         )
@@ -76,10 +76,10 @@ class Game:
         self.map.draw_loaded_map()
 
     def draw_timer(self, time):
-        text_surface = pygame.font.Font(None, 36).render(
+        text_surface = pygame.font.Font(None, int(13 * MAP_CM_PER_PIXELS)).render(
             "Time: " + "{:.3f}s".format(time), True, (255, 0, 0)
         )
-        self.screen.blit(text_surface, (10, 10))
+        self.screen.blit(text_surface, (5, 5))
 
     def filter_line(self, line_sensor: list):
         if (
@@ -184,7 +184,6 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.draw_map()
-            self.draw_timer(time)
 
             line_sensor = self.robot.get_line_sensor(
                 self.screen, self.screen_width, self.screen_height
@@ -212,6 +211,7 @@ class Game:
                     self.base_speed = 15
                     self.kd = self.kp = self.kp_w = self.kd_w = 0
 
+            self.draw_timer(time)
             self.robot.display(self.screen)
             pygame.display.flip()
 
