@@ -76,13 +76,13 @@ class Game:
     def radius_to_velocity(self, radius):
         velocity = 45
         if(radius < 20):
-            velocity = 30
-        elif(radius < 30):
             velocity = 40
+        elif(radius < 30):
+            velocity = 50
         elif(radius < 50):
-            velocity = 60
+            velocity = 70
         elif(radius < 70):
-            velocity = 80
+            velocity = 90
         else:
             velocity = 100
         
@@ -116,10 +116,10 @@ class Game:
             self.velocity_table.append(velocity)
         
         # Delay filter
-        self.shift_velocity_table(3)
+        self.shift_velocity_table(6)
 
         # Process acceleration
-        self.velocity_process_acceleration(15, -5)
+        self.velocity_process_acceleration(10, -10)
 
     
     def trackGoal(self, currentPos: Vector2, goal: Vector2, robot_angle):

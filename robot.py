@@ -19,7 +19,7 @@ class Robot:
         y = self.centimeters_to_pixel(pos_y_cm)
         self.position = Vector2(x, y)
         self.angle = angle
-        self.estimated_position = Vector2(x, y)
+        self.estimated_position_cm = Vector2(pos_x_cm, pos_y_cm)
         self.estimated_angle = angle
 
         
@@ -126,7 +126,7 @@ class Robot:
             estimated_delta_angle = (estimated_delta_r_cm - estimated_delta_l_cm) / self.wheels_distance_cm
 
             self.estimated_total_dist_cm += estimated_delta.x
-            self.estimated_position += estimated_delta.rotate(-self.estimated_angle)
+            self.estimated_position_cm += estimated_delta.rotate(-self.estimated_angle)
             self.estimated_angle += math.degrees((estimated_delta_angle))
 
 

@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw
 import os
 
 
-INPUT_MAP_TRACK_FILE = "map5_track.txt"
+TRACK_FOLDER = "map0"
 OUPUT_FILE_NAME = "out.png"
 
 
@@ -11,9 +11,9 @@ points = []
 markers = []
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(current_dir, INPUT_MAP_TRACK_FILE)
+file_path = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_waypoints.txt"))
 
-out_path = os.path.join(current_dir, OUPUT_FILE_NAME)
+out_path = os.path.join(current_dir, "mapping_data", TRACK_FOLDER, OUPUT_FILE_NAME)
 
 with open(file_path, "r") as file:
     for line in file:
