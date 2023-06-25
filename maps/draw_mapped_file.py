@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw
 import os
 
 
-TRACK_FOLDER = "map0"
+TRACK_FOLDER = "map2"
 OUPUT_FILE_NAME = "out.png"
 
 
@@ -81,4 +81,5 @@ for i in range(1, len(points)):
 #     draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="blue")
 
 # Save the image
+# image.show()
 image.save(out_path)

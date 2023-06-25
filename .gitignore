@@ -1,5 +1,6 @@
 *.txt
 !maps/maps_params.txt
+*out.png
 
 Models*
 logs*

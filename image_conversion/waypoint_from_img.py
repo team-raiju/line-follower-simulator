@@ -1,9 +1,10 @@
 import os
 import pygame
-
+from pygame.math import Vector2
+import math
 
 INPUT_MAP_NAME = "map0.png"
-WAYPOINT_LIST_NAME = "waypoints_map0.txt"
+WAYPOINT_LIST_NAME = "waypoints_map0-9.txt"
 
 MAP_WIDTH_CM = 100
 MAP_HEIGHT_CM = 300
@@ -36,6 +37,15 @@ class Game:
             for point in self.waypoint_list:
                 f.write(f"{point[0]},{point[1]}\n")
 
+    def coord_cm_to_pixel(self, point):
+        x_val_pixel = (point[0] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
+        y_val_pixel = (point[1] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
+        return x_val_pixel, y_val_pixel
+    
+    def draw_points(self):
+        for waypoint in self.waypoint_list:
+                x_val_pixel, y_val_pixel = self.coord_cm_to_pixel(waypoint)
+                pygame.draw.circle(self.screen, (255, 0, 255), (x_val_pixel, y_val_pixel), 3)
 
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -57,8 +67,11 @@ class Game:
                     x_val_cm = (pos[0] / MAP_CM_PER_PIXELS) - MAP_MARGIN_CM
                     y_val_cm = (pos[1] / MAP_CM_PER_PIXELS) - MAP_MARGIN_CM
                     coord = (x_val_cm, y_val_cm)
+                    print(f"Mouse clicked at ({pos[0]}, {pos[1]})")
+
                     print(f"Mouse clicked at ({coord[0]}, {coord[1]})")
                     self.waypoint_list.append(coord)
+                    self.draw_points()
                     
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
                     print("Backspace key pressed")
@@ -66,6 +79,8 @@ class Game:
                         self.screen.fill((0, 0, 0))
                         self.screen.blit(resized_custom_map, (self.margin_pixels, self.margin_pixels))
                         self.waypoint_list.pop()
+                    self.draw_points()
+                    
 
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
                     print("Delete key pressed")
@@ -73,15 +88,12 @@ class Game:
                         self.screen.fill((0, 0, 0))
                         self.screen.blit(resized_custom_map, (self.margin_pixels, self.margin_pixels))
                         self.waypoint_list.pop()
-                
+                    self.draw_points()                    
+
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                     print("List saved")
                     self.save_waypoint_list()
                     
-            for waypoint in self.waypoint_list:
-                x_val_pixel = (waypoint[0] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
-                y_val_pixel = (waypoint[1] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
-                pygame.draw.circle(self.screen, (255, 0, 255), (x_val_pixel, y_val_pixel), 3)
 
             pygame.display.flip()
 
