@@ -1,23 +1,25 @@
 import os
 import pygame
 from pygame.math import Vector2
-from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 import math
+from helper import Helper as hp
+from helper import PIDFunctions as pid
+from helper import CountMarkers as cm
 
-MAPPING_NAME = "map3"
+MAPPING_NAME = "map2"
 
-MAP_FILE_NAME = "map3.png"
-MAP_WIDTH_CM = 545
-MAP_HEIGHT_CM = 595
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 1.5
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 175
-ROBOT_INIT_POS_Y_CM = 12
-ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 40
+ROBOT_INIT_POS_X_CM = 178 
+ROBOT_INIT_POS_Y_CM = 75
+ROBOT_INIT_ANGLE = 270
+MIN_LEFT_MARKER_COUNTER = 26
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -26,7 +28,9 @@ ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
 
-
+INIT_BASE_SPEED = 33
+INIT_KP = 3
+INIT_KD = 1.5
 
 
 class Game:
@@ -65,13 +69,8 @@ class Game:
 
         self.left_marker_counter = 0
         self.right_marker_counter = 0
-        self.last_left_marker = False
-        self.last_right_marker = False
-        self.last_error = 0
-        
-        self.base_speed = 33
-        self.kp = 3
-        self.kd = 1.5
+
+        self.pid_calc = pid(INIT_BASE_SPEED, INIT_KP, INIT_KD)
 
         self.track_points = []
         self.track_markers = []
@@ -131,23 +130,21 @@ class Game:
 
 
     def gen_optimized_waypoints(self):
-        
-
         centers = []
-        optmized_points = []
+        optimized_points = []
 
         for i in range(len(self.track_markers) - 1):
             circle_center_x = (self.track_markers[i][0] + self.track_markers[i + 1][0]) / 2
             circle_center_y = (self.track_markers[i][1]  + self.track_markers[i + 1][1]) / 2
             point = (circle_center_x, circle_center_y)
-            # x_val_pixel, y_val_pixel = self.coord_cm_to_pixel(point)
             center = Vector2(point[0], point[1])
             centers.append(center)
+            # x_val_pixel, y_val_pixel = self.coord_cm_to_pixel(point)
             # pygame.draw.circle(self.screen, (255, 0, 0), (x_val_pixel, y_val_pixel), 3, 0)
 
 
-        # get medium curvature between markers
-        # If circle, then aproxima o centro do centro. E a cada 2 para o lado aproxima do centro tambem
+        # 1. Get average curvature between markers
+        # 2. If is circle, then try to generate shortcuts.
         for i in range(len(self.points_between_markers) - 1):
             init = self.points_between_markers[i]
             end  = self.points_between_markers[i + 1]
@@ -156,7 +153,7 @@ class Game:
             mean_radius = radius_sum / num_of_points
 
             marker_center = (self.track_markers_center[i][0], self.track_markers_center[i][1])
-            optmized_points.append(marker_center)
+            optimized_points.append(marker_center)
 
             if (mean_radius < 1000):
                 waypoints = []
@@ -169,7 +166,6 @@ class Game:
                         waypoint = self.track_points[int(j)]
                         waypoints.append(waypoint)
 
-
                 for item in waypoints:
                     my_vect = Vector2(item[0], item[1])
                     dx = my_vect.x - centers[i].x
@@ -177,15 +173,16 @@ class Game:
                     angleDiffRaw = (math.atan2(dy, dx) * 180 / math.pi)
 
                     new_vect = my_vect - Vector2(10, 0).rotate(angleDiffRaw)
-                    optmized_points.append(new_vect)
+                    optimized_points.append(new_vect)
 
+        # Save optimized points
         current_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_opt_waypoints.txt"))
 
         with open(file_path, "w") as f:
-            for optmized in optmized_points:
-                f.write(f"{optmized[0]},{optmized[1]}\n")
-                x_val_pixel, y_val_pixel = self.coord_cm_to_pixel(optmized)
+            for optimized in optimized_points:
+                f.write(f"{optimized[0]},{optimized[1]}\n")
+                x_val_pixel, y_val_pixel = hp.coord_cm_to_pixel(optimized, MAP_CM_PER_PIXELS, MAP_MARGIN_CM)
                 pygame.draw.circle(self.screen, (0, 0, 255), (x_val_pixel, y_val_pixel), 3, 0)
 
              # Always write the last point
@@ -193,71 +190,12 @@ class Game:
             f.write(f"{point[0]},{point[1]}\n")
 
 
-    def coord_cm_to_pixel(self, point):
-        x_val_pixel = (point[0] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
-        y_val_pixel = (point[1] + MAP_MARGIN_CM) * MAP_CM_PER_PIXELS
-        return x_val_pixel, y_val_pixel
-    
-    def draw_map(self):
-        self.map.draw_loaded_map()
-    
-    def draw_timer(self, time):
-        text_surface = pygame.font.Font(None, 36).render("Time: " + "{:.3f}s".format(time), True, (255, 0, 0))
-        self.screen.blit(text_surface, (10, 10))
-
-    def calc_error(self, line_sensor_val: list):
-        # Similar to center of mass calculation
-        num_half_sensors = int(8)
-        count_left = 0
-        count_right = 0
-        sum_left = 0
-        sum_right = 0
-        for i in range (num_half_sensors):
-            count_left += line_sensor_val[i]
-            count_right += line_sensor_val[num_half_sensors + i]
-
-            sum_left += i * line_sensor_val[num_half_sensors - 1 - i]
-            sum_right += i * line_sensor_val[num_half_sensors + i]
-
-        if count_left == 0:
-            count_left = 1
-        if count_right == 0:
-            count_right = 1
-        pos_left = sum_left / count_left
-        pos_right = sum_right / count_right
-
-        return (pos_left - pos_right)
-    
-    def filter_line(self, line_sensor: list):
-        if (
-            line_sensor[0] == self.robot.white_val
-            or line_sensor[1] == self.robot.white_val
-            or line_sensor[14] == self.robot.white_val
-            or line_sensor[15] == self.robot.white_val
-        ):
-            if (
-                line_sensor[7] == self.robot.white_val
-                or line_sensor[8] == self.robot.white_val
-                or line_sensor[6] == self.robot.white_val
-                or line_sensor[9] == self.robot.white_val
-            ):
-                line_sensor[0] = self.robot.black_val
-                line_sensor[1] = self.robot.black_val
-                line_sensor[15] = self.robot.black_val
-                line_sensor[14] = self.robot.black_val
-        return line_sensor
-
     def run(self):
         time = 0
         finished = False
         last_dist_saved = 0
         last_theta = 0
-
-        start_left_marker = False
-        left_marker_position = Vector2(0, 0)
-        left_marker_position_center = Vector2(0, 0)
-
-        start_right_marker = False
+        count_markers = cm()
 
         while not self.exit:
             for event in pygame.event.get():
@@ -269,25 +207,17 @@ class Game:
                 time += dt 
 
                 self.screen.fill((0, 0, 0))
-                self.draw_map()
-                self.draw_timer(time)
+                self.map.draw_loaded_map()
+                hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
 
 
-            line_sensor = self.robot.get_line_sensor(
-                self.screen, self.screen_width, self.screen_height
-            )
+            line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
+            line_sensor = hp.filter_line(line_sensor, self.robot.white_val, self.robot.black_val)
 
-            line_sensor = self.filter_line(line_sensor)
-
-            error = self.calc_error(line_sensor)
+            error = pid.calc_error(line_sensor, self.robot.line_sensor_pos[0:16])
+            l_speed, r_speed = self.pid_calc.simple_pid(error)
+            self.robot.set_motors_voltage(l_speed, r_speed)
             
-            derivative = (error - self.last_error)
-            l_speed = self.base_speed - (error * self.kp + derivative * self.kd)
-            r_speed = self.base_speed + (error * self.kp + derivative * self.kd)
-            self.robot.motor_l.set_voltage(l_speed)
-            self.robot.motor_r.set_voltage(r_speed)
-            
-            self.last_error = error
             self.robot.update(dt)
 
 
@@ -311,7 +241,7 @@ class Game:
                     theta_rad = math.radians(delta_theta)
                     radius = (total_dist - last_dist_saved) / theta_rad
                 
-                print(radius)
+                # print(radius)
                 self.radius_list.append(radius)
 
                 last_dist_saved = total_dist
@@ -319,75 +249,49 @@ class Game:
 
         
             # Count markers
-            left_marker = line_sensor[16] == 1 or line_sensor[17] == 1
-            right_marker = line_sensor[18] == 1 or line_sensor[19] == 1
+            markers = count_markers.marker_process(line_sensor[16:18], line_sensor[18:20], 
+                                         self.robot.white_val, self.robot.estimated_position_cm, self.robot.estimated_angle)
             
-            if (start_left_marker):
-                if (right_marker):
-                    start_left_marker = False
-                    print("Crossing L")
-                elif (not left_marker and self.last_left_marker):
-                    self.left_marker_counter += 1
-                    print("Left marker - " + str(self.left_marker_counter))
-                    self.track_markers.append(left_marker_position)
-                    self.track_markers_center.append(left_marker_position_center)
-                    self.points_between_markers.append(int(len(self.track_points)))
-                    start_left_marker = False
+            if (markers["left_marker"]["seeing"]):
+                self.left_marker_counter += 1
+                print("Left marker - " + str(self.left_marker_counter))
+                marker_raw_pos = markers["left_marker"]["position"]
+                marker_raw_angle = markers["left_marker"]["rotation"]
 
-            else:
-                if (left_marker and not self.last_left_marker and not right_marker):
-                    start_left_marker = True
-                    offset = Vector2(self.robot.rot_center_offset_cm, 0)
-                    sensor_position = self.robot.estimated_position_cm + self.robot.line_sensor_pos[16].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
-                    sensor_position.x -= MAP_MARGIN_CM
-                    sensor_position.y -= MAP_MARGIN_CM
-                    left_marker_position = sensor_position
+                offset = Vector2(self.robot.rot_center_offset_cm, 0)
+                sensor_position = marker_raw_pos + self.robot.line_sensor_pos[16].rotate(-marker_raw_angle) + offset.rotate(-marker_raw_angle)
+                sensor_position.x -= MAP_MARGIN_CM
+                sensor_position.y -= MAP_MARGIN_CM
+                left_marker_position = sensor_position
+                self.track_markers.append(left_marker_position)
 
-                    # Center of the robot
-                    robot_center = Vector2(self.robot.estimated_position_cm.x, self.robot.estimated_position_cm.y)
-                    robot_center.x -= MAP_MARGIN_CM
-                    robot_center.y -= MAP_MARGIN_CM
-                    left_marker_position_center = robot_center
+                robot_center = Vector2(marker_raw_pos.x - MAP_MARGIN_CM, marker_raw_pos.y - MAP_MARGIN_CM)
+                left_marker_position_center = robot_center
+                self.track_markers_center.append(left_marker_position_center)
+
+                self.points_between_markers.append(int(len(self.track_points)))
 
 
+            if (markers["right_marker"]["seeing"]):
+                self.right_marker_counter += 1
+                print("Right marker - " + str(self.right_marker_counter))
 
-            if (start_right_marker):
-                if (left_marker):
-                    start_right_marker = False
-                    print("Crossing R")
-                elif (not right_marker and self.last_right_marker):
-                    self.right_marker_counter += 1
-                    print("Right marker - " + str(self.right_marker_counter))
+                if (self.right_marker_counter == 1 and self.left_marker_counter < 1):
+                    print("Start")
+                    time = 0
 
-                    if (self.right_marker_counter == 1 and self.left_marker_counter < 2):
-                        time = 0
+                elif (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
+                    print("Total time: " + str(round(time, 4)) + "s")
+                    self.save_track_mapped()
+                    self.gen_waypoint()
+                    self.gen_optimized_waypoints()
+                    finished = True
+                    self.pid_calc = pid(15, 0, 0)
 
-                    if (self.left_marker_counter > MIN_LEFT_MARKER_COUNTER):
-                        print("Total time: " + str(round(time, 4)) + "s")
-                        self.save_track_mapped()
-                        self.gen_waypoint()
-                        self.gen_optimized_waypoints()
-                        finished = True
-
-                        self.base_speed = 15
-                        self.kd = 0
-                        self.kp = 0
                     
-                    start_right_marker = False
-
-            else:
-                if (right_marker and not self.last_right_marker and not left_marker):
-                    start_right_marker = True
-
-
-            self.last_left_marker = left_marker
-            self.last_right_marker = right_marker
-            
             #Draw
             self.robot.display(self.screen)
-            # self.robot.display_line_sensor(self.screen)
             pygame.display.flip()
-
             self.clock.tick(self.ticks)
 
 
