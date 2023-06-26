@@ -67,6 +67,9 @@ class Game:
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
+        self.last_dist_saved = 0
+        self.last_theta = 0
+
         self.left_marker_counter = 0
         self.right_marker_counter = 0
 
@@ -190,11 +193,35 @@ class Game:
             f.write(f"{point[0]},{point[1]}\n")
 
 
+    def append_point(self):
+        total_dist = float(self.robot.estimated_total_dist_cm)
+        if (total_dist > (self.last_dist_saved + 5)):
+            offset = Vector2(self.robot.rot_center_offset_cm, 0)
+            sensor_position = self.robot.estimated_position_cm + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
+            
+            # Remove Margin to save absolute position
+            sensor_position.x -= MAP_MARGIN_CM
+            sensor_position.y -= MAP_MARGIN_CM
+            self.track_points.append(sensor_position)
+
+            self.track_total_dist.append(total_dist)
+            self.track_thetas.append(float(self.robot.estimated_angle))
+
+            delta_theta = self.robot.estimated_angle - self.last_theta
+            radius = 5000
+            if delta_theta != 0:
+                theta_rad = math.radians(delta_theta)
+                radius = (total_dist - self.last_dist_saved) / theta_rad
+            
+            print(radius)
+            self.radius_list.append(radius)
+
+            self.last_dist_saved = total_dist
+            self.last_theta = float(self.robot.estimated_angle)
+
     def run(self):
         time = 0
         finished = False
-        last_dist_saved = 0
-        last_theta = 0
         count_markers = cm()
 
         while not self.exit:
@@ -218,36 +245,9 @@ class Game:
             l_speed, r_speed = self.pid_calc.simple_pid(error)
             self.robot.set_motors_voltage(l_speed, r_speed)
             
-            self.robot.update(dt)
-
-
             # Append point every 5 cm
-            total_dist = float(self.robot.estimated_total_dist_cm)
-            if (total_dist > (last_dist_saved + 5)):
-                offset = Vector2(self.robot.rot_center_offset_cm, 0)
-                sensor_position = self.robot.estimated_position_cm + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
-                
-                # Remove Margin to save absolute position
-                sensor_position.x -= MAP_MARGIN_CM
-                sensor_position.y -= MAP_MARGIN_CM
-                self.track_points.append(sensor_position)
+            self.append_point()
 
-                self.track_total_dist.append(total_dist)
-                self.track_thetas.append(float(self.robot.estimated_angle))
-
-                delta_theta = self.robot.estimated_angle - last_theta
-                radius = 5000
-                if delta_theta != 0:
-                    theta_rad = math.radians(delta_theta)
-                    radius = (total_dist - last_dist_saved) / theta_rad
-                
-                # print(radius)
-                self.radius_list.append(radius)
-
-                last_dist_saved = total_dist
-                last_theta = float(self.robot.estimated_angle)
-
-        
             # Count markers
             markers = count_markers.marker_process(line_sensor[16:18], line_sensor[18:20], 
                                          self.robot.white_val, self.robot.estimated_position_cm, self.robot.estimated_angle)
@@ -288,7 +288,8 @@ class Game:
                     finished = True
                     self.pid_calc = pid(15, 0, 0)
 
-                    
+            self.robot.update(dt)
+
             #Draw
             self.robot.display(self.screen)
             pygame.display.flip()
