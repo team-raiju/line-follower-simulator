@@ -8,16 +8,16 @@ from helper import Helper as hp
 from helper import PIDFunctions as pid
 import sys
 
-MAP_FILE_NAME = "map2.png"
-MAP_WIDTH_CM = 186
-MAP_HEIGHT_CM = 354
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 178 
-ROBOT_INIT_POS_Y_CM = 75
-ROBOT_INIT_ANGLE = 270
-MIN_LEFT_MARKER_COUNTER = 26
+ROBOT_INIT_POS_X_CM = 125 
+ROBOT_INIT_POS_Y_CM = 309
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 33
 
 ROBOT_IMAGE = "robot-img-2.png"
 ROBOT_SIZE_X_CM = 19.0 # Width
@@ -111,6 +111,13 @@ class Game:
         
         return (dist, angleDiff)
     
+    def get_estimated_pos_pixel(self):
+        position_cm = self.robot.estimated_position_cm + Vector2(0, 0).rotate(-self.robot.estimated_angle)
+        pixel_x = position_cm.x * MAP_CM_PER_PIXELS
+        pixel_y = position_cm.y * MAP_CM_PER_PIXELS
+        return Vector2(pixel_x, pixel_y)
+
+    
     def run(self):
         waypoint_idx = 0
         time = 0
@@ -133,7 +140,8 @@ class Game:
             self.map.draw_loaded_map()
 
             if (len(self.waypoint_list) > waypoint_idx):
-                (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[waypoint_idx], self.robot.angle)
+                estimated_robot_pos = self.get_estimated_pos_pixel()
+                (dist, angleDiff) = self.trackGoal(estimated_robot_pos, self.waypoint_list[waypoint_idx], self.robot.estimated_angle)
 
                 derivative = (angleDiff - self.last_error)
                 # print(angleDiff)
@@ -144,11 +152,10 @@ class Game:
 
                 self.robot.set_motors_voltage_vel_w(self.base_speed, w)
             else:
-                # (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[0], self.robot.angle)
                 if (not finished):
                     print("Total time: " + str(round(time, 4)) + "s")
                     finished = True
-                    self.pid_base_speed = 75
+                    self.pid_base_speed = self.base_speed - 15
                     self.pid_kp = 25
                     self.pid_kd = 50 
                     self.pid_calc = pid(self.pid_base_speed, self.pid_kp, self.pid_kd)
@@ -164,6 +171,8 @@ class Game:
                     self.robot.set_motors_voltage(l_speed, r_speed)
                     
                     self.pid_base_speed -= 1.5
+                    if (self.pid_base_speed < 0):
+                        self.pid_base_speed = 0
                     self.pid_kp -= 0.5
                     self.pid_kd -= 1
                     self.pid_calc = pid(self.pid_base_speed, self.pid_kp, self.pid_kd)
@@ -177,12 +186,11 @@ class Game:
 
             # Update travalled distance
             if (waypoint_idx < len(self.waypoint_list)):
-                if (self.near_waypoint(self.robot.position, self.waypoint_list[waypoint_idx])):
+                estimated_robot_pos = self.get_estimated_pos_pixel()
+                if (self.near_waypoint(estimated_robot_pos, self.waypoint_list[waypoint_idx])):
                     waypoint_idx += 1
                     print(waypoint_idx)
 
-            # print("")
-            # print(self.robot.position)
 
             hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
             self.robot.display(self.screen)
