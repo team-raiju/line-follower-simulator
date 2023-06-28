@@ -6,7 +6,7 @@ from robot import Robot
 import math
 from helper import Helper as hp
 from helper import PIDFunctions as pid
-
+import sys
 
 MAP_FILE_NAME = "map2.png"
 MAP_WIDTH_CM = 186
@@ -26,7 +26,7 @@ ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
 
-WAYPOINT_LIST = "map2_opt_waypoints.txt"
+DEFAULT_WAYPOINT_LIST = "image_conversion/waypoints/map2_opt_waypoints.txt"
 
 class Game:
     def __init__(self):
@@ -62,18 +62,24 @@ class Game:
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
-        self.load_waypoint_list()
+        print(len(sys.argv))
+        if (len(sys.argv) < 2):
+            print("Using default track")
+            self.load_waypoint_list(DEFAULT_WAYPOINT_LIST)
+        else:
+            self.load_waypoint_list(sys.argv[1])
+
 
         self.last_error = 0
         self.base_speed = 100
         self.kp = 0.357 # 5 / wheels_dist
         self.kd = 1.07  # 10 / wheels_dist
 
-    def load_waypoint_list(self):
+    def load_waypoint_list(self, waypoints_file_name):
 
         self.waypoint_list = []
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        waypoint_list_path = os.path.join(current_dir, "image_conversion", "waypoints", WAYPOINT_LIST)
+        waypoint_list_path = os.path.join(current_dir, waypoints_file_name)
 
         with open(waypoint_list_path, "r") as f:
             for line in f:
