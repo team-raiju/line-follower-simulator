@@ -5,27 +5,27 @@ from helper import Helper as hp
 from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 
-MAP_FILE_NAME = "map0.png"
-MAP_WIDTH_CM = 100
-MAP_HEIGHT_CM = 300
-MAP_MARGIN_CM = 10
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
+MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 11
-ROBOT_INIT_POS_Y_CM = 220
-ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 20
+ROBOT_INIT_POS_X_CM = 125 
+ROBOT_INIT_POS_Y_CM = 308
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 33
 
-ROBOT_IMAGE = "robot-img.png"
-ROBOT_SIZE_X_CM = 14.0  # Width
-ROBOT_SIZE_Y_CM = 14.0  # Height
-ROTATION_OFFSET_FROM_CENTER_CM = 4.73
-WHEELS_DIST_CM = 14.0
+ROBOT_IMAGE = "robot-img-3.png"
+ROBOT_SIZE_X_CM = 18.0 # Width
+ROBOT_SIZE_Y_CM = 15.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 3.72
+WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
 INIT_BASE_SPEED = 100
-INIT_KP = 35
-INIT_KD = 70
+INIT_KP = 45
+INIT_KD = 55
 
 
 class Game:
@@ -42,7 +42,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.clock = pygame.time.Clock()
-        self.ticks = 150
+        self.ticks = 200
         self.exit = False
 
         self.robot = Robot(
