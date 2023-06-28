@@ -31,6 +31,11 @@ class Helper:
         y_val_pixel = (point[1] + map_margin_cm) * map_cm_to_pixel
         return x_val_pixel, y_val_pixel
 
+    def coord_pixel_to_cm(pixel, map_cm_to_pixel, map_margin_cm):
+        x_val_cm = (pixel[0] / map_cm_to_pixel) - map_margin_cm
+        y_val_cm, = (pixel[1] / map_cm_to_pixel) - map_margin_cm
+        return x_val_cm, y_val_cm
+
 class CountMarkers:
     def __init__(self):
         self.maybe_left_marker = False

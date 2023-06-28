@@ -8,18 +8,18 @@ from helper import Helper as hp
 from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 
-MAPPING_NAME = "map2"
+MAPPING_NAME = "map5"
 
-MAP_FILE_NAME = "map2.png"
-MAP_WIDTH_CM = 186
-MAP_HEIGHT_CM = 354
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 178 
-ROBOT_INIT_POS_Y_CM = 75
-ROBOT_INIT_ANGLE = 270
-MIN_LEFT_MARKER_COUNTER = 26
+ROBOT_INIT_POS_X_CM = 125 
+ROBOT_INIT_POS_Y_CM = 309
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 33
 
 ROBOT_IMAGE = "robot-img.png"
 ROBOT_SIZE_X_CM = 14.0 # Width
@@ -158,7 +158,7 @@ class Game:
             marker_center = (self.track_markers_center[i][0], self.track_markers_center[i][1])
             optimized_points.append(marker_center)
 
-            if (mean_radius < 1000):
+            if (mean_radius < 4000):
                 waypoints = []
                 
                 if (num_of_points <= 5 and num_of_points > 0):
