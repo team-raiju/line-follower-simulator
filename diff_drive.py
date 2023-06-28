@@ -12,15 +12,16 @@ MAP_HEIGHT_CM = 317
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 150 
-ROBOT_INIT_POS_Y_CM = 334
+ROBOT_INIT_POS_X_CM = 125 
+ROBOT_INIT_POS_Y_CM = 308
 ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 33
 
-ROBOT_IMAGE = "robot-img.png"
-ROBOT_SIZE_X_CM = 14.0 # Width
-ROBOT_SIZE_Y_CM = 14.0 # Height
-ROTATION_OFFSET_FROM_CENTER_CM = 4.73
-WHEELS_DIST_CM = 14.0
+ROBOT_IMAGE = "robot-img-3.png"
+ROBOT_SIZE_X_CM = 18.0 # Width
+ROBOT_SIZE_Y_CM = 15.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 3.72
+WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
 class Game:
@@ -41,11 +42,18 @@ class Game:
         self.exit = False
         self.last_error = 0
 
-        self.robot = Robot(MAP_CM_PER_PIXELS, ROBOT_SIZE_X_CM,           \
-                        ROBOT_SIZE_Y_CM, ROTATION_OFFSET_FROM_CENTER_CM, \
-                        WHEELS_DIST_CM, WHEELS_RADIUS_CM,                \
-                        ROBOT_INIT_POS_X_CM, ROBOT_INIT_POS_Y_CM,        \
-                        ROBOT_INIT_ANGLE, ROBOT_IMAGE)
+        self.robot = Robot(
+            MAP_CM_PER_PIXELS,
+            ROBOT_SIZE_X_CM,
+            ROBOT_SIZE_Y_CM,
+            ROTATION_OFFSET_FROM_CENTER_CM,
+            WHEELS_DIST_CM,
+            WHEELS_RADIUS_CM,
+            ROBOT_INIT_POS_X_CM + MAP_MARGIN_CM,
+            ROBOT_INIT_POS_Y_CM + MAP_MARGIN_CM,
+            ROBOT_INIT_ANGLE,
+            ROBOT_IMAGE,
+        )
     
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
@@ -93,6 +101,7 @@ class Game:
 
             self.robot.display(self.screen)
             self.robot.display_line_sensor(self.screen)
+            self.robot.display_rot_center(self.screen)
 
 
             pygame.display.flip()

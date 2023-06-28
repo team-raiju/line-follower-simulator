@@ -88,8 +88,8 @@ ROBOT_INIT_ANGLE = 90
 MIN_LEFT_MARKER_COUNTER = 50
 
 self.base_speed = 100
-self.kp = 43
-self.kd = 60
+self.kp = 41
+self.kd = 50
 ---------------------------
 ---------------------------
 MAP_FILE_NAME = "map5.png"
@@ -99,7 +99,7 @@ MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
 ROBOT_INIT_POS_X_CM = 125 
-ROBOT_INIT_POS_Y_CM = 309
+ROBOT_INIT_POS_Y_CM = 308
 ROBOT_INIT_ANGLE = 180
 MIN_LEFT_MARKER_COUNTER = 33
 

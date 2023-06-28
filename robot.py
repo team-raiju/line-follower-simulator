@@ -34,30 +34,30 @@ class Robot:
         self.white_val = WHITE_VAL
         self.black_val = BLACK_VAL
         self.line_sensor_pos = [
-            Vector2(4.22, -4.56),
-            Vector2(4.62, -3.98),
-            Vector2(5.10, -3.40),
-            Vector2(5.44, -2.82),
-            Vector2(5.84, -2.24),
-            Vector2(6.18, -1.66),
-            Vector2(6.38, -1.08),
-            Vector2(6.66, -0.50),
+            Vector2(6.76, -4.56),
+            Vector2(6.76, -3.98),
+            Vector2(6.76, -3.40),
+            Vector2(6.76, -2.82),
+            Vector2(6.76, -2.24),
+            Vector2(6.76, -1.66),
+            Vector2(6.76, -1.08),
+            Vector2(6.76, -0.50),
 
-            Vector2(6.66, 0.50),
-            Vector2(6.38, 1.08),
-            Vector2(6.18, 1.66),
-            Vector2(5.84, 2.24),
-            Vector2(5.44, 2.82),
-            Vector2(5.10, 3.40),
-            Vector2(4.62, 3.98),
-            Vector2(4.22, 4.56),
+            Vector2(6.76, 0.50),
+            Vector2(6.76, 1.08),
+            Vector2(6.76, 1.66),
+            Vector2(6.76, 2.24),
+            Vector2(6.76, 2.82),
+            Vector2(6.76, 3.40),
+            Vector2(6.76, 3.98),
+            Vector2(6.76, 4.56),
 
 
-            Vector2(-0.3,  -7.2),
-            Vector2(-0.6,  -6.5),
+            Vector2(-0.1,  -8),
+            Vector2(-0.1,  -6.5),
             
-            Vector2(-0.3,  7.2),
-            Vector2(-0.6,  6.5),
+            Vector2(-0.1,  8),
+            Vector2(-0.1,  6.5),
 
 
         ]
@@ -234,6 +234,9 @@ class Robot:
                 sensor_position = self.position + self.centimeters_to_pixel(sensor).rotate(-self.angle) + offset.rotate(-self.angle)
                 line_sensor_draw = sensor_position
                 pygame.draw.circle(screen, (255, 0, 255), (line_sensor_draw.x, line_sensor_draw.y), 2)
+    
+    def display_rot_center(self, screen: Surface):
+        pygame.draw.circle(screen, (255, 255, 255), (self.position.x, self.position.y), 2)
     
     # Voltage is proportional to a linear and angular velocity, but is not in a standard unit (such as m/s or rad/s)
     def set_motors_voltage_vel_w(self, vel, w):
