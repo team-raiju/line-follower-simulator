@@ -1,29 +1,32 @@
 import os
 import pygame
 from pygame.math import Vector2
-from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 import math
+from helper import Helper as hp
+from helper import PIDFunctions as pid
 
-MAP_FILE_NAME = "map0.png"
-MAP_WIDTH_CM = 100
-MAP_HEIGHT_CM = 300
-MAP_MARGIN_CM = 10
-MAP_CM_PER_PIXELS = 3
 
-ROBOT_INIT_POS_X_CM = 11
-ROBOT_INIT_POS_Y_CM = 220
-ROBOT_INIT_ANGLE = 90
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
 
-ROBOT_IMAGE = "robot-img.png"
-ROBOT_SIZE_X_CM = 14.0 # Width
+ROBOT_INIT_POS_X_CM = 178 
+ROBOT_INIT_POS_Y_CM = 75
+ROBOT_INIT_ANGLE = 270
+MIN_LEFT_MARKER_COUNTER = 26
+
+ROBOT_IMAGE = "robot-img-2.png"
+ROBOT_SIZE_X_CM = 19.0 # Width
 ROBOT_SIZE_Y_CM = 14.0 # Height
 ROTATION_OFFSET_FROM_CENTER_CM = 4.73
 WHEELS_DIST_CM = 14.0
 WHEELS_RADIUS_CM = 1.0
 
-WAYPOINT_LIST = "waypoints_map0.txt"
+WAYPOINT_LIST = "map2_opt_waypoints.txt"
 
 class Game:
     def __init__(self):
@@ -101,53 +104,6 @@ class Game:
             angleDiff += 360
         
         return (dist, angleDiff)
-
-    def draw_map(self):
-        self.map.draw_loaded_map()
-    
-    def draw_timer(self, time):
-        text_surface = pygame.font.Font(None, int(13 * MAP_CM_PER_PIXELS)).render(
-            "Time: " + "{:.3f}s".format(time), True, (255, 0, 0)
-        )
-        self.screen.blit(text_surface, (5, 5))
-
-    def calc_error(self, line_sensor_val: list):
-        # Similar to center of mass calculation
-        num_half_sensors = int(8)
-
-        # Weight list is based on the distance to center of each line sensor
-        weight_list = []
-        for idx in range(num_half_sensors):
-            weight_list.append(self.robot.line_sensor_pos[num_half_sensors + idx].y)
-
-        count_left = 0
-        count_right = 0
-        sum_left = 0
-        sum_right = 0
-        for i in range(num_half_sensors):
-            count_left += line_sensor_val[i]
-            count_right += line_sensor_val[num_half_sensors + i]
-
-            sum_left += weight_list[i] * line_sensor_val[num_half_sensors - 1 - i]
-            sum_right += weight_list[i] * line_sensor_val[num_half_sensors + i]
-
-        if count_left == 0:
-            count_left = 1
-        if count_right == 0:
-            count_right = 1
-        pos_left = sum_left / count_left
-        pos_right = sum_right / count_right
-
-        return pos_left - pos_right
-    
-    def process_simple_pid(self, line_sensor_values: list):
-        error = self.calc_error(line_sensor_values)
-        derivative = error - self.last_error
-        l_speed = self.pid_base_speed - (error * self.pid_kp + derivative * self.pid_kd)
-        r_speed = self.pid_base_speed + (error * self.pid_kp + derivative * self.pid_kd)
-        self.last_error = error
-
-        return l_speed, r_speed
     
     def run(self):
         waypoint_idx = 0
@@ -168,7 +124,7 @@ class Game:
             
             #Draw
             self.screen.fill((0, 0, 0))
-            self.draw_map()
+            self.map.draw_loaded_map()
 
             if (len(self.waypoint_list) > waypoint_idx):
                 (dist, angleDiff) = self.trackGoal(self.robot.position, self.waypoint_list[waypoint_idx], self.robot.angle)
@@ -189,23 +145,26 @@ class Game:
                     self.pid_base_speed = 75
                     self.pid_kp = 25
                     self.pid_kd = 50 
+                    self.pid_calc = pid(self.pid_base_speed, self.pid_kp, self.pid_kd)
                 
-                if (stop_counter < 15):
-                    line_sensor = self.robot.get_line_sensor(
-                        self.screen, self.screen_width, self.screen_height
-                    )
-                    l_speed, r_speed = self.process_simple_pid(line_sensor)
-                    self.robot.set_motors_voltage(l_speed, r_speed)
+                if (stop_counter < 45):
                     stop_counter += 1 
-                    self.pid_base_speed -= 5
-                    self.pid_kp -= 1.5
-                    self.pid_kd -= 3
+                    
+                    line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
+                    line_sensor = hp.filter_line(line_sensor, self.robot.white_val, self.robot.black_val)
+
+                    error = pid.calc_error(line_sensor, self.robot.line_sensor_pos[0:16])
+                    l_speed, r_speed = self.pid_calc.simple_pid(error)
+                    self.robot.set_motors_voltage(l_speed, r_speed)
+                    
+                    self.pid_base_speed -= 1.5
+                    self.pid_kp -= 0.5
+                    self.pid_kd -= 1
+                    self.pid_calc = pid(self.pid_base_speed, self.pid_kp, self.pid_kd)
+                else:
+                    self.robot.set_motors_voltage(0, 0)
 
 
-                # if dist < 0:
-                #     dist = 0
-                # self.robot.motor_l.set_voltage(dist/15)
-                # self.robot.motor_r.set_voltage(dist/15)
 
 
             self.robot.update(dt)
@@ -217,11 +176,9 @@ class Game:
                     print(waypoint_idx)
 
             # print("")
-            
-            # print(self.waypoint_list[1])
             # print(self.robot.position)
 
-            self.draw_timer(time)
+            hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
             self.robot.display(self.screen)
 
             pygame.display.flip()
