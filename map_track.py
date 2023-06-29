@@ -8,29 +8,29 @@ from helper import Helper as hp
 from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 
-MAPPING_NAME = "map5"
+MAPPING_NAME = "map6"
 
-MAP_FILE_NAME = "map5.png"
-MAP_WIDTH_CM = 651
-MAP_HEIGHT_CM = 317
+MAP_FILE_NAME = "map6.png"
+MAP_WIDTH_CM = 303
+MAP_HEIGHT_CM = 227
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 2
+MAP_CM_PER_PIXELS = 3
 
-ROBOT_INIT_POS_X_CM = 125 
-ROBOT_INIT_POS_Y_CM = 309
-ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 33
+ROBOT_INIT_POS_X_CM = 9 
+ROBOT_INIT_POS_Y_CM = 135
+ROBOT_INIT_ANGLE = 90
+MIN_LEFT_MARKER_COUNTER = 49
 
-ROBOT_IMAGE = "robot-img.png"
-ROBOT_SIZE_X_CM = 14.0 # Width
-ROBOT_SIZE_Y_CM = 14.0 # Height
-ROTATION_OFFSET_FROM_CENTER_CM = 4.73
-WHEELS_DIST_CM = 14.0
+ROBOT_IMAGE = "robot-img-3.png"
+ROBOT_SIZE_X_CM = 18.0 # Width
+ROBOT_SIZE_Y_CM = 15.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 3.72
+WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
 INIT_BASE_SPEED = 33
-INIT_KP = 3
-INIT_KD = 1.5
+INIT_KP = 2.5
+INIT_KD = 1.3
 
 
 class Game:
@@ -112,7 +112,7 @@ class Game:
         file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_markers.txt"))
         with open(file_path, "w") as f:
             for marker in self.track_markers:
-                f.write(f"{marker}\n")
+                f.write(f"{marker[0]},{marker[1]}\n")
 
 
     def gen_waypoint(self):
@@ -137,8 +137,8 @@ class Game:
         optimized_points = []
 
         for i in range(len(self.track_markers) - 1):
-            circle_center_x = (self.track_markers[i][0] + self.track_markers[i + 1][0]) / 2
-            circle_center_y = (self.track_markers[i][1]  + self.track_markers[i + 1][1]) / 2
+            circle_center_x = (self.track_markers[i].x + self.track_markers[i + 1].x) / 2
+            circle_center_y = (self.track_markers[i].y  + self.track_markers[i + 1].y) / 2
             point = (circle_center_x, circle_center_y)
             center = Vector2(point[0], point[1])
             centers.append(center)
@@ -155,7 +155,7 @@ class Game:
             radius_sum = sum(self.radius_list[init: end])
             mean_radius = radius_sum / num_of_points
 
-            marker_center = (self.track_markers_center[i][0], self.track_markers_center[i][1])
+            marker_center = (self.track_markers_center[i].x, self.track_markers_center[i].y)
             optimized_points.append(marker_center)
 
             if (mean_radius < 4000):
@@ -258,15 +258,14 @@ class Game:
             if (markers["left_marker"]["seeing"]):
                 self.left_marker_counter += 1
                 print("Left marker - " + str(self.left_marker_counter))
-                marker_raw_pos = markers["left_marker"]["position"]
+                marker_raw_pos: Vector2 = markers["left_marker"]["position"]
                 marker_raw_angle = markers["left_marker"]["rotation"]
 
                 offset = Vector2(self.robot.rot_center_offset_cm, 0)
                 sensor_position = marker_raw_pos + self.robot.line_sensor_pos[16].rotate(-marker_raw_angle) + offset.rotate(-marker_raw_angle)
                 sensor_position.x -= MAP_MARGIN_CM
                 sensor_position.y -= MAP_MARGIN_CM
-                left_marker_position = sensor_position
-                self.track_markers.append(left_marker_position)
+                self.track_markers.append(sensor_position)
 
                 robot_center = Vector2(marker_raw_pos.x - MAP_MARGIN_CM, marker_raw_pos.y - MAP_MARGIN_CM)
                 left_marker_position_center = robot_center

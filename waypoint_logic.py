@@ -66,7 +66,6 @@ class Game:
         self.map = LoadMap(self.screen)
         self.map.load_map_from_file(MAP_FILE_NAME, margin_pixels, self.map_width_pixels, self.map_height_pixels)
 
-        print(len(sys.argv))
         if (len(sys.argv) < 2):
             print("Using default track")
             self.load_waypoint_list(DEFAULT_WAYPOINT_LIST)
