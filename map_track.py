@@ -8,18 +8,18 @@ from helper import Helper as hp
 from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 
-MAPPING_NAME = "map6"
+MAPPING_NAME = "map4"
 
-MAP_FILE_NAME = "map6.png"
-MAP_WIDTH_CM = 303
-MAP_HEIGHT_CM = 227
+MAP_FILE_NAME = "map4.png"
+MAP_WIDTH_CM = 600
+MAP_HEIGHT_CM = 378
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 3
+MAP_CM_PER_PIXELS = 2
 
 ROBOT_INIT_POS_X_CM = 9 
-ROBOT_INIT_POS_Y_CM = 135
+ROBOT_INIT_POS_Y_CM = 155
 ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 49
+MIN_LEFT_MARKER_COUNTER = 50
 
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
@@ -31,6 +31,8 @@ WHEELS_RADIUS_CM = 1.0
 INIT_BASE_SPEED = 33
 INIT_KP = 2.5
 INIT_KD = 1.3
+
+TRACK_POINTS_DIST_CM = 5
 
 
 class Game:
@@ -195,7 +197,7 @@ class Game:
 
     def append_point(self):
         total_dist = float(self.robot.estimated_total_dist_cm)
-        if (total_dist > (self.last_dist_saved + 5)):
+        if (total_dist > (self.last_dist_saved + TRACK_POINTS_DIST_CM)):
             offset = Vector2(self.robot.rot_center_offset_cm, 0)
             sensor_position = self.robot.estimated_position_cm + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
             

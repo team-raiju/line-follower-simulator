@@ -10,16 +10,16 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 import sys
 
-MAP_FILE_NAME = "map6.png"
-MAP_WIDTH_CM = 303
-MAP_HEIGHT_CM = 227
+MAP_FILE_NAME = "map4.png"
+MAP_WIDTH_CM = 600
+MAP_HEIGHT_CM = 378
 MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 3
+MAP_CM_PER_PIXELS = 2
 
 ROBOT_INIT_POS_X_CM = 9 
-ROBOT_INIT_POS_Y_CM = 135
+ROBOT_INIT_POS_Y_CM = 155
 ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 49
+MIN_LEFT_MARKER_COUNTER = 50
 
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
@@ -31,8 +31,9 @@ WHEELS_RADIUS_CM = 1.0
 INIT_KP = 40
 INIT_KD = 55
 
-DEFAULT_RADIUS_LIST = "maps/mapping_data/map6/map6_radius.txt"
+DEFAULT_RADIUS_LIST = "maps/mapping_data/map4/map4_radius.txt"
 
+TRACK_POINTS_DIST_CM = 5
 
 class Game:
     def __init__(self):
@@ -124,12 +125,12 @@ class Game:
         with open(radius_list_path, "r") as f:
             for line in f:
                 radius_val = float(line.strip())
-                radius_list.append(radius_val)
+                radius_list.append(abs(radius_val))
 
         for radius in radius_list:
             velocity = self.radius_to_velocity(radius)
             self.velocity_table.append(velocity)
-        
+   
         # Delay filter
         self.shift_velocity_table(6)
 
@@ -189,18 +190,18 @@ class Game:
 
             if (not finished):
                 total_dist = float(self.robot.estimated_total_dist_cm)
-                if (total_dist > (last_dist_saved + 10)):
+                if (total_dist > (last_dist_saved + TRACK_POINTS_DIST_CM)):
                     vel_tbl_idx += 1
                     last_dist_saved = total_dist
                     
                     base_speed = self.velocity_table[vel_tbl_idx]
                     self.pid_calc.set_base_speed(base_speed)
                     if (base_speed < 45):
-                        self.pid_calc.set_kp(6.5)
-                        self.pid_calc.set_kd(2.5)
+                        self.pid_calc.set_kp(5.6)
+                        self.pid_calc.set_kd(2.2)
                     else:
-                        self.pid_calc.set_kp(43)
-                        self.pid_calc.set_kd(60)
+                        self.pid_calc.set_kp(40)
+                        self.pid_calc.set_kd(50)
                
 
             # Count markers
