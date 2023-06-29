@@ -15,18 +15,22 @@ MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
 ROBOT_INIT_POS_X_CM = 125 
-ROBOT_INIT_POS_Y_CM = 309
+ROBOT_INIT_POS_Y_CM = 308
 ROBOT_INIT_ANGLE = 180
 MIN_LEFT_MARKER_COUNTER = 33
 
-ROBOT_IMAGE = "robot-img-2.png"
-ROBOT_SIZE_X_CM = 19.0 # Width
-ROBOT_SIZE_Y_CM = 14.0 # Height
-ROTATION_OFFSET_FROM_CENTER_CM = 4.73
-WHEELS_DIST_CM = 14.0
+ROBOT_IMAGE = "robot-img-3.png"
+ROBOT_SIZE_X_CM = 18.0 # Width
+ROBOT_SIZE_Y_CM = 15.0 # Height
+ROTATION_OFFSET_FROM_CENTER_CM = 3.72
+WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-DEFAULT_WAYPOINT_LIST = "image_conversion/waypoints/map2_opt_waypoints.txt"
+DEFAULT_WAYPOINT_LIST = "maps/mapping_data/map5/map5_waypoints.txt"
+
+INIT_BASE_SPEED = 100
+INIT_KP = 0.416 # 5 / wheels_dist
+INIT_KD = 0.833 # 10 / wheels_dist
 
 class Game:
     def __init__(self):
@@ -71,9 +75,9 @@ class Game:
 
 
         self.last_error = 0
-        self.base_speed = 100
-        self.kp = 0.357 # 5 / wheels_dist
-        self.kd = 1.07  # 10 / wheels_dist
+        self.base_speed = INIT_BASE_SPEED
+        self.kp = INIT_KP
+        self.kd = INIT_KD
 
     def load_waypoint_list(self, waypoints_file_name):
 
@@ -156,11 +160,11 @@ class Game:
                     print("Total time: " + str(round(time, 4)) + "s")
                     finished = True
                     self.pid_base_speed = self.base_speed - 15
-                    self.pid_kp = 25
-                    self.pid_kd = 50 
+                    self.pid_kp = 20
+                    self.pid_kd = 30 
                     self.pid_calc = pid(self.pid_base_speed, self.pid_kp, self.pid_kd)
                 
-                if (stop_counter < 45):
+                if (stop_counter < 35):
                     stop_counter += 1 
                     
                     line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
