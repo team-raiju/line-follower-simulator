@@ -24,7 +24,7 @@ WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
 INIT_BASE_SPEED = 100
-INIT_KP = 45
+INIT_KP = 40
 INIT_KD = 55
 
 
@@ -90,6 +90,9 @@ class Game:
             line_sensor = hp.filter_line(line_sensor, self.robot.white_val, self.robot.black_val)
 
             error = pid.calc_error(line_sensor, self.robot.line_sensor_pos[0:16])
+            if (error == -99):
+                error = self.pid_calc.get_last_error()
+
             l_speed, r_speed = self.pid_calc.simple_pid(error)
             self.robot.set_motors_voltage(l_speed, r_speed)
 
@@ -110,7 +113,7 @@ class Game:
                 elif self.left_marker_counter > MIN_LEFT_MARKER_COUNTER:
                     print("Total time: " + str(round(time, 4)) + "s")
                     finished = True
-                    self.pid_calc = pid(15, 0, 0)
+                    self.pid_calc = pid(15, 3.5, 2)
 
             self.robot.update(dt)
 

@@ -166,6 +166,9 @@ class Game:
             line_sensor = hp.filter_line(line_sensor, self.robot.white_val, self.robot.black_val)
 
             error = pid.calc_error(line_sensor, self.robot.line_sensor_pos[0:16])
+            if (error == -99):
+                error = self.pid_calc.get_last_error()
+
             l_speed, r_speed = self.pid_calc.simple_pid(error)
             self.robot.set_motors_voltage(l_speed, r_speed)
 

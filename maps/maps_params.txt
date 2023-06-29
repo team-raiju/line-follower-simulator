@@ -88,7 +88,7 @@ ROBOT_INIT_ANGLE = 90
 MIN_LEFT_MARKER_COUNTER = 50
 
 self.base_speed = 100
-self.kp = 41
+self.kp = 40
 self.kd = 50
 ---------------------------
 ---------------------------
@@ -103,9 +103,9 @@ ROBOT_INIT_POS_Y_CM = 308
 ROBOT_INIT_ANGLE = 180
 MIN_LEFT_MARKER_COUNTER = 33
 
-self.base_speed = 80
-self.kp = 28
-self.kd = 15 
+self.base_speed = 100
+self.kp = 45
+self.kd = 55 
 ---------------------------
 ---------------------------
 MAP_FILE_NAME = "map6.png"

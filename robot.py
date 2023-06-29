@@ -34,23 +34,23 @@ class Robot:
         self.white_val = WHITE_VAL
         self.black_val = BLACK_VAL
         self.line_sensor_pos = [
-            Vector2(6.76, -4.56),
-            Vector2(6.76, -3.98),
-            Vector2(6.76, -3.40),
-            Vector2(6.76, -2.82),
-            Vector2(6.76, -2.24),
-            Vector2(6.76, -1.66),
-            Vector2(6.76, -1.08),
+            Vector2(6.76, -4.0),
+            Vector2(6.76, -3.50),
+            Vector2(6.76, -3.00),
+            Vector2(6.76, -2.50),
+            Vector2(6.76, -2.00),
+            Vector2(6.76, -1.50),
+            Vector2(6.76, -1.00),
             Vector2(6.76, -0.50),
 
             Vector2(6.76, 0.50),
-            Vector2(6.76, 1.08),
-            Vector2(6.76, 1.66),
-            Vector2(6.76, 2.24),
-            Vector2(6.76, 2.82),
-            Vector2(6.76, 3.40),
-            Vector2(6.76, 3.98),
-            Vector2(6.76, 4.56),
+            Vector2(6.76, 1.0),
+            Vector2(6.76, 1.5),
+            Vector2(6.76, 2.0),
+            Vector2(6.76, 2.5),
+            Vector2(6.76, 3.0),
+            Vector2(6.76, 3.5),
+            Vector2(6.76, 4),
 
 
             Vector2(-0.1,  -8),

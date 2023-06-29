@@ -132,6 +132,9 @@ class PIDFunctions:
     
     def set_base_speed(self, new_speed):
         self.base_speed = new_speed
+    
+    def get_last_error(self):
+        return self.last_error
         
     def calc_error(line_sensor_val: list, central_sensors_pos_list: list):
         # Similar to center of mass calculation
@@ -153,6 +156,8 @@ class PIDFunctions:
             sum_left += weight_list[i] * line_sensor_val[num_half_sensors - 1 - i]
             sum_right += weight_list[i] * line_sensor_val[num_half_sensors + i]
 
+        if count_left == 0 and count_right == 0:
+            return -99
         if count_left == 0:
             count_left = 1
         if count_right == 0:
