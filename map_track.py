@@ -78,6 +78,7 @@ class Game:
         self.pid_calc = pid(INIT_BASE_SPEED, INIT_KP, INIT_KD)
 
         self.track_points = []
+        self.track_points_new = []
         self.track_markers = []
         self.track_markers_center = []
         self.points_between_markers = []
@@ -93,6 +94,12 @@ class Game:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             for point in self.track_points:
+                f.write(f"{point[0]},{point[1]}\n")
+
+
+        file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_track_new.txt"))
+        with open(file_path, "w") as f:
+            for point in self.track_points_new:
                 f.write(f"{point[0]},{point[1]}\n")
         
         file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_total_dist.txt"))
@@ -199,12 +206,23 @@ class Game:
         total_dist = float(self.robot.estimated_total_dist_cm)
         if (total_dist > (self.last_dist_saved + TRACK_POINTS_DIST_CM)):
             offset = Vector2(self.robot.rot_center_offset_cm, 0)
+
+            # Old method
             sensor_position = self.robot.estimated_position_cm + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
             
             # Remove Margin to save absolute position
             sensor_position.x -= MAP_MARGIN_CM
             sensor_position.y -= MAP_MARGIN_CM
             self.track_points.append(sensor_position)
+
+            # New method
+            sensor_position_new = self.robot.estimated_position_cm_new + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
+            
+            # Remove Margin to save absolute position
+            sensor_position_new.x -= MAP_MARGIN_CM
+            sensor_position_new.y -= MAP_MARGIN_CM
+            self.track_points_new.append(sensor_position_new)
+
 
             self.track_total_dist.append(total_dist)
             self.track_thetas.append(float(self.robot.estimated_angle))
