@@ -189,9 +189,11 @@ class Game:
 
 
             if (not finished):
-                total_dist = float(self.robot.estimated_total_dist_cm)
+                total_dist = float(self.robot.total_dist_cm)
                 if (total_dist > (last_dist_saved + TRACK_POINTS_DIST_CM)):
                     vel_tbl_idx += 1
+                    # print(str(base_speed) + " - " +str(vel_tbl_idx))
+                    
                     last_dist_saved = total_dist
                     
                     base_speed = self.velocity_table[vel_tbl_idx]

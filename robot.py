@@ -62,6 +62,9 @@ class Robot:
 
         ]
 
+        self.wheel_perimeter_cm = 2 * math.pi * self.wheel_radius_cm
+        self.dist_per_encoder_pulse_cm = self.wheel_perimeter_cm / ENCODER_PPR
+
         self.wheels_distance_pixels = self.centimeters_to_pixel(self.wheels_distance_cm)
 
         self.motor_l = Motor(self.wheel_radius_cm)
@@ -88,6 +91,8 @@ class Robot:
         self.left_encoder_raw = 0
         self.right_encoder_raw = 0
         self.estimated_total_dist_cm = 0
+        self.total_dist_cm = 0
+
     
     def centimeters_to_pixel(self, centimeters):
         return centimeters * self.cm_per_pixel 
@@ -96,27 +101,27 @@ class Robot:
         return meters * self.cm_per_pixel  * 100
     
     def update_estimated_pos(self, mot_vel_l, mot_vel_r, dt):
-        wheel_perimeter_cm = 2 * math.pi * self.wheel_radius_cm
-
         # simulate encoder values
-        num_of_rot_l = ((mot_vel_l * 100) * dt) / (wheel_perimeter_cm) # cm/s
-        num_of_rot_r = ((mot_vel_r * 100) * dt) / (wheel_perimeter_cm) # cm/s
-        self.left_encoder_raw += ENCODER_PPR * num_of_rot_l
-        self.right_encoder_raw += ENCODER_PPR * num_of_rot_r
+        num_of_rot_l = ((mot_vel_l * 100) * dt) / self.dist_per_encoder_pulse_cm
+        num_of_rot_r = ((mot_vel_r * 100) * dt) / self.dist_per_encoder_pulse_cm
+        self.left_encoder_raw += num_of_rot_l
+        self.right_encoder_raw += num_of_rot_r
         self.left_encoder = math.floor(self.left_encoder_raw)
         self.right_encoder = math.floor(self.right_encoder_raw)
+
+        # print(str(self.left_encoder_raw * self.dist_per_encoder_pulse_cm) + ", " + str(self.left_encoder * self.dist_per_encoder_pulse_cm))
 
         #estimate velocity based on encoder value
         estimated_delta_l_cm = 0
         estimated_delta_r_cm = 0
         changed = False
         if (self.left_encoder_last != self.left_encoder):
-            estimated_delta_l_cm = ((self.left_encoder - self.left_encoder_last) * wheel_perimeter_cm) / ENCODER_PPR
+            estimated_delta_l_cm = ((self.left_encoder - self.left_encoder_last) * self.dist_per_encoder_pulse_cm)
             self.left_encoder_last = int(self.left_encoder)
             changed = True
 
         if (self.right_encoder_last != self.right_encoder):
-            estimated_delta_r_cm = ((self.right_encoder - self.right_encoder_last) * wheel_perimeter_cm) / ENCODER_PPR
+            estimated_delta_r_cm = ((self.right_encoder - self.right_encoder_last) * self.dist_per_encoder_pulse_cm)
             self.right_encoder_last = int(self.right_encoder)
             changed = True
 
@@ -141,6 +146,8 @@ class Robot:
 
         self.angular_velocity = self.meters_to_pixel((self.mot_vel_r - self.mot_vel_l)) / self.wheels_distance_pixels # Pixel per second / Pixel = rad/s
 
+        self.total_dist_cm += (self.velocity.x * dt) / self.cm_per_pixel
+        
         self.position += self.velocity.rotate(-self.angle) * dt
         self.angle += math.degrees((self.angular_velocity) * dt)
     
