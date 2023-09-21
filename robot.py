@@ -13,6 +13,8 @@ ENCODER_PPR = 7
 BLACK_VAL = 0
 WHITE_VAL = 1
 
+ODOMETRY_STD_DEVIATION = 0.05
+
 class Robot:
     def __init__(self, cm_per_pixel, size_x_cm, size_y_cm, rot_center_offset_cm, wheels_dist_cm, wheel_radius_cm, pos_x_cm, pos_y_cm, angle, image):
         #Robot position
@@ -107,8 +109,8 @@ class Robot:
         # simulate encoder values
         num_of_rot_l = ((mot_vel_l * 100) * dt) / self.dist_per_encoder_pulse_cm
         num_of_rot_r = ((mot_vel_r * 100) * dt) / self.dist_per_encoder_pulse_cm
-        self.left_encoder_raw += num_of_rot_l
-        self.right_encoder_raw += num_of_rot_r
+        self.left_encoder_raw += num_of_rot_l + np.random.randn() * ODOMETRY_STD_DEVIATION
+        self.right_encoder_raw += num_of_rot_r  + np.random.randn() * ODOMETRY_STD_DEVIATION
         self.left_encoder = math.floor(self.left_encoder_raw)
         self.right_encoder = math.floor(self.right_encoder_raw)
 
@@ -130,7 +132,7 @@ class Robot:
 
         if (changed):
             estimated_delta = Vector2(1, 0.0)
-            estimated_delta.x = ((estimated_delta_l_cm + estimated_delta_r_cm) / 2) + np.random.randn() * 0.1
+            estimated_delta.x = ((estimated_delta_l_cm + estimated_delta_r_cm) / 2)
             estimated_delta_angle = (estimated_delta_r_cm - estimated_delta_l_cm) / self.wheels_distance_cm
 
             self.estimated_total_dist_cm += estimated_delta.x
@@ -138,7 +140,7 @@ class Robot:
 
             delta_angle_degrees = math.degrees((estimated_delta_angle))
             self.estimated_position_cm_new += estimated_delta.rotate(-self.estimated_angle + (delta_angle_degrees / 2))
-            self.estimated_angle += delta_angle_degrees + np.random.randn() * 1
+            self.estimated_angle += delta_angle_degrees
 
 
 
