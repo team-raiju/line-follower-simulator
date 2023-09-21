@@ -4,6 +4,8 @@ from pygame.surface import Surface
 from pygame.math import Vector2
 from motor import Motor
 import os
+import numpy as np
+
 
 LINE_COLOR_THRESHOLD = 150
 ENCODER_PPR = 7
@@ -18,6 +20,7 @@ class Robot:
         x = self.centimeters_to_pixel(pos_x_cm)
         y = self.centimeters_to_pixel(pos_y_cm)
         self.position = Vector2(x, y)
+        self.position_real_position_cm = Vector2(x, y)
         self.angle = angle
         self.estimated_position_cm = Vector2(pos_x_cm, pos_y_cm)
         self.estimated_position_cm_new = Vector2(pos_x_cm, pos_y_cm)
@@ -94,7 +97,6 @@ class Robot:
         self.estimated_total_dist_cm = 0
         self.total_dist_cm = 0
 
-    
     def centimeters_to_pixel(self, centimeters):
         return centimeters * self.cm_per_pixel 
     
@@ -128,7 +130,7 @@ class Robot:
 
         if (changed):
             estimated_delta = Vector2(1, 0.0)
-            estimated_delta.x = (estimated_delta_l_cm + estimated_delta_r_cm) / 2
+            estimated_delta.x = ((estimated_delta_l_cm + estimated_delta_r_cm) / 2) + np.random.randn() * 0.1
             estimated_delta_angle = (estimated_delta_r_cm - estimated_delta_l_cm) / self.wheels_distance_cm
 
             self.estimated_total_dist_cm += estimated_delta.x
@@ -136,7 +138,7 @@ class Robot:
 
             delta_angle_degrees = math.degrees((estimated_delta_angle))
             self.estimated_position_cm_new += estimated_delta.rotate(-self.estimated_angle + (delta_angle_degrees / 2))
-            self.estimated_angle += delta_angle_degrees
+            self.estimated_angle += delta_angle_degrees + np.random.randn() * 1
 
 
 
@@ -151,9 +153,13 @@ class Robot:
         self.angular_velocity = self.meters_to_pixel((self.mot_vel_r - self.mot_vel_l)) / self.wheels_distance_pixels # Pixel per second / Pixel = rad/s
 
         self.total_dist_cm += (self.velocity.x * dt) / self.cm_per_pixel
+
+        delta_theta_degrees = math.degrees((self.angular_velocity) * dt)
         
-        self.position += self.velocity.rotate(-self.angle) * dt
-        self.angle += math.degrees((self.angular_velocity) * dt)
+        self.position += self.velocity.rotate(-self.angle + (delta_theta_degrees / 2)) * dt
+        self.position_real_position_cm = (self.position / self.cm_per_pixel)
+
+        self.angle += delta_theta_degrees
     
     def get_line_sensor(self, screen: Surface, max_x, max_y):
         

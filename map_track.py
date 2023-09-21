@@ -8,18 +8,18 @@ from helper import Helper as hp
 from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 
-MAPPING_NAME = "map4"
+MAPPING_NAME = "map2"
 
-MAP_FILE_NAME = "map4.png"
-MAP_WIDTH_CM = 600
-MAP_HEIGHT_CM = 378
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 9 
-ROBOT_INIT_POS_Y_CM = 155
-ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 50
+ROBOT_INIT_POS_X_CM = 178 
+ROBOT_INIT_POS_Y_CM = 75
+ROBOT_INIT_ANGLE = 270
+MIN_LEFT_MARKER_COUNTER = 15
 
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
@@ -28,9 +28,9 @@ ROTATION_OFFSET_FROM_CENTER_CM = 3.72
 WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-INIT_BASE_SPEED = 33
-INIT_KP = 2.5
-INIT_KD = 1.3
+INIT_BASE_SPEED = 80
+INIT_KP = 43
+INIT_KD = 60
 
 TRACK_POINTS_DIST_CM = 5
 
@@ -79,6 +79,7 @@ class Game:
 
         self.track_points = []
         self.track_points_new = []
+        self.track_points_real = []
         self.track_markers = []
         self.track_markers_center = []
         self.points_between_markers = []
@@ -100,6 +101,12 @@ class Game:
         file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_track_new.txt"))
         with open(file_path, "w") as f:
             for point in self.track_points_new:
+                f.write(f"{point[0]},{point[1]}\n")
+        
+
+        file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_track_real.txt"))
+        with open(file_path, "w") as f:
+            for point in self.track_points_real:
                 f.write(f"{point[0]},{point[1]}\n")
         
         file_path = os.path.join(current_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_total_dist.txt"))
@@ -217,11 +224,16 @@ class Game:
 
             # New method
             sensor_position_new = self.robot.estimated_position_cm_new + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
-            
-            # Remove Margin to save absolute position
             sensor_position_new.x -= MAP_MARGIN_CM
             sensor_position_new.y -= MAP_MARGIN_CM
             self.track_points_new.append(sensor_position_new)
+
+
+            # Real Position
+            sensor_position_real = self.robot.position_real_position_cm + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
+            sensor_position_real.x -= MAP_MARGIN_CM
+            sensor_position_real.y -= MAP_MARGIN_CM
+            self.track_points_real.append(sensor_position_real)
 
 
             self.track_total_dist.append(total_dist)
