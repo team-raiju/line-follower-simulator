@@ -5,6 +5,7 @@ from pygame.math import Vector2
 from motor import Motor
 import os
 import numpy as np
+from kalman_filter import KalmanFilter as kf
 
 
 LINE_COLOR_THRESHOLD = 150
@@ -14,6 +15,7 @@ BLACK_VAL = 0
 WHITE_VAL = 1
 
 ODOMETRY_STD_DEVIATION = 0.05
+IMU_STD_DEVIATION = 0.03
 
 class Robot:
     def __init__(self, cm_per_pixel, size_x_cm, size_y_cm, rot_center_offset_cm, wheels_dist_cm, wheel_radius_cm, pos_x_cm, pos_y_cm, angle, image):
@@ -24,6 +26,7 @@ class Robot:
         self.position = Vector2(x, y)
         self.position_real_position_cm = Vector2(x, y)
         self.angle = angle
+        self.imu_angle = angle
         self.estimated_position_cm = Vector2(pos_x_cm, pos_y_cm)
         self.estimated_position_cm_new = Vector2(pos_x_cm, pos_y_cm)
         self.estimated_angle = angle
@@ -99,6 +102,11 @@ class Robot:
         self.estimated_total_dist_cm = 0
         self.total_dist_cm = 0
 
+        self.kalman = kf()
+        self.estimated_delta_x = 0
+        self.estimated_delta_angle_degrees = 0
+        self.kalman_pos = [0,0,0]
+
     def centimeters_to_pixel(self, centimeters):
         return centimeters * self.cm_per_pixel 
     
@@ -109,8 +117,8 @@ class Robot:
         # simulate encoder values
         num_of_rot_l = ((mot_vel_l * 100) * dt) / self.dist_per_encoder_pulse_cm
         num_of_rot_r = ((mot_vel_r * 100) * dt) / self.dist_per_encoder_pulse_cm
-        self.left_encoder_raw += num_of_rot_l + np.random.randn() * ODOMETRY_STD_DEVIATION
-        self.right_encoder_raw += num_of_rot_r  + np.random.randn() * ODOMETRY_STD_DEVIATION
+        self.left_encoder_raw += num_of_rot_l + (np.random.randn() * ODOMETRY_STD_DEVIATION)
+        self.right_encoder_raw += num_of_rot_r  + (np.random.randn() * ODOMETRY_STD_DEVIATION)
         self.left_encoder = math.floor(self.left_encoder_raw)
         self.right_encoder = math.floor(self.right_encoder_raw)
 
@@ -120,6 +128,7 @@ class Robot:
         estimated_delta_l_cm = 0
         estimated_delta_r_cm = 0
         changed = False
+        self.estimated_delta_x = 0
         if (self.left_encoder_last != self.left_encoder):
             estimated_delta_l_cm = ((self.left_encoder - self.left_encoder_last) * self.dist_per_encoder_pulse_cm)
             self.left_encoder_last = int(self.left_encoder)
@@ -133,15 +142,18 @@ class Robot:
         if (changed):
             estimated_delta = Vector2(1, 0.0)
             estimated_delta.x = ((estimated_delta_l_cm + estimated_delta_r_cm) / 2)
+            self.estimated_delta_x = estimated_delta.x
             estimated_delta_angle = (estimated_delta_r_cm - estimated_delta_l_cm) / self.wheels_distance_cm
 
             self.estimated_total_dist_cm += estimated_delta.x
             self.estimated_position_cm += estimated_delta.rotate(-self.estimated_angle)
 
-            delta_angle_degrees = math.degrees((estimated_delta_angle))
-            self.estimated_position_cm_new += estimated_delta.rotate(-self.estimated_angle + (delta_angle_degrees / 2))
-            self.estimated_angle += delta_angle_degrees
-
+            self.estimated_delta_angle_degrees = math.degrees((estimated_delta_angle))
+            self.estimated_position_cm_new += estimated_delta.rotate(-self.estimated_angle + (self.estimated_delta_angle_degrees / 2))
+            self.estimated_angle += self.estimated_delta_angle_degrees
+    
+    def update_imu(self, delta_theta_degrees):
+        self.imu_angle += delta_theta_degrees + (np.random.randn() * IMU_STD_DEVIATION)
 
 
     def update(self, dt):
@@ -162,6 +174,9 @@ class Robot:
         self.position_real_position_cm = (self.position / self.cm_per_pixel)
 
         self.angle += delta_theta_degrees
+        self.update_imu(delta_theta_degrees)
+
+        self.kalman_pos = self.kalman.KalmanFilterRunStep(self.estimated_delta_x, self.estimated_delta_angle_degrees, self.imu_angle)
     
     def get_line_sensor(self, screen: Surface, max_x, max_y):
         

@@ -212,6 +212,12 @@ class Game:
     def append_point(self):
         total_dist = float(self.robot.estimated_total_dist_cm)
         if (total_dist > (self.last_dist_saved + TRACK_POINTS_DIST_CM)):
+
+
+            print(self.robot.kalman_pos)
+            print(self.robot.position_real_position_cm)
+            print("")
+
             offset = Vector2(self.robot.rot_center_offset_cm, 0)
 
             # Old method
@@ -245,7 +251,7 @@ class Game:
                 theta_rad = math.radians(delta_theta)
                 radius = (total_dist - self.last_dist_saved) / theta_rad
             
-            print(radius)
+            # print(radius)
             self.radius_list.append(radius)
 
             self.last_dist_saved = total_dist
