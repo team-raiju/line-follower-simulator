@@ -5,94 +5,91 @@ import math
 
 class KalmanFilter:
 
-    def __init__(self):
+    def __init__(self, alpha_param, rk_param, inital_xt):
 
-        # Error parameters
-        self.sigma = np.array([0.0, 0.0])
-        self.Rt = np.array([[0.0, 0.0], [0.0, 0.0]])
-        # a = np.array([0.1, 0.1, 0.1, 0.1])  # [a1, a2, a3, a4]
-        self.Qt = (0.03 ** 2)
+        # Robot parameter for estimating erros
+        self.alpha = np.array([alpha_param, alpha_param, alpha_param, alpha_param])  # [a1, a2, a3, a4]
 
         # Position initialization
-        self.PreXt = np.array([0.0, 0.0, 0.0])
+        self.state_estimate_k_minus_1 = np.array(inital_xt)
 
         # Dispersion initialization
-        self.PrePt = np.zeros((3, 3))
+        self.P_k_minus_1 = np.zeros((3, 3))
+
+        # IMU noise
+        self.sensor_noise_w_k = 0.001
+
+        # Observation covariance in yaw                    
+        self.R_k = rk_param
 
                 
-    def CalcPositionWithErrorAndReturn(self, position, robot_input):
-        dS, dTh = robot_input
-        pre_x, pre_y, pre_th = position
-
-        dS += np.random.randn() * np.sqrt(self.sigma[0])
-        dTh += np.random.randn() * np.sqrt(self.sigma[1])
-        x = pre_x + dS * np.cos(pre_th + dTh / 2)
-        y = pre_y + dS * np.sin(pre_th + dTh / 2)
-        th = pre_th + dTh
-
-        ret_array = np.array([x, y, th])
-        return ret_array
-
+    def getB(self, yaw_minus_1, delta_s, delta_yaw):
+        B = np.array([np.cos(-(yaw_minus_1 + delta_yaw / 2)) * delta_s, np.sin(-(yaw_minus_1 + delta_yaw / 2)) * delta_s, delta_yaw])
+        return B
+    
+    def getA(self):
+        return np.array([[1.0,  0,   0],
+                        [  0,1.0,   0],
+                        [  0,  0, 1.0]])
 
 
     def CalcRt(self, param, robot_input):
         return np.array([[param[0] * robot_input[0]**2 + param[1] * robot_input[1]**2, 0],
                         [0, param[2] * robot_input[0]**2 + param[3] * robot_input[1]**2]])
 
-    def CalcAt(self, pre, robot_input):
+    def CalcFk(self, yaw_minus_1, robot_input):
         dS, dTh = robot_input
-        pre_x, pre_y, pre_th = pre
-        return np.array([[1, 0, -dS * np.sin(pre_th + dTh / 2)],
-                        [0, 1, dS * np.cos(pre_th + dTh / 2)],
+        return np.array([[1, 0, -dS * np.sin(-(yaw_minus_1 + dTh / 2))],
+                        [0, 1, dS * np.cos(-(yaw_minus_1 + dTh / 2))],
                         [0, 0, 1]])
-
-    def CalcWt(self, pre, robot_input):
-        dS, dTh = robot_input
-        pre_x, pre_y, pre_th = pre
-        return np.array([[np.cos(pre_th + dTh / 2), (-dS / 2) * np.sin(pre_th + dTh / 2)],
-                        [np.sin(pre_th + dTh / 2), (dS / 2) * np.cos(pre_th + dTh / 2)],
+    
+    # Predicted covariance of the state equation
+    def getQk(self, yaw_minus_1, delta_s, delta_yaw):
+        W_k = np.array([[np.cos(-(yaw_minus_1 + delta_yaw / 2)), (-delta_s / 2) * np.sin(-(yaw_minus_1 + delta_yaw / 2))],
+                        [np.sin(-(yaw_minus_1 + delta_yaw / 2)), (delta_s / 2) * np.cos(-(yaw_minus_1 + delta_yaw / 2))],
                         [0, 1]])
 
+        Error_params = np.array([[self.alpha[0] * delta_s ** 2 + self.alpha[1] * delta_yaw ** 2, 0],
+                                [0, self.alpha[2] * delta_s ** 2 + self.alpha[3] * delta_yaw ** 2]])
+
+        # return np.array([[1.0,   0,   0],
+        #             [  0, 1.0,   0],
+        #             [  0,   0, 1.0]])
+
+        return W_k @ Error_params @ W_k.T
 
 
     def KalmanFilterRunStep(self, delta_s, delta_theta, angle_imu):
-        # Calculate control robot_input
 
         delta_theta_rad = math.radians(delta_theta)
         angle_imu_rad = math.radians(angle_imu)
 
-        robot_input = [delta_s, delta_theta_rad]
+        control_vector_k_minus_1 = [delta_s, delta_theta_rad]
 
-        # Calculate process noise
-        # Rt = CalcRt(a, robot_input)
-        # self.sigma[0] = Rt[0, 0]
-        # self.sigma[1] = Rt[1, 1]
+        # Calculate process noise. (Encoder noise)
+        process_noise_v_k_minus_1 = np.array([0.01 * np.random.randn(), 0.01 * np.random.randn() , 0.01 * np.random.randn() ])
 
-        self.sigma[0] = 0.05 ** 2
-        self.sigma[1] = 0.05 ** 2
+        state_estimate_k = self.getA() @ (self.state_estimate_k_minus_1) + (
+            self.getB(self.state_estimate_k_minus_1[2], control_vector_k_minus_1[0], control_vector_k_minus_1[1])) + (process_noise_v_k_minus_1)
 
-        # Forecast step
-        EstXt = self.CalcPositionWithErrorAndReturn(self.PreXt, robot_input)
-        At = self.CalcAt(self.PreXt, robot_input)
-        Wt = self.CalcWt(self.PreXt, robot_input)
 
-        self.EstPt = np.dot(np.dot(At, self.PrePt), np.transpose(At)) + np.dot(np.dot(Wt, self.Rt), np.transpose(Wt))
+        Fk_minus_1 = self.CalcFk(self.state_estimate_k_minus_1[2], control_vector_k_minus_1)
 
-        # Update IMU step
-        ObsZt = angle_imu_rad
-        Ht = np.array([0, 0, 1])  
+        P_k = Fk_minus_1 @ self.P_k_minus_1 @ Fk_minus_1.T + self.getQk(self.state_estimate_k_minus_1[2], control_vector_k_minus_1[0], control_vector_k_minus_1[1])
 
-        
-        St = np.array([np.dot(np.dot(Ht, self.EstPt), np.transpose(Ht)) + self.Qt])
+        measurement_residual_y_k = angle_imu_rad - ( state_estimate_k[2] + (self.sensor_noise_w_k))
 
-        # Kt = np.linalg.solve(St * np.eye(3), np.dot(EstPt, np.transpose(Ht)))
-        Kt = np.dot(np.dot(self.EstPt, np.transpose(Ht)), np.linalg.inv(St * np.eye(3)))
+        S_k = P_k[2][2] + self.R_k
+        H_k = np.array([0, 0, 1])
+        K_k = (P_k @ H_k.T) * (1 / S_k)
 
-        EstXt = EstXt + np.dot(Kt, (ObsZt - np.dot(Ht, EstXt)))
-        ExtPt = np.dot((np.identity(3) - np.dot(Kt, Ht)), self.EstPt)
+        # Calculate an updated state estimate for time k
+        state_estimate_k[2] = state_estimate_k[2] + (K_k[2] * measurement_residual_y_k)
 
-        # Update variables for the next iteration
-        self.PreXt = EstXt.copy()
-        self.PrePt = ExtPt.copy()
+        P_k = (1 - K_k[2]) * P_k
 
-        return [EstXt[0], EstXt[1], math.degrees(EstXt[2])] # [x, y, theta]
+        # Update variables for next iteration
+        self.state_estimate_k_minus_1 = state_estimate_k
+        self.P_k_minus_1 = P_k
+
+        return [state_estimate_k[0], state_estimate_k[1], math.degrees(state_estimate_k[2])] # [x, y, theta]

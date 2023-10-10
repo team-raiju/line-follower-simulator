@@ -102,7 +102,7 @@ class Robot:
         self.estimated_total_dist_cm = 0
         self.total_dist_cm = 0
 
-        self.kalman = kf()
+        self.kalman = kf(0.0001, (0.0005 ** 2), [203, 100, 4.7124])
         self.estimated_delta_x = 0
         self.estimated_delta_angle_degrees = 0
         self.kalman_pos = [0,0,0]
@@ -149,8 +149,9 @@ class Robot:
             self.estimated_position_cm += estimated_delta.rotate(-self.estimated_angle)
 
             self.estimated_delta_angle_degrees = math.degrees((estimated_delta_angle))
-            self.estimated_position_cm_new += estimated_delta.rotate(-self.estimated_angle + (self.estimated_delta_angle_degrees / 2))
+            self.estimated_position_cm_new += estimated_delta.rotate(-(self.estimated_angle + (self.estimated_delta_angle_degrees / 2)))
             self.estimated_angle += self.estimated_delta_angle_degrees
+            self.kalman_pos = self.kalman.KalmanFilterRunStep(self.estimated_delta_x, self.estimated_delta_angle_degrees, self.imu_angle)
     
     def update_imu(self, delta_theta_degrees):
         self.imu_angle += delta_theta_degrees + (np.random.randn() * IMU_STD_DEVIATION)
@@ -170,13 +171,12 @@ class Robot:
 
         delta_theta_degrees = math.degrees((self.angular_velocity) * dt)
         
-        self.position += self.velocity.rotate(-self.angle + (delta_theta_degrees / 2)) * dt
+        self.position += self.velocity.rotate(-(self.angle + (delta_theta_degrees / 2))) * dt
         self.position_real_position_cm = (self.position / self.cm_per_pixel)
 
         self.angle += delta_theta_degrees
         self.update_imu(delta_theta_degrees)
 
-        self.kalman_pos = self.kalman.KalmanFilterRunStep(self.estimated_delta_x, self.estimated_delta_angle_degrees, self.imu_angle)
     
     def get_line_sensor(self, screen: Surface, max_x, max_y):
         
