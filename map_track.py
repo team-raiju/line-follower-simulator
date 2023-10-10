@@ -28,9 +28,9 @@ ROTATION_OFFSET_FROM_CENTER_CM = 3.72
 WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-INIT_BASE_SPEED = 80
-INIT_KP = 43
-INIT_KD = 60
+INIT_BASE_SPEED = 33
+INIT_KP = 2.5
+INIT_KD = 1.3
 
 TRACK_POINTS_DIST_CM = 5
 
@@ -214,8 +214,9 @@ class Game:
         if (total_dist > (self.last_dist_saved + TRACK_POINTS_DIST_CM)):
 
 
-            print(self.robot.kalman_pos)
-            print(self.robot.position_real_position_cm)
+            print("Real:   " + str(self.robot.position_real_position_cm))
+            print("Kalman: " + str(self.robot.kalman_pos[0:2]))
+            print("Estima: " + str(self.robot.estimated_position_cm_new))
             print("")
 
             offset = Vector2(self.robot.rot_center_offset_cm, 0)
@@ -229,7 +230,8 @@ class Game:
             self.track_points.append(sensor_position)
 
             # New method
-            sensor_position_new = self.robot.estimated_position_cm_new + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
+            kalman = Vector2(self.robot.kalman_pos[0], self.robot.kalman_pos[1])
+            sensor_position_new = kalman + self.robot.line_sensor_pos[7].rotate(-self.robot.estimated_angle) + offset.rotate(-self.robot.estimated_angle)
             sensor_position_new.x -= MAP_MARGIN_CM
             sensor_position_new.y -= MAP_MARGIN_CM
             self.track_points_new.append(sensor_position_new)

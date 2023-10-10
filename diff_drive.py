@@ -6,16 +6,19 @@ from generate_track import Map
 from load_track import LoadMap
 from robot import Robot
 
-MAP_FILE_NAME = "map5.png"
-MAP_WIDTH_CM = 651
-MAP_HEIGHT_CM = 317
+MAPPING_NAME = "map2"
+
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 125 
-ROBOT_INIT_POS_Y_CM = 308
-ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 33
+ROBOT_INIT_POS_X_CM = 178 
+ROBOT_INIT_POS_Y_CM = 75
+ROBOT_INIT_ANGLE = 270
+MIN_LEFT_MARKER_COUNTER = 15
+
 
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
@@ -65,6 +68,11 @@ class Game:
     def run(self):
         while not self.exit:
             dt = self.clock.get_time() / 1000
+
+            # print("Real:   " + str(self.robot.position_real_position_cm))
+            # print("Kalman: " + str(self.robot.kalman_pos[0:2]))
+            # print("Estima: " + str(self.robot.estimated_position_cm_new))
+            # print("")
 
             # Event queue
             for event in pygame.event.get():
