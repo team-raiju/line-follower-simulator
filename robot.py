@@ -14,8 +14,8 @@ ENCODER_PPR = 7
 BLACK_VAL = 0
 WHITE_VAL = 1
 
-ODOMETRY_STD_DEVIATION = 0.05
-IMU_STD_DEVIATION = 0.03
+ODOMETRY_STD_DEVIATION = 0.00
+IMU_STD_DEVIATION = 0.00
 
 class Robot:
     def __init__(self, cm_per_pixel, size_x_cm, size_y_cm, rot_center_offset_cm, wheels_dist_cm, wheel_radius_cm, pos_x_cm, pos_y_cm, angle, image):
