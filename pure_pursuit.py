@@ -33,7 +33,9 @@ INIT_BASE_SPEED = 50
 INIT_KP = 0.416 # 5 / wheels_dist
 INIT_KD = 0.833 # 10 / wheels_dist
 
-look_ahead = 30
+# Pure pursuit parameters
+LOOK_AHEAD = 20
+MAX_WAYPOINTS_AHEAD = 4
 
 class Game:
     def __init__(self):
@@ -146,64 +148,39 @@ class Game:
             self.map.draw_loaded_map()
 
             # Draw all waypoints
-            for i in range(len(self.waypoint_list)):
-                pygame.draw.circle(self.screen, (255, 0, 0), (int(self.waypoint_list[i].x), int(self.waypoint_list[i].y)), 5)
+            # for i in range(len(self.waypoint_list)):
+            #     pygame.draw.circle(self.screen, (255, 0, 0), (int(self.waypoint_list[i].x), int(self.waypoint_list[i].y)), 5)
 
-
-            pressed = pygame.key.get_pressed()
-
-            # Rotations per second
-            self.robot.motor_l.set_voltage(0)
-            self.robot.motor_r.set_voltage(0)
-            
-            if pressed[pygame.K_UP]:
-                self.robot.motor_l.set_voltage(40)
-                self.robot.motor_r.set_voltage(40)
-            elif pressed[pygame.K_DOWN]:
-                self.robot.motor_l.set_voltage(-40)
-                self.robot.motor_r.set_voltage(-40)
-
-            if pressed[pygame.K_LEFT]:
-                self.robot.motor_l.set_voltage(-30)
-                self.robot.motor_r.set_voltage(30)
-            elif pressed[pygame.K_RIGHT]:
-                self.robot.motor_l.set_voltage(30)
-                self.robot.motor_r.set_voltage(-30)
 
             if (len(self.waypoint_list) > waypoint_idx):
                 # estimated_robot_pos = self.get_estimated_pos_pixel()
                 estimated_robot_pos = self.robot.position
                 (dist, angleDiff) = self.trackGoal(estimated_robot_pos, self.waypoint_list[waypoint_idx], self.robot.estimated_angle)
-                # print(dist, angleDiff)
+                
                 R = 10000
-                # if (abs(angleDiff) > 140):
-                #     R = 10
-                # elif(abs(angleDiff) > 1):
-                #     R = look_ahead / (2 * math.sin(math.radians(angleDiff)))
-
                 if(abs(angleDiff) > 1):
-                    R = look_ahead / (2 * math.sin(math.radians(angleDiff)))
+                    R = LOOK_AHEAD / (2 * math.sin(math.radians(angleDiff)))
  
-                # print(R)
-                # Radius center point
+                ## Radius center point
                 # center_x = estimated_robot_pos.x - R * math.sin(math.radians(self.robot.estimated_angle + 90))
                 # center_y = estimated_robot_pos.y + R * math.cos(math.radians(self.robot.estimated_angle + 90))
                 # pygame.draw.circle(self.screen, (0, 0, 255), (int(center_x), int(center_y)), 3)
                 # pygame.draw.circle(self.screen, (255, 0, 0), (int(center_x), int(center_y)), abs(R), 1)
 
+                ## Draw line from center to robot to the next goal
+                # pygame.draw.line(self.screen, (255, 0, 255), (self.robot.position.x, self.robot.position.y), (self.waypoint_list[waypoint_idx].x, self.waypoint_list[waypoint_idx].y), 4)
 
-                pygame.draw.line(self.screen, (255, 0, 255), (self.robot.position.x, self.robot.position.y), (self.waypoint_list[waypoint_idx].x, self.waypoint_list[waypoint_idx].y), 4)
-
-                # Draw a circle around the robot position
-                pygame.draw.circle(self.screen, (0, 255, 0), (int(self.robot.position.x), int(self.robot.position.y)), look_ahead, 1)
+                ## Draw look ahead search distance
+                # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.robot.position.x), int(self.robot.position.y)), LOOK_AHEAD, 1)
 
                 w = (WHEELS_DIST_CM / (2 * R)) * self.base_speed
                 
-
-                # print(angleDiff)
-
-                # self.robot.set_motors_voltage_vel_w(self.base_speed, w)
                 self.robot.set_motors_voltage(self.base_speed + w, self.base_speed - w)
+            else:
+                if (not finished):
+                    self.robot.set_motors_voltage(0, 0)
+                    print("Total time: " + str(round(time, 4)) + "s")
+                    finished = True
             
             self.robot.update(dt)
 
@@ -213,8 +190,10 @@ class Game:
                 # Find look ahead point
                 min_diff_modulo = 1000
                 look_ahead_point = waypoint_idx
-                for i in range(7):
-                    diff = self.robot.position.distance_to(self.waypoint_list[waypoint_idx + i]) - look_ahead
+                for i in range(MAX_WAYPOINTS_AHEAD):
+                    if (waypoint_idx + i >= len(self.waypoint_list)):
+                        break
+                    diff = self.robot.position.distance_to(self.waypoint_list[waypoint_idx + i]) - LOOK_AHEAD
                     if (diff < 0 and abs(diff) < min_diff_modulo):
                         min_diff_modulo = abs(diff)
                         look_ahead_point = waypoint_idx + i
