@@ -34,7 +34,7 @@ INIT_KP = 0.416 # 5 / wheels_dist
 INIT_KD = 0.833 # 10 / wheels_dist
 
 # Pure pursuit parameters
-LOOK_AHEAD = 20
+LOOK_AHEAD = 30
 MAX_WAYPOINTS_AHEAD = 4
 
 class Game:
@@ -152,7 +152,7 @@ class Game:
             #     pygame.draw.circle(self.screen, (255, 0, 0), (int(self.waypoint_list[i].x), int(self.waypoint_list[i].y)), 5)
 
 
-            if (len(self.waypoint_list) > waypoint_idx):
+            if (waypoint_idx < len(self.waypoint_list) - 1):
                 # estimated_robot_pos = self.get_estimated_pos_pixel()
                 estimated_robot_pos = self.robot.position
                 (dist, angleDiff) = self.trackGoal(estimated_robot_pos, self.waypoint_list[waypoint_idx], self.robot.estimated_angle)
@@ -192,6 +192,7 @@ class Game:
                 look_ahead_point = waypoint_idx
                 for i in range(MAX_WAYPOINTS_AHEAD):
                     if (waypoint_idx + i >= len(self.waypoint_list)):
+                        look_ahead_point = len(self.waypoint_list) - 1
                         break
                     diff = self.robot.position.distance_to(self.waypoint_list[waypoint_idx + i]) - LOOK_AHEAD
                     if (diff < 0 and abs(diff) < min_diff_modulo):
@@ -200,14 +201,11 @@ class Game:
 
 
                 waypoint_idx = look_ahead_point
-                # print("")
-
-                estimated_robot_pos = self.get_estimated_pos_pixel()
-                if (self.near_waypoint(estimated_robot_pos, self.waypoint_list[waypoint_idx])):
-                    waypoint_idx += 1
-                    print(waypoint_idx)
+            else:
+                waypoint_idx = len(self.waypoint_list) - 1
 
 
+            print("Waypoint: " + str(waypoint_idx) + " of " + str(len(self.waypoint_list)))
             hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
             self.robot.display(self.screen)
 
