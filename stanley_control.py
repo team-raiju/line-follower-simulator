@@ -29,14 +29,14 @@ WHEELS_RADIUS_CM = 1.0
 
 DEFAULT_WAYPOINT_LIST = "maps/mapping_data/map5/map5_track.txt"
 
-INIT_BASE_SPEED = 50
+INIT_BASE_SPEED = 70
 INIT_KP = 0.416 # 5 / wheels_dist
 INIT_KD = 0.833 # 10 / wheels_dist
 
 # Stanley parameters
 A_PARAM = 1
 K_PARAM = 0.1
-STEERING_ANGLE_CONSTANT = 20
+STEERING_ANGLE_CONSTANT = 25
 MAX_WAYPOINTS_AHEAD = 5
 
 class Game:
@@ -152,8 +152,8 @@ class Game:
             self.map.draw_loaded_map()
 
             # Draw all waypoints
-            for i in range(len(self.waypoint_list)):
-                pygame.draw.circle(self.screen, (255, 0, 0), (int(self.waypoint_list[i].x), int(self.waypoint_list[i].y)), 5)
+            # for i in range(len(self.waypoint_list)):
+            #     pygame.draw.circle(self.screen, (255, 0, 0), (int(self.waypoint_list[i].x), int(self.waypoint_list[i].y)), 5)
 
             pressed = pygame.key.get_pressed()
 
@@ -213,14 +213,19 @@ class Game:
             # Update travalled distance
             if (waypoint_idx < len(self.waypoint_list) - 2):
 
-                # Find look ahead point
+                # Find frontal point
+                front_vector = Vector2(20, 0)
+                point_front = self.robot.position + front_vector.rotate(-self.robot.angle)
+                # pygame.draw.circle(self.screen, (0, 255, 0), (int(point_front.x), int(point_front.y)), 6)
+
+                # Find nearest point from robot front
                 min_diff_modulo = 1000
                 look_ahead_point = waypoint_idx
                 for i in range(MAX_WAYPOINTS_AHEAD):
                     if (waypoint_idx + i >= len(self.waypoint_list)):
                         break
 
-                    diff = self.robot.position.distance_to(self.waypoint_list[waypoint_idx + i])
+                    diff = point_front.distance_to(self.waypoint_list[waypoint_idx + i])
 
                     if (abs(diff) < min_diff_modulo):
                         min_diff_modulo = abs(diff)
