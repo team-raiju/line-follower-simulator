@@ -10,16 +10,16 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 import sys
 
-MAP_FILE_NAME = "circles.png"
-MAP_WIDTH_CM = 200
-MAP_HEIGHT_CM = 200
-MAP_MARGIN_CM = 0
+MAP_FILE_NAME = "map5.png"
+MAP_WIDTH_CM = 651
+MAP_HEIGHT_CM = 317
+MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 55
-ROBOT_INIT_POS_Y_CM = 150
-ROBOT_INIT_ANGLE = 90
-MIN_LEFT_MARKER_COUNTER = 50
+ROBOT_INIT_POS_X_CM = 125 
+ROBOT_INIT_POS_Y_CM = 308
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 33
 
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
@@ -31,9 +31,11 @@ WHEELS_RADIUS_CM = 1.0
 INIT_KP = 40
 INIT_KD = 55
 
-DEFAULT_RADIUS_LIST = "maps/mapping_data/map4/map4_radius.txt"
+DEFAULT_RADIUS_LIST = "maps/mapping_data/map5/map5_radius_edit.txt"
 
 TRACK_POINTS_DIST_CM = 5
+
+BASE_VEL_M_S = 0.5
 
 class Game:
     def __init__(self):
@@ -73,43 +75,14 @@ class Game:
         self.left_marker_counter = 0
         self.right_marker_counter = 0
 
-        self.velocity_table = []
+        self.rot_ratio_table = []
     
     
     def radius_to_velocity(self, radius):
-        velocity = 45
-        if(radius < 20):
-            velocity = 40
-        elif(radius < 30):
-            velocity = 50
-        elif(radius < 50):
-            velocity = 70
-        elif(radius < 70):
-            velocity = 90
-        else:
-            velocity = 100
+        rot_ratio = ((WHEELS_DIST_CM * 0.01) / (2 * (radius * 0.01))) * BASE_VEL_M_S # m/s -> wheel ratio to subtract from right wheel and add to left wheel
         
-        return velocity
+        return rot_ratio
 
-    def shift_velocity_table(self, shift_size):
-        for i in range(shift_size, len(self.velocity_table)):
-            self.velocity_table[i - shift_size] = self.velocity_table[i]
-        
-        for i in range(shift_size):
-            self.velocity_table[-i - 1] = 30
-
-        return self.velocity_table
-
-
-    def velocity_process_acceleration(self, max_v_diff_positive, min_v_diff_negative):
-        # TODO Remove dist_between points dependency using t = p_dist/v-diff
-        for i in range(len(self.velocity_table) - 1):
-            v_diff = self.velocity_table[i + 1] - self.velocity_table[i]
-            if (v_diff > max_v_diff_positive):
-                self.velocity_table[i + 1] = self.velocity_table[i] + max_v_diff_positive
-            elif (v_diff < min_v_diff_negative):
-                self.velocity_table[i + 1] = self.velocity_table[i] + min_v_diff_negative
-    
     def create_velocity_table(self):
 
         # TODO Filter big radius inside small radius sequency
@@ -125,17 +98,17 @@ class Game:
         with open(radius_list_path, "r") as f:
             for line in f:
                 radius_val = float(line.strip())
-                radius_list.append(abs(radius_val))
+                radius_list.append(radius_val)
 
         for radius in radius_list:
-            velocity = self.radius_to_velocity(radius)
-            self.velocity_table.append(velocity)
+            ratio = self.radius_to_velocity(radius)
+            self.rot_ratio_table.append(ratio)
    
         # Delay filter
-        self.shift_velocity_table(6)
+        #self.shift_velocity_table(6)
 
         # Process acceleration
-        self.velocity_process_acceleration(10, -10)
+        #self.velocity_process_acceleration(10, -10)
 
     
     def trackGoal(self, currentPos: Vector2, goal: Vector2, robot_angle):
@@ -160,10 +133,7 @@ class Game:
         last_dist_saved = 0
         vel_tbl_idx = 0
         self.create_velocity_table()
-        base_speed = self.velocity_table[0]
-        count_markers = cm()
-        self.pid_calc = pid(base_speed, INIT_KP, INIT_KD)
-        vel = 3
+        base_rotation = self.rot_ratio_table[0]
 
         while not self.exit:
             for event in pygame.event.get():
@@ -176,21 +146,30 @@ class Game:
 
             self.screen.fill((0, 0, 0))
             self.map.draw_loaded_map()
-            hp.draw_timer(self.screen, vel, MAP_CM_PER_PIXELS)
+            hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
 
-            R = -40 * 0.01 # cm
-            # vel += 0.1
-            # vel = min(vel, 100)
+
+            if (not finished):
+                total_dist = float(self.robot.total_dist_cm)
+                if (total_dist > (last_dist_saved + TRACK_POINTS_DIST_CM)):
+                    vel_tbl_idx += 1
+                    last_dist_saved = total_dist
+                    base_rotation = self.rot_ratio_table[vel_tbl_idx]
+                    print(vel_tbl_idx)
+
+
             vel_m_s = (self.robot.mot_vel_l + self.robot.mot_vel_r) / 2
 
-            rot_ratio = ((WHEELS_DIST_CM * 0.01) / (2 * R)) * vel_m_s # m/s -> wheel ratio to subtract from right wheel and add to left wheel
+            # rot_ratio = ((WHEELS_DIST_CM * 0.01) / (2 * R)) * vel_m_s # m/s -> wheel ratio to subtract from right wheel and add to left wheel
 
-            target_w = (2 * rot_ratio) / (WHEELS_DIST_CM * 0.01) # rad/s
+            target_w = (2 * base_rotation) / (WHEELS_DIST_CM * 0.01) # rad/s
 
-            print("rot_ratio: " + str(rot_ratio) + " vel: " + str(vel_m_s), " target_w: " + str(target_w))
-            print(self.robot.angular_velocity)
+            #print("rot_ratio: " + str(base_rotation) + " vel: " + str(vel_m_s), " target_w: " + str(target_w))
+            #print(self.robot.angular_velocity)
+
+            #TODO add pid control for target angular velocity and current angular velocity
                 
-            self.robot.set_motor_vel_inf(vel - rot_ratio, vel + rot_ratio)
+            self.robot.set_motor_vel_inf(BASE_VEL_M_S - base_rotation, BASE_VEL_M_S + base_rotation)
             
             #Draw
             self.robot.update(dt)
