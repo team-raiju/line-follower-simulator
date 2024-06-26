@@ -21,6 +21,7 @@ ROBOT_INIT_POS_Y_CM = 308
 ROBOT_INIT_ANGLE = 180
 MIN_LEFT_MARKER_COUNTER = 33
 
+
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
 ROBOT_SIZE_Y_CM = 15.0 # Height
@@ -28,14 +29,14 @@ ROTATION_OFFSET_FROM_CENTER_CM = 3.72
 WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-INIT_KP = 0.8
-INIT_KD = 0.4
+INIT_KP = 2.6
+INIT_KD = 2
 
 DEFAULT_RADIUS_LIST = "maps/mapping_data/map5/map5_radius.txt"
 
 TRACK_POINTS_DIST_CM = 5
 
-BASE_VEL_M_S = 2.3
+BASE_VEL_M_S = 4
 
 class Game:
     def __init__(self):
@@ -136,7 +137,10 @@ class Game:
         self.create_velocity_table()
         count_markers = cm()
         self.pid_calc = pid(0, INIT_KP, INIT_KD, 0)
-        self.vel_pid_calc = pid(0, 1, 0, 0.05)
+        self.vel_pid_calc = pid(0, 0.0, 0, 0.00)
+        self.w_pid_calc = pid(0, 1, 0.1, 0.0)
+        loop = 0
+        error_w_sum = 0
 
         while not self.exit:
             for event in pygame.event.get():
@@ -151,6 +155,7 @@ class Game:
             self.map.draw_loaded_map()
             hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
 
+            # Line sensor error
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
             line_sensor = hp.filter_line(line_sensor, self.robot.white_val, self.robot.black_val)
 
@@ -160,10 +165,10 @@ class Game:
 
             sensor_rot_ratio = self.pid_calc.pid_process(error)
 
+            # Linear speed error
             speed_error = BASE_VEL_M_S - self.robot.velocity_m_s.x
-            vel_pid = self.vel_pid_calc.pid_process(speed_error)
+            vel_pid = BASE_VEL_M_S + self.vel_pid_calc.pid_process(speed_error)
 
-            
             if (not finished):
                 total_dist = float(self.robot.total_dist_cm)
                 if (total_dist > (last_dist_saved + TRACK_POINTS_DIST_CM)):
@@ -172,14 +177,23 @@ class Game:
                     # print(vel_tbl_idx)
 
 
+            # Angular target speed
             base_rot_ratio = ((WHEELS_DIST_CM * 0.01) / (2 * (self.radius_list[vel_tbl_idx] * 0.01))) * self.robot.velocity_m_s.x
-            # base_rot_ratio = 0
             target_w = (2 * base_rot_ratio) / (WHEELS_DIST_CM * 0.01) # rad/s
+            error_w = target_w - self.robot.angular_velocity
+
+            # Angular speed error
+            w_pid = self.w_pid_calc.pid_process(error_w)
+            alpha = ((WHEELS_DIST_CM * 0.01) * w_pid) / 2
+
+
+            # print("mean = " + str(error_w_sum / loop) + " target_w = " + str(target_w) + " w = " + str(self.robot.angular_velocity) + "vel = " + str(self.robot.velocity_m_s.x))
+            
 
             # print("rot_ratio: " + str(self.robot.angular_velocity) + " vel: " + str(self.robot.velocity_m_s.x), " target_w: " + str(target_w))
             #print(self.robot.angular_velocity)
 
-            self.robot.set_motors_speed_m_s(vel_pid - base_rot_ratio - sensor_rot_ratio, vel_pid + base_rot_ratio + sensor_rot_ratio)
+            self.robot.set_motors_speed_m_s(vel_pid - (base_rot_ratio + sensor_rot_ratio + alpha), vel_pid + (base_rot_ratio + sensor_rot_ratio + alpha))
                 
             
             #Draw
