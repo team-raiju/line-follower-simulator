@@ -29,13 +29,13 @@ WHEELS_RADIUS_CM = 1.0
 
 DEFAULT_WAYPOINT_LIST = "maps/mapping_data/map5/map5_track.txt"
 
-INIT_BASE_SPEED = 50
+INIT_BASE_SPEED = 75
 INIT_KP = 0.416 # 5 / wheels_dist
 INIT_KD = 0.833 # 10 / wheels_dist
 
 # Pure pursuit parameters
-LOOK_AHEAD = 30
-MAX_WAYPOINTS_AHEAD = 4
+LOOK_AHEAD = 40
+MAX_WAYPOINTS_AHEAD = 7
 
 class Game:
     def __init__(self):
@@ -132,6 +132,8 @@ class Game:
         time = 0
         finished = False
         stop_counter = 0
+        self.w_pid_calc = pid(0, 1, 2, 0.0)
+
 
         while not self.exit:
             # Event queue
@@ -173,9 +175,16 @@ class Game:
                 ## Draw look ahead search distance
                 # pygame.draw.circle(self.screen, (0, 255, 0), (int(self.robot.position.x), int(self.robot.position.y)), LOOK_AHEAD, 1)
 
-                w = (WHEELS_DIST_CM / (2 * R)) * self.base_speed
+                base_rot_ratio = (WHEELS_DIST_CM / (2 * R)) * self.base_speed
+                target_w = (2 * base_rot_ratio) / (WHEELS_DIST_CM * 0.01) # rad/s
+                error_w = target_w - self.robot.angular_velocity
+
+                # Angular speed error
+                w_pid = self.w_pid_calc.pid_process(error_w)
+                alpha = ((WHEELS_DIST_CM * 0.01) * w_pid) / 2
+
                 
-                self.robot.set_motors_voltage(self.base_speed + w, self.base_speed - w)
+                self.robot.set_motors_voltage(self.base_speed + base_rot_ratio + alpha, self.base_speed - base_rot_ratio - alpha)
             else:
                 if (not finished):
                     self.robot.set_motors_voltage(0, 0)
