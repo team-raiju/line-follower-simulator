@@ -118,17 +118,22 @@ class CountMarkers:
 
 class PIDFunctions:
 
-    def __init__(self, speed, kp, kd):
+    def __init__(self, speed, kp, kd, ki=0):
         self.kp = kp
         self.kd = kd
+        self.ki = ki
         self.base_speed = speed
         self.last_error = 0
+        self.integral = 0
     
     def set_kp(self, new_kp):
         self.kp = new_kp
 
     def set_kd(self, new_kd):
         self.kd = new_kd
+
+    def set_ki(self, new_ki):
+        self.ki = new_ki
     
     def set_base_speed(self, new_speed):
         self.base_speed = new_speed
@@ -174,6 +179,15 @@ class PIDFunctions:
         self.last_error = error
 
         return l_speed, r_speed
+    
+    def pid_process(self, error):
+        derivative = error - self.last_error
+        self.integral += error
+        result = (error * self.kp + derivative * self.kd + self.integral * self.ki)
+
+        self.last_error = error
+
+        return result
     
     def angle_pid(self, error):
         derivative = (error - self.last_error)

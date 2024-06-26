@@ -85,6 +85,7 @@ class Robot:
         self.mot_vel_r = 0.0
 
         self.velocity = Vector2(1, 0.0)
+        self.velocity_m_s = Vector2(1, 0.0)
         self.angular_velocity = 0
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -163,7 +164,9 @@ class Robot:
 
         self.update_estimated_pos(self.mot_vel_l, self.mot_vel_r, dt)
         
-        self.velocity.x = self.meters_to_pixel((self.mot_vel_l + self.mot_vel_r) / 2)    # Pixel per second
+        self.velocity_m_s.x = (self.mot_vel_l + self.mot_vel_r) / 2 # m/s
+
+        self.velocity.x = self.meters_to_pixel(self.velocity_m_s.x)    # Pixel per second
 
         self.angular_velocity = self.meters_to_pixel((self.mot_vel_r - self.mot_vel_l)) / self.wheels_distance_pixels # Pixel per second / Pixel = rad/s
 
@@ -280,3 +283,7 @@ class Robot:
     def set_motors_voltage(self, l_speed, r_speed):
         self.motor_l.set_voltage(l_speed)
         self.motor_r.set_voltage(r_speed)
+
+    def set_motors_speed_m_s(self, l_speed_m_s, r_speed_m_s):
+        self.motor_l.set_voltage(l_speed_m_s * 30.0)
+        self.motor_r.set_voltage(r_speed_m_s * 30.0)

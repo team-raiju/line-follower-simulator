@@ -28,14 +28,14 @@ ROTATION_OFFSET_FROM_CENTER_CM = 3.72
 WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-INIT_KP = 40
-INIT_KD = 55
+INIT_KP = 0.8
+INIT_KD = 0.4
 
-DEFAULT_RADIUS_LIST = "maps/mapping_data/map5/map5_radius_edit.txt"
+DEFAULT_RADIUS_LIST = "maps/mapping_data/map5/map5_radius.txt"
 
 TRACK_POINTS_DIST_CM = 5
 
-BASE_VEL_M_S = 0.5
+BASE_VEL_M_S = 2.3
 
 class Game:
     def __init__(self):
@@ -76,6 +76,8 @@ class Game:
         self.right_marker_counter = 0
 
         self.rot_ratio_table = []
+        self.radius_list = []
+
     
     
     def radius_to_velocity(self, radius):
@@ -86,7 +88,6 @@ class Game:
     def create_velocity_table(self):
 
         # TODO Filter big radius inside small radius sequency
-        radius_list = []
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         file_name = DEFAULT_RADIUS_LIST
@@ -98,9 +99,9 @@ class Game:
         with open(radius_list_path, "r") as f:
             for line in f:
                 radius_val = float(line.strip())
-                radius_list.append(radius_val)
+                self.radius_list.append(radius_val)
 
-        for radius in radius_list:
+        for radius in self.radius_list:
             ratio = self.radius_to_velocity(radius)
             self.rot_ratio_table.append(ratio)
    
@@ -133,7 +134,9 @@ class Game:
         last_dist_saved = 0
         vel_tbl_idx = 0
         self.create_velocity_table()
-        base_rotation = self.rot_ratio_table[0]
+        count_markers = cm()
+        self.pid_calc = pid(0, INIT_KP, INIT_KD, 0)
+        self.vel_pid_calc = pid(0, 1, 0, 0.05)
 
         while not self.exit:
             for event in pygame.event.get():
@@ -148,28 +151,36 @@ class Game:
             self.map.draw_loaded_map()
             hp.draw_timer(self.screen, time, MAP_CM_PER_PIXELS)
 
+            line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
+            line_sensor = hp.filter_line(line_sensor, self.robot.white_val, self.robot.black_val)
 
+            error = pid.calc_error(line_sensor, self.robot.line_sensor_pos[0:16])
+            if (error == -99):
+                error = self.pid_calc.get_last_error()
+
+            sensor_rot_ratio = self.pid_calc.pid_process(error)
+
+            speed_error = BASE_VEL_M_S - self.robot.velocity_m_s.x
+            vel_pid = self.vel_pid_calc.pid_process(speed_error)
+
+            
             if (not finished):
                 total_dist = float(self.robot.total_dist_cm)
                 if (total_dist > (last_dist_saved + TRACK_POINTS_DIST_CM)):
                     vel_tbl_idx += 1
                     last_dist_saved = total_dist
-                    base_rotation = self.rot_ratio_table[vel_tbl_idx]
-                    print(vel_tbl_idx)
+                    # print(vel_tbl_idx)
 
 
-            vel_m_s = (self.robot.mot_vel_l + self.robot.mot_vel_r) / 2
+            base_rot_ratio = ((WHEELS_DIST_CM * 0.01) / (2 * (self.radius_list[vel_tbl_idx] * 0.01))) * self.robot.velocity_m_s.x
+            # base_rot_ratio = 0
+            target_w = (2 * base_rot_ratio) / (WHEELS_DIST_CM * 0.01) # rad/s
 
-            # rot_ratio = ((WHEELS_DIST_CM * 0.01) / (2 * R)) * vel_m_s # m/s -> wheel ratio to subtract from right wheel and add to left wheel
-
-            target_w = (2 * base_rotation) / (WHEELS_DIST_CM * 0.01) # rad/s
-
-            #print("rot_ratio: " + str(base_rotation) + " vel: " + str(vel_m_s), " target_w: " + str(target_w))
+            # print("rot_ratio: " + str(self.robot.angular_velocity) + " vel: " + str(self.robot.velocity_m_s.x), " target_w: " + str(target_w))
             #print(self.robot.angular_velocity)
 
-            #TODO add pid control for target angular velocity and current angular velocity
+            self.robot.set_motors_speed_m_s(vel_pid - base_rot_ratio - sensor_rot_ratio, vel_pid + base_rot_ratio + sensor_rot_ratio)
                 
-            self.robot.set_motor_vel_inf(BASE_VEL_M_S - base_rotation, BASE_VEL_M_S + base_rotation)
             
             #Draw
             self.robot.update(dt)
