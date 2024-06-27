@@ -29,15 +29,15 @@ WHEELS_RADIUS_CM = 1.0
 
 DEFAULT_WAYPOINT_LIST = "maps/mapping_data/map5/map5_track.txt"
 
-INIT_BASE_SPEED = 70
+INIT_BASE_SPEED = 100
 INIT_KP = 0.416 # 5 / wheels_dist
 INIT_KD = 0.833 # 10 / wheels_dist
 
 # Stanley parameters
 A_PARAM = 1
 K_PARAM = 0.1
-STEERING_ANGLE_CONSTANT = 25
-MAX_WAYPOINTS_AHEAD = 5
+STEERING_ANGLE_CONSTANT = 35
+MAX_WAYPOINTS_AHEAD = 7
 
 class Game:
     def __init__(self):
@@ -136,6 +136,8 @@ class Game:
         stop_counter = 0
         currentPathAbsAngle = 0
         trackSideFromRobot = "Right"
+        self.w_pid_calc = pid(0, 1, 2, 0.0)
+
 
         while not self.exit:
             # Event queue
@@ -199,9 +201,15 @@ class Game:
                 ## Draw line from center to robot to the next goal
                 # pygame.draw.line(self.screen, (255, 0, 255), (self.robot.position.x, self.robot.position.y), (self.waypoint_list[waypoint_idx].x, self.waypoint_list[waypoint_idx].y), 4)
 
-                w = steering_angle * STEERING_ANGLE_CONSTANT
+                base_rot_ratio = steering_angle * STEERING_ANGLE_CONSTANT
+
+                # Angular speed error
+                target_w = (2 * base_rot_ratio) / (WHEELS_DIST_CM * 0.01) # rad/s
+                error_w = target_w - self.robot.angular_velocity
+                w_pid = self.w_pid_calc.pid_process(error_w)
+                alpha = ((WHEELS_DIST_CM * 0.01) * w_pid) / 2
                 
-                self.robot.set_motors_voltage(self.base_speed + w, self.base_speed - w)
+                self.robot.set_motors_voltage(self.base_speed + base_rot_ratio + alpha, self.base_speed - base_rot_ratio - alpha)
             else:
                 if (not finished):
                     self.robot.set_motors_voltage(0, 0)
