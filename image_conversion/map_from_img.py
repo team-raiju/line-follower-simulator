@@ -1,11 +1,11 @@
 import cv2
 import os
 
-INPUT_FILE_NAME = "robot-2.jpeg"
-OUTPUT_FILE_NAME = "out-2.png"
+INPUT_FILE_NAME = "rcx-2024.jpg"
+OUTPUT_FILE_NAME = "map19.png"
 
 # Pixel value to be considered as a black pixel 0 - 255
-FILTER_THERESHOLD = 120
+FILTER_THERESHOLD = 190
 
 
 def main():

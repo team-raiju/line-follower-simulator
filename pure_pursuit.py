@@ -9,16 +9,16 @@ from helper import PIDFunctions as pid
 import sys
 import numpy as np
 
-MAP_FILE_NAME = "map5.png"
-MAP_WIDTH_CM = 651
-MAP_HEIGHT_CM = 317
+MAP_FILE_NAME = "map2.png"
+MAP_WIDTH_CM = 186
+MAP_HEIGHT_CM = 354
 MAP_MARGIN_CM = 25
 MAP_CM_PER_PIXELS = 2
 
-ROBOT_INIT_POS_X_CM = 125 
-ROBOT_INIT_POS_Y_CM = 308
-ROBOT_INIT_ANGLE = 180
-MIN_LEFT_MARKER_COUNTER = 33
+ROBOT_INIT_POS_X_CM = 178 
+ROBOT_INIT_POS_Y_CM = 75
+ROBOT_INIT_ANGLE = 270
+MIN_LEFT_MARKER_COUNTER = 26
 
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 # Width
@@ -27,7 +27,7 @@ ROTATION_OFFSET_FROM_CENTER_CM = 3.72
 WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-DEFAULT_WAYPOINT_LIST = "maps/mapping_data/map5/map5_track.txt"
+DEFAULT_WAYPOINT_LIST = "maps/mapping_data/map2/map2_track.txt"
 
 INIT_BASE_SPEED = 75
 INIT_KP = 0.416 # 5 / wheels_dist
@@ -35,7 +35,7 @@ INIT_KD = 0.833 # 10 / wheels_dist
 
 # Pure pursuit parameters
 LOOK_AHEAD = 40
-MAX_WAYPOINTS_AHEAD = 7
+MAX_WAYPOINTS_AHEAD = 4 
 
 class Game:
     def __init__(self):
@@ -196,6 +196,10 @@ class Game:
             # Update travalled distance
             if (waypoint_idx < len(self.waypoint_list)):
 
+                # Find frontal point
+                front_vector = Vector2(25, 0)
+                point_front = self.robot.position + front_vector.rotate(-self.robot.angle)
+
                 # Find look ahead point
                 min_diff_modulo = 1000
                 look_ahead_point = waypoint_idx
@@ -203,7 +207,7 @@ class Game:
                     if (waypoint_idx + i >= len(self.waypoint_list)):
                         look_ahead_point = len(self.waypoint_list) - 1
                         break
-                    diff = self.robot.position.distance_to(self.waypoint_list[waypoint_idx + i]) - LOOK_AHEAD
+                    diff = point_front.distance_to(self.waypoint_list[waypoint_idx + i]) - LOOK_AHEAD
                     if (diff < 0 and abs(diff) < min_diff_modulo):
                         min_diff_modulo = abs(diff)
                         look_ahead_point = waypoint_idx + i

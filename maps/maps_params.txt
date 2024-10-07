@@ -157,3 +157,59 @@ MIN_LEFT_MARKER_COUNTER = 60
 self.base_speed = 80
 self.kp = 28
 self.kd = 15 
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map17.png"
+MAP_WIDTH_CM = 405
+MAP_HEIGHT_CM = 132
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 3
+
+ROBOT_INIT_POS_X_CM = 195
+ROBOT_INIT_POS_Y_CM = 20
+ROBOT_INIT_ANGLE = 180
+MIN_LEFT_MARKER_COUNTER = 40
+
+
+INIT_BASE_SPEED = 65
+INIT_KP = 30
+INIT_KD = 45
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map-0-0.png"
+MAP_WIDTH_CM = 96
+MAP_HEIGHT_CM = 301
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 3
+
+ROBOT_INIT_POS_X_CM = 11
+ROBOT_INIT_POS_Y_CM = 200
+ROBOT_INIT_ANGLE = 90
+MIN_LEFT_MARKER_COUNTER = 20
+
+INIT_BASE_SPEED = 65
+INIT_KP = 30
+INIT_KD = 45
+
+---------------------------
+---------------------------
+MAP_FILE_NAME = "map19.png"
+MAP_WIDTH_CM = 653
+MAP_HEIGHT_CM = 255
+MAP_MARGIN_CM = 25
+MAP_CM_PER_PIXELS = 2
+
+ROBOT_INIT_POS_X_CM = 640 
+ROBOT_INIT_POS_Y_CM = 100
+ROBOT_INIT_ANGLE = 90
+MIN_LEFT_MARKER_COUNTER = 53
+
+INIT_BASE_SPEED = 62
+INIT_KP = 30
+INIT_KD = 45
+---------------------------
+---------------------------
+Raijin velocidade contante
+INIT_BASE_SPEED = 60
+INIT_KP = 30
+INIT_KD = 45
