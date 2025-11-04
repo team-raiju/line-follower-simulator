@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw
 import os
 
 
-TRACK_FOLDER = "map2"
+TRACK_FOLDER = "map6"
 OUPUT_FILE_NAME = "out_2.png"
 
 # Read the points from the text file
@@ -10,7 +10,7 @@ points = []
 markers = []
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-file_path_1 = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_track_real.txt"))
+file_path_1 = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_map_data.txt"))
 
 out_path = os.path.join(current_dir, "mapping_data", TRACK_FOLDER, OUPUT_FILE_NAME)
 
@@ -59,69 +59,4 @@ for point in points:
 #     y2 = int(points[i][1]) + y_offset
 #     draw.line([(x1, y1), (x2, y2)], fill="white", width=1)
 
-
-
-file_path_2 = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_track.txt"))
-
-
-points = []
-with open(file_path_2, "r") as file:
-    for line in file:
-        x, y = line.strip().split(",")
-        points.append((float(x), float(y)))
-
-
-
-# Draw larger white points on the image with margins
-for point in points:
-    x = int(point[0]) + x_offset
-    y = int(point[1]) + y_offset
-    draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="blue")
-
-
-
-
-file_path_3 = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_track_new.txt"))
-
-points = []
-with open(file_path_3, "r") as file:
-    for line in file:
-        x, y = line.strip().split(",")
-        points.append((float(x), float(y)))
-
-
-
-# Draw larger white points on the image with margins
-for point in points:
-    x = int(point[0]) + x_offset
-    y = int(point[1]) + y_offset
-    draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="green")
-
-
-
-
-
-
-
-
-# # Draw markers
-# file_path = os.path.join(current_dir, "markers.txt")
-# with open(file_path, "r") as file:
-#     for line in file:
-#         x, y = line.strip().split(",")
-#         markers.append((float(x), float(y)))
-
-
-# # Calculate the offset for placing the points with margins
-# x_offset = margin - int(min_x)
-# y_offset = margin - int(min_y)
-
-# # Draw larger white points on the image with margins
-# for marker in markers:
-#     x = int(marker[0]) + x_offset
-#     y = int(marker[1]) + y_offset
-#     draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="blue")
-
-# Save the image
-# image.show()
 image.save(out_path)

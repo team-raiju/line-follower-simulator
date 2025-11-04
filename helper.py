@@ -35,6 +35,14 @@ class Helper:
         x_val_cm = (pixel[0] / map_cm_to_pixel) - map_margin_cm
         y_val_cm, = (pixel[1] / map_cm_to_pixel) - map_margin_cm
         return x_val_cm, y_val_cm
+    
+    def get_shortest_delta_angle(a, b):
+        delta = a - b
+        if delta > 180:
+            delta -= 360
+        elif delta < -180:
+            delta += 360
+        return delta
 
 class CountMarkers:
     def __init__(self):
