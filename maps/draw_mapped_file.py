@@ -51,6 +51,22 @@ for point in points:
     y = int(point[1]) + y_offset
     draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="white")
 
+
+# Draw the shortcut path
+
+file_shortcut = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_shortcut_map.txt"))
+shortcut_points = []
+with open(file_shortcut, "r") as file:
+    for line in file:
+        x, y = line.strip().split(",")
+        shortcut_points.append((float(x), float(y)))
+
+for point in shortcut_points:
+    x = int(point[0]) + x_offset
+    y = int(point[1]) + y_offset
+    draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="blue")
+
+
 # Connect the points with lines
 # for i in range(1, len(points)):
 #     x1 = int(points[i - 1][0]) + x_offset

@@ -9,6 +9,7 @@ import os
 MIN_LEFT_MARKER_COUNTER = 40
 TRACK_POINTS_DIST_CM = 5.0
 MAPPING_NAME = "map6" 
+SHORTCUT_MOVING_AVG_POINTS = 5  # Define the window size for the moving average
 
 class MapTrackLogic(RobotLogic):
     """
@@ -34,6 +35,7 @@ class MapTrackLogic(RobotLogic):
         self.last_theta = 0
 
         self.mapping_points = []
+        self.shortcut_map = []
         self.radius_list = []
         
         print("MapTrackLogic initialized.")
@@ -82,6 +84,7 @@ class MapTrackLogic(RobotLogic):
                     print("Total time: " + str(round(self.time, 4)) + "s")
                     
                     print("Track mapping complete. Saving data...")
+                    self._generate_shortcut_map()
                     self._save_mapping_data()
                     self.finished = True
                     self.pid_calc = pid(15, 3.5, 2)
@@ -125,6 +128,12 @@ class MapTrackLogic(RobotLogic):
             for radius in self.radius_list:
                 f.write(f"{radius}\n")
         
+        file_path = os.path.join(base_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_shortcut_map.txt"))
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            for point in self.shortcut_map:
+                f.write(f"{point[0]},{point[1]}\n")
+        
     
     def estimate_radius(self, current_angle_deg, last_angle_deg, dist_traveled, previous_traveled_dist_cm):
         delta_theta_deg = hp.get_shortest_delta_angle(current_angle_deg, last_angle_deg)
@@ -141,3 +150,32 @@ class MapTrackLogic(RobotLogic):
             current_radius_cm = -100.0
 
         return current_radius_cm
+    
+    def _generate_shortcut_map(self):
+        """
+        Generates a shortcut map by applying a moving average filter
+        to the mapping points.
+        """
+        self.shortcut_map = []
+
+        map_list_length = len(self.mapping_points)
+        for i in range(map_list_length):
+            half_window = SHORTCUT_MOVING_AVG_POINTS // 2
+
+            if i < half_window:
+                half_window = i
+            elif i > map_list_length - half_window - 1:
+                half_window = map_list_length - i - 1
+
+            start_idx = max(0, i - half_window)
+            end_idx = min(map_list_length, i + half_window + 1)
+
+            sum_x = 0.0
+            sum_y = 0.0
+
+            for j in range(start_idx, end_idx):
+                sum_x += self.mapping_points[j][0]
+                sum_y += self.mapping_points[j][1]
+
+            average_point = Vector2(sum_x / (end_idx - start_idx), sum_y / (end_idx - start_idx))
+            self.shortcut_map.append(average_point)

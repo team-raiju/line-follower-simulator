@@ -6,7 +6,7 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 from helper import Helper as hp
 
-MAP_FILE = "../maps/mapping_data/map6/map6_map_data.txt"
+MAP_FILE = "../maps/mapping_data/map6/map6_shortcut_map.txt"
 
 class PurePursuitLogic(RobotLogic):
     """
@@ -16,7 +16,7 @@ class PurePursuitLogic(RobotLogic):
     
     def __init__(self, **kwargs):
         # Load parameters from kwargs
-        self.base_speed = kwargs.get('base_speed', 50)
+        self.base_speed = kwargs.get('base_speed', 60)
         self.wheels_dist_cm = kwargs.get('wheels_dist_cm', 12.0)
         self.look_ahead = kwargs.get('look_ahead', 10)
         self.max_waypoints_ahead = kwargs.get('max_waypoints_ahead', 8)
@@ -94,17 +94,24 @@ class PurePursuitLogic(RobotLogic):
         
 
         # --- 2. Main Logic: Follow Waypoints ---
-        if self.waypoint_idx < len(self.waypoint_list) - 1:
-            (dist, angleDiff) = self._trackGoal(pos_cm, self.waypoint_list[self.waypoint_idx], robot_angle)
+        dist_to_end_cm = pos_cm.distance_to(Vector2(-70, 0))
+        if self.waypoint_idx < len(self.waypoint_list) - 10 or dist_to_end_cm > 15:
+            # If we are at the last waypoint, set the goal to Vector2(-50, 0)
+            if self.waypoint_idx == len(self.waypoint_list) - 1:
+                goal = Vector2(-70, 0)
+            else:
+                goal = self.waypoint_list[self.waypoint_idx]
+
+            (dist, angleDiff) = self._trackGoal(pos_cm, goal, robot_angle)
             
             # Calculate curvature (R)
-            R = 10000.0 # Default to straight line
-            if(abs(angleDiff) > 1):
+            R = 10000.0  # Default to straight line
+            if abs(angleDiff) > 1:
                 R = self.look_ahead / (2 * math.sin(math.radians(angleDiff)))
             
             # Calculate motor speeds
             base_rot_ratio = (self.wheels_dist_cm / (2 * R)) * self.base_speed
-            target_w = (2 * base_rot_ratio) / (self.wheels_dist_cm * 0.01) # rad/s
+            target_w = (2 * base_rot_ratio) / (self.wheels_dist_cm * 0.01)  # rad/s
             error_w = target_w - angular_velocity
 
             w_pid = self.w_pid_calc.pid_process(error_w)
@@ -115,7 +122,7 @@ class PurePursuitLogic(RobotLogic):
 
             # --- 3. Update Target Waypoint ---
             # Find the next best waypoint to track based on look-ahead distance
-            front_vector = Vector2(11, 0) # A point x cm in front of the robot
+            front_vector = Vector2(11, 0)  # A point x cm in front of the robot
             point_front = pos_cm + front_vector.rotate(-robot_angle)
 
             min_diff_modulo = 1000
@@ -129,7 +136,7 @@ class PurePursuitLogic(RobotLogic):
                 
                 diff = point_front.distance_to(self.waypoint_list[current_idx]) - self.look_ahead
                 
-                if (diff < 0 and abs(diff) < min_diff_modulo):
+                if diff < 0 and abs(diff) < min_diff_modulo:
                     min_diff_modulo = abs(diff)
                     look_ahead_point_idx = current_idx
             
@@ -142,7 +149,7 @@ class PurePursuitLogic(RobotLogic):
             if not self.finished:
                 print("Total time: " + str(round(self.time, 4)) + "s")
                 self.finished = True
-            return 0.0, 0.0 # Stop
+            return 0.0, 0.0  # Stop
 
     # --- Helper Methods ---
 
