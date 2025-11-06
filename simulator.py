@@ -3,7 +3,7 @@ from load_track import LoadMap
 from robot import Robot
 from helper import Helper as hp
 
-# --- Import the available brains ---
+# --- Import the available logic ---
 from robot_programs.base_logic import RobotLogic
 from robot_programs.manual_logic import ManualLogic
 from robot_programs.bitbang_logic import BitBangLogic
@@ -12,24 +12,33 @@ from robot_programs.map_track_logic import MapTrackLogic
 from robot_programs.optimized_run_logic import OptimizedRunLogic
 from robot_programs.pure_pursuit_logic import PurePursuitLogic
 
+# --- Import map definitions ---
+from map_configs import *
+
 
 # --- 1. SELECT THE ROBOT BRAIN ---
 # SELECTED_LOGIC: RobotLogic = ManualLogic
 # SELECTED_LOGIC: RobotLogic = BitBangLogic
-# SELECTED_LOGIC: RobotLogic = PIDLogic
+SELECTED_LOGIC: RobotLogic = PIDLogic
 # SELECTED_LOGIC: RobotLogic = MapTrackLogic
 # SELECTED_LOGIC: RobotLogic = OptimizedRunLogic
-SELECTED_LOGIC: RobotLogic = PurePursuitLogic
+# SELECTED_LOGIC: RobotLogic = PurePursuitLogic
 
-# --- 2. MAP & ROBOT PARAMS ---
-# Map parameters
-MAP_FILE_NAME = "map6.png"
-MAP_WIDTH_CM = 303
-MAP_HEIGHT_CM = 227
-MAP_MARGIN_CM = 25
-MAP_CM_PER_PIXELS = 3
+# --- 2. SELECT THE MAP ---
+map_selected = map6
 
-# Robot physical parameters
+# --- 3. MAP & ROBOT PARAMS ---
+MAP_NAME = map_selected.MAP_NAME
+MAP_FILE_NAME = map_selected.MAP_FILE_NAME          
+MAP_WIDTH_CM = map_selected.MAP_WIDTH_CM            
+MAP_HEIGHT_CM = map_selected.MAP_HEIGHT_CM          
+MAP_MARGIN_CM = map_selected.MAP_MARGIN_CM          
+MAP_CM_PER_PIXELS = map_selected.MAP_CM_PER_PIXELS  
+MIN_LEFT_MARKER_COUNTER = map_selected.MIN_LEFT_MARKER_COUNTER
+ROBOT_INIT_POS_X_CM = map_selected.ROBOT_INIT_POS_X_CM
+ROBOT_INIT_POS_Y_CM = map_selected.ROBOT_INIT_POS_Y_CM
+ROBOT_INIT_ANGLE = map_selected.ROBOT_INIT_ANGLE      
+
 ROBOT_IMAGE = "robot-img-3.png"
 ROBOT_SIZE_X_CM = 18.0 
 ROBOT_SIZE_Y_CM = 15.0 
@@ -37,26 +46,20 @@ ROTATION_OFFSET_FROM_CENTER_CM = 3.72
 WHEELS_DIST_CM = 12.0
 WHEELS_RADIUS_CM = 1.0
 
-# Robot initial state
-ROBOT_INIT_POS_X_CM = 9 
-ROBOT_INIT_POS_Y_CM = 135
-ROBOT_INIT_ANGLE = 90
-
 # Simulation tick rate
 SIM_TICK_RATE = 200
 
-# --- 3. CONFIGURE THE ROBOT LOGIC ---
+# --- 4. PARAMS THAT WILL BE SENT TO ROBOT LOGIC ---
 LOGIC_CONFIG = {
-    # Pass physical params the robot logic might need
-    'map_cm_per_pixel': MAP_CM_PER_PIXELS,
-    'map_margin_cm': MAP_MARGIN_CM,
+    'map_name': MAP_NAME,
+    'min_left_marker_counter': MIN_LEFT_MARKER_COUNTER,
     'wheels_dist_cm': WHEELS_DIST_CM
 }
+
 # -----------------------------
 
 class Simulator:
     def __init__(self):
-        # ... (pygame and map init is the same) ...
         pygame.init()
         pygame.display.set_caption("Line Follower Simulator")
 
@@ -96,11 +99,9 @@ class Simulator:
             self.screen.fill((0, 0, 0))
             self.map.draw_loaded_map()
 
-            # --- SENSE ---
+
             line_sensor = self.robot.get_line_sensor(self.screen, self.screen_width, self.screen_height)
 
-            # --- THINK ---
-            # Create the state dictionary to pass to the brain
             robot_state = {
                 'position_cm': self.robot.estimated_position_cm,
                 'angle_deg': self.robot.estimated_angle,
@@ -120,11 +121,9 @@ class Simulator:
                 print(self.robot.estimated_position_cm)
 
 
-            # --- ACT ---
             self.robot.set_motors_voltage(l_speed, r_speed)
             self.robot.update(dt)
 
-            # --- RENDER ---
             hp.draw_timer(self.screen, self.robot_logic.get_time(), MAP_CM_PER_PIXELS)
             self.robot.display(self.screen)
             
@@ -132,7 +131,6 @@ class Simulator:
             self.clock.tick(self.ticks)
 
         pygame.quit()
-
 
 if __name__ == "__main__":
     game = Simulator()

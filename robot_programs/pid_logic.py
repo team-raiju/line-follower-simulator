@@ -3,17 +3,14 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 from helper import Helper as hp
 
-# Logic-specific constants
-MIN_LEFT_MARKER_COUNTER = 49
 
 class PIDLogic(RobotLogic):
-    """
-    A robot logic that uses a PID controller to follow a line.
-    """
+
     def __init__(self, **kwargs):
         base_speed = kwargs.get('base_speed', 70)
         kp = kwargs.get('kp', 35)
         kd = kwargs.get('kd', 50)
+        self.min_left_marker_counter = kwargs.get('min_left_marker_counter', 50)
         
         self.pid_calc = pid(base_speed, kp, kd)
         self.count_markers = cm()
@@ -61,7 +58,7 @@ class PIDLogic(RobotLogic):
             if self.right_marker_counter == 1 and self.left_marker_counter < 1:
                 print("Start")
                 self.time = 0.0
-            elif self.left_marker_counter > MIN_LEFT_MARKER_COUNTER:
+            elif self.left_marker_counter > self.min_left_marker_counter:
                 if not self.finished:
                     print("Total time: " + str(round(self.time, 4)) + "s")
                     self.finished = True

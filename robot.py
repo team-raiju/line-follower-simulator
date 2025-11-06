@@ -6,7 +6,6 @@ from motor import Motor
 import os
 import numpy as np
 
-
 LINE_COLOR_THRESHOLD = 150
 ENCODER_PPR = 7
 

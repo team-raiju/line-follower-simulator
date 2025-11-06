@@ -1,13 +1,7 @@
-# file: robot_brains/bitbang_brain.py
-
 from .base_logic import RobotLogic
 
 class BitBangLogic(RobotLogic):
-    """
-    A simple "bang-bang" controller.
-    If the left sensor sees the line, turn right.
-    If the right sensor sees the line, turn left.
-    """
+
     def __init__(self, **kwargs):
         self.base_speed = kwargs.get('base_speed', 35)
         self.time = 0.0

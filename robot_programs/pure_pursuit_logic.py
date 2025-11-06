@@ -9,18 +9,13 @@ from helper import Helper as hp
 MAP_FILE = "../maps/mapping_data/map6/map6_shortcut_map.txt"
 
 class PurePursuitLogic(RobotLogic):
-    """
-    A robot logic that follows a list of waypoints using the
-    Pure Pursuit path tracking algorithm.
-    """
-    
+
     def __init__(self, **kwargs):
         # Load parameters from kwargs
         self.base_speed = kwargs.get('base_speed', 60)
         self.wheels_dist_cm = kwargs.get('wheels_dist_cm', 12.0)
         self.look_ahead = kwargs.get('look_ahead', 10)
         self.max_waypoints_ahead = kwargs.get('max_waypoints_ahead', 8)
-        self.map_cm_per_pixel = kwargs.get('map_cm_per_pixel', 3)
 
         # Internal state
         self.time = 0.0

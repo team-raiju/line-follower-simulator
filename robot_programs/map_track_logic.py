@@ -6,20 +6,16 @@ from pygame.math import Vector2
 import math
 import os
 
-MIN_LEFT_MARKER_COUNTER = 40
 TRACK_POINTS_DIST_CM = 5.0
+SHORTCUT_MOVING_AVG_POINTS = 5
 MAPPING_NAME = "map6" 
-SHORTCUT_MOVING_AVG_POINTS = 5  # Define the window size for the moving average
 
 class MapTrackLogic(RobotLogic):
-    """
-    A logic that follows a line using PID and simultaneously
-    maps the track by saving points and marker locations.
-    """
     def __init__(self, **kwargs):
         base_speed = kwargs.get('base_speed', 60)
         kp = kwargs.get('kp', 35)
         kd = kwargs.get('kd', 50)
+        self.min_left_marker_counter = kwargs.get('min_left_marker_counter', 50)
 
         self.pid_calc = pid(base_speed, kp, kd)
         self.count_markers = cm()
@@ -79,7 +75,7 @@ class MapTrackLogic(RobotLogic):
                 print("Start")
                 self.time = 0.0
                 self.last_dist_saved = 0
-            elif self.left_marker_counter > MIN_LEFT_MARKER_COUNTER:
+            elif self.left_marker_counter > self.min_left_marker_counter:
                 if not self.finished:
                     print("Total time: " + str(round(self.time, 4)) + "s")
                     
@@ -115,20 +111,20 @@ class MapTrackLogic(RobotLogic):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         # Go up one directory (from robot_logics) to find maps/
         base_dir = os.path.join(current_dir, "..") 
-        file_path = os.path.join(base_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_map_data.txt"))
+        file_path = os.path.join(base_dir, "maps", "mapping_data", self.MAPPING_NAME, (self.MAPPING_NAME + "_map_data.txt"))
 
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             for point in self.mapping_points:
                 f.write(f"{point[0]},{point[1]}\n")
 
-        file_path = os.path.join(base_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_radius.txt"))
+        file_path = os.path.join(base_dir, "maps", "mapping_data", self.MAPPING_NAME, (self.MAPPING_NAME + "_radius.txt"))
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             for radius in self.radius_list:
                 f.write(f"{radius}\n")
         
-        file_path = os.path.join(base_dir, "maps", "mapping_data", MAPPING_NAME, (MAPPING_NAME + "_shortcut_map.txt"))
+        file_path = os.path.join(base_dir, "maps", "mapping_data", self.MAPPING_NAME, (self.MAPPING_NAME + "_shortcut_map.txt"))
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             for point in self.shortcut_map:

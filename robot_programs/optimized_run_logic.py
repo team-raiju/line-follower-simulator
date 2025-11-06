@@ -5,22 +5,18 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 from helper import Helper as hp
 
-# Logic-specific constants
-MIN_LEFT_MARKER_COUNTER = 40
 TRACK_POINTS_DIST_CM = 5.0
-
-
 RADIUS_LIST = "../maps/mapping_data/map6/map6_radius.txt"
 
 class OptimizedRunLogic(RobotLogic):
-    """
-    A robot logic that uses a PID controller to follow a line.
-    """
+
     def __init__(self, **kwargs):
         start_speed = kwargs.get('start_speed', 80)
 
         self.kp = kwargs.get('kp', 35)
         self.kd = kwargs.get('kd', 50)
+        self.min_left_marker_counter = kwargs.get('min_left_marker_counter', 50)
+
         
         self.pid_calc = pid(start_speed, self.kp, self.kd)
         self.count_markers = cm()
@@ -86,7 +82,7 @@ class OptimizedRunLogic(RobotLogic):
             if self.right_marker_counter == 1 and self.left_marker_counter < 1:
                 print("Start")
                 self.time = 0.0
-            elif self.left_marker_counter > MIN_LEFT_MARKER_COUNTER:
+            elif self.left_marker_counter > self.min_left_marker_counter:
                 if not self.finished:
                     print("Total time: " + str(round(self.time, 4)) + "s")
                     self.finished = True
