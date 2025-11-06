@@ -2,6 +2,8 @@
 !maps/maps_params.txt
 *out.png
 
+!maps/mapping_data/map_example/*
+
 Models*
 logs*
 # Byte-compiled / optimized / DLL files

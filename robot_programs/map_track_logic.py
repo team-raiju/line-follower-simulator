@@ -15,9 +15,10 @@ class MapTrackLogic(RobotLogic):
         base_speed = kwargs.get('base_speed', 60)
         kp = kwargs.get('kp', 35)
         kd = kwargs.get('kd', 50)
+        ki = 0
         self.min_left_marker_counter = kwargs.get('min_left_marker_counter', 50)
 
-        self.pid_calc = pid(base_speed, kp, kd)
+        self.pid_calc = pid(base_speed, kp, kd, ki)
         self.count_markers = cm()
 
         self.left_marker_counter = 0

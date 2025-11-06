@@ -16,7 +16,8 @@ from robot_programs.pure_pursuit_logic import PurePursuitLogic
 from map_configs import *
 
 
-# --- 1. SELECT THE ROBOT BRAIN ---
+# --- 1. SELECT THE ROBOT BRAIN --- # Uncomment the desired logic implementation
+
 # SELECTED_LOGIC: RobotLogic = ManualLogic
 # SELECTED_LOGIC: RobotLogic = BitBangLogic
 SELECTED_LOGIC: RobotLogic = PIDLogic
@@ -24,7 +25,7 @@ SELECTED_LOGIC: RobotLogic = PIDLogic
 # SELECTED_LOGIC: RobotLogic = OptimizedRunLogic
 # SELECTED_LOGIC: RobotLogic = PurePursuitLogic
 
-# --- 2. SELECT THE MAP ---
+# --- 2. SELECT THE MAP --- # Choose the desired map configuration (e.g., map1, map2, etc.)
 map_selected = map6
 
 # --- 3. MAP & ROBOT PARAMS ---
@@ -51,7 +52,6 @@ SIM_TICK_RATE = 200
 
 # --- 4. PARAMS THAT WILL BE SENT TO ROBOT LOGIC ---
 LOGIC_CONFIG = {
-    'map_name': MAP_NAME,
     'min_left_marker_counter': MIN_LEFT_MARKER_COUNTER,
     'wheels_dist_cm': WHEELS_DIST_CM
 }

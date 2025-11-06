@@ -3,7 +3,7 @@ import os
 
 
 TRACK_FOLDER = "map6"
-OUPUT_FILE_NAME = "out_2.png"
+OUPUT_FILE_NAME = "out.png"
 
 # Read the points from the text file
 points = []
