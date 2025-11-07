@@ -104,7 +104,7 @@ map6 = MapConfig(
     ROBOT_INIT_POS_X_CM = 9.0,
     ROBOT_INIT_POS_Y_CM = 135.0,
     ROBOT_INIT_ANGLE = 90.0,
-    MIN_LEFT_MARKER_COUNTER = 49,
+    MIN_LEFT_MARKER_COUNTER = 40,
 )
 
 map7 = MapConfig(

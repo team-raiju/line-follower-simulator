@@ -59,13 +59,15 @@ The `PIDLogic` will use a PID controller to follow the line. It has 3 main param
 
 The robot will only stop after min_left_marker_counter are detected. This number is depedent of the map that is beeing used
 
+![alt text](docs/normalPID.gif)
+
 ### Map tracking logic:
 The `MapTrackLogic` is almost identical with the PID Logic program, with the difference that every 5cm it is saving the robot position and the map curvature into a file. You can change the file to be saved changing the `MAPPING_NAME` variable.
 
 The maps are saved on `maps/mapping_data/MAPPING_NAME`. 3 Maps are saved:
 - Map Data:  The exactly coordinates measured
 - Radius Map: The curvature measured between of the track, measured every two points
-- Shortcut Map: Calculated on top of Map Data it makes a mooving average of the map to generate shortcuts
+- Shortcut Map: Calculated on top of Map Data it makes a moving average of the map to generate shortcuts
 
 You can also change `TRACK_POINTS_DIST_CM` to set the distance between each point to be saved
 
@@ -79,10 +81,11 @@ A example map is located on `maps/mapping_data/map_example`
 ### Optimized run logic:
 The `OptimizedRunLogic` is almost the same as the PID Logic program with the difference that it read a mapping file that was mapped with `MapTrackLogic` and saved on `maps/mapping_data/MAPPING_NAME` and uses this file to calculate the base speed in each point of the map. So it will try to accelerate on straight lines and mantain a smaller speed on curves.
 
-Change the path on `RADIUS_LIST` variable to point to the map you want to read from the current map beeing used.
+Change the path on `MAP_LIST` variable to point to the map you want to read of the current map beeing used.
 
-You can also configure the PID constants and the speed that it will have depending on the curvature pf the map on the function `radius_to_velocity`.
+You can also configure the PID constants and the speed that you want in each curvature on  `radius_to_velocity` function.
 
+![alt text](docs/optimizedPID.gif)
 
 ### Pure pursuit logic:
 The `PurePursuitLogic` uses the pure pursuit algorith to follow a list of points. So on this mode, it will read a mapping file defined on `MAP_FILE` variable and follow these points. It will not use line sensors and will make a pure virtual line following.
@@ -91,6 +94,7 @@ The main parameters to change are the `look_ahead` distance (the greater the smo
 
 You can use the shortcut map or the normal map here. The shortcut map will try to skip some curves.
 
+![alt text](docs/pure_pursuit.gif)
 
 ## Extra configs
 The simulator also have some configurations that can be changed on the `motor.py` file and on the `robot.py` file. 
@@ -146,4 +150,4 @@ An example of how map2.png was generated:
 
 - Steps 2, 4 and 5 from left to right
 
-![alt text](image_conversion/img_raw/RSM_2022_example.png)
+![alt text](docs/RSM_2022_example.png)

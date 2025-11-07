@@ -1,3 +1,4 @@
+import math
 import pygame
 from pygame.math import Vector2
 
@@ -43,6 +44,31 @@ class Helper:
         elif delta < -180:
             delta += 360
         return delta
+    
+    def get_shortest_delta_angle_rad(a, b):
+        delta = a - b
+        if delta > math.pi:
+            delta -= 2 * math.pi
+        elif delta < -math.pi:
+            delta += 2 * math.pi
+        return delta
+    
+    def limit_angle_minus_pi_pi(angle_rad):
+        while angle_rad > math.pi:
+            angle_rad -= 2 * math.pi
+        while angle_rad < -math.pi:
+            angle_rad += 2 * math.pi
+        return angle_rad
+    
+    def angle_to_point_rad(p_origin: Vector2, p_target: Vector2, origin_angle: float) -> float:
+        dx = p_target.x - p_origin.x
+        dy = p_target.y - p_origin.y
+
+        angleDiffRaw = math.atan2(dy, dx)
+
+        angleDiff = angleDiffRaw + origin_angle
+
+        return Helper.limit_angle_minus_pi_pi(angleDiff)
 
 class CountMarkers:
     def __init__(self):

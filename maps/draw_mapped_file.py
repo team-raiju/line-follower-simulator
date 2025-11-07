@@ -1,25 +1,27 @@
 from PIL import Image, ImageDraw
 import os
 
-
 TRACK_FOLDER = "map6"
-OUPUT_FILE_NAME = "out.png"
+OUPUT_FILE_NAME = "out5.png"
+
+# Scale factor
+scale_factor = 3
 
 # Read the points from the text file
 points = []
 markers = []
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-file_path_1 = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_map_data.txt"))
+file_path_1 = os.path.join(current_dir, "mapping_data", TRACK_FOLDER, (TRACK_FOLDER + "_map_data.txt"))
 
 out_path = os.path.join(current_dir, "mapping_data", TRACK_FOLDER, OUPUT_FILE_NAME)
 
 with open(file_path_1, "r") as file:
     for line in file:
         x, y = line.strip().split(",")
-        points.append((float(x), float(y)))
+        points.append((float(x) * scale_factor, float(y) * scale_factor))  # Scale the points
 
-# Determine the image dimensions based on the points
+# Determine the image dimensions based on the scaled points
 min_x = min(point[0] for point in points)
 max_x = max(point[0] for point in points)
 min_y = min(point[1] for point in points)
@@ -28,10 +30,10 @@ width = int(max_x - min_x) + 1
 height = int(max_y - min_y) + 1
 
 # Set the desired point size
-point_size = 1
+point_size = scale_factor
 
 # Set the desired margin size
-margin = 60
+margin = 60 * scale_factor
 
 # Calculate the new dimensions with margins
 new_width = width + 2 * margin
@@ -45,34 +47,29 @@ draw = ImageDraw.Draw(image)
 x_offset = margin - int(min_x)
 y_offset = margin - int(min_y)
 
-# # Draw larger white points on the image with margins
 for point in points:
     x = int(point[0]) + x_offset
     y = int(point[1]) + y_offset
     draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="white")
 
-
 # Draw the shortcut path
-
-file_shortcut = os.path.join(current_dir, "mapping_data" , TRACK_FOLDER, (TRACK_FOLDER + "_shortcut_map.txt"))
+file_shortcut = os.path.join(current_dir, "mapping_data", TRACK_FOLDER, (TRACK_FOLDER + "_shortcut_map.txt"))
 shortcut_points = []
 with open(file_shortcut, "r") as file:
     for line in file:
         x, y = line.strip().split(",")
-        shortcut_points.append((float(x), float(y)))
+        shortcut_points.append((float(x) * scale_factor, float(y) * scale_factor))  # Scale the shortcut points
 
 for point in shortcut_points:
     x = int(point[0]) + x_offset
     y = int(point[1]) + y_offset
     draw.ellipse([(x - point_size, y - point_size), (x + point_size, y + point_size)], fill="blue")
 
-
-# Connect the points with lines
+# Uncomment to connect the points with lines
 # for i in range(1, len(points)):
 #     x1 = int(points[i - 1][0]) + x_offset
 #     y1 = int(points[i - 1][1]) + y_offset
 #     x2 = int(points[i][0]) + x_offset
 #     y2 = int(points[i][1]) + y_offset
 #     draw.line([(x1, y1), (x2, y2)], fill="white", width=1)
-
 image.save(out_path)

@@ -7,13 +7,15 @@ from helper import Helper as hp
 class PIDLogic(RobotLogic):
 
     def __init__(self, **kwargs):
-        base_speed = kwargs.get('base_speed', 70)
+        self.target_speed = kwargs.get('target_speed', 70)
         kp = kwargs.get('kp', 35)
         kd = kwargs.get('kd', 50)
         ki = 0.0
         self.min_left_marker_counter = kwargs.get('min_left_marker_counter', 50)
         
-        self.pid_calc = pid(base_speed, kp, kd, ki)
+        self.current_speed = 0
+        self.pid_calc = pid(self.current_speed, kp, kd, ki)
+
         self.count_markers = cm()
         
         self.left_marker_counter = 0
@@ -33,6 +35,10 @@ class PIDLogic(RobotLogic):
         # Timekeeping
         if not self.finished:
             self.time += dt
+        
+        if self.current_speed < self.target_speed:
+            self.current_speed += 1
+            self.pid_calc.set_base_speed(self.current_speed)
 
         # Process Sensors
         filtered_line_sensor = hp.filter_line(line_sensor_data, robot_state['white_val'], robot_state['black_val'])

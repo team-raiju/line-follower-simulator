@@ -6,7 +6,7 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 from helper import Helper as hp
 
-MAP_FILE = "../maps/mapping_data/map6/map6_shortcut_map.txt"
+MAP_FILE = "../maps/mapping_data/map_example/map6_shortcut_map.txt"
 
 class PurePursuitLogic(RobotLogic):
 
@@ -15,7 +15,7 @@ class PurePursuitLogic(RobotLogic):
         self.base_speed = kwargs.get('base_speed', 60)
         self.wheels_dist_cm = kwargs.get('wheels_dist_cm', 12.0)
         self.look_ahead = kwargs.get('look_ahead', 10)
-        self.max_waypoints_ahead = kwargs.get('max_waypoints_ahead', 8)
+        self.max_waypoints_ahead = kwargs.get('max_waypoints_ahead', 13)
 
         # Internal state
         self.time = 0.0
@@ -123,7 +123,11 @@ class PurePursuitLogic(RobotLogic):
             min_diff_modulo = 1000
             look_ahead_point_idx = self.waypoint_idx
             
-            for i in range(self.max_waypoints_ahead):
+            waypoints_ahead = self.max_waypoints_ahead
+            if self.waypoint_idx >= len(self.waypoint_list) - self.max_waypoints_ahead:
+                waypoints_ahead = 5
+
+            for i in range(waypoints_ahead):
                 current_idx = self.waypoint_idx + i
                 if current_idx >= len(self.waypoint_list):
                     look_ahead_point_idx = len(self.waypoint_list) - 1
@@ -136,6 +140,7 @@ class PurePursuitLogic(RobotLogic):
                     look_ahead_point_idx = current_idx
             
             self.waypoint_idx = look_ahead_point_idx
+            #print(f"Updated waypoint index: {self.waypoint_idx} out of {len(self.waypoint_list)}")
 
             return l_speed, r_speed
 
