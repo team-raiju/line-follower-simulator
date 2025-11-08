@@ -3,7 +3,7 @@
 ## Introduction
 
 The **Line Follower Simulator** is a Python-based simulation environment designed to emulate the behavior of a line-following robot. This project allows users to test and develop various robot control algorithms. The simulator includes a physics model for the robot's dynamics.
-![alt text](docs/compare_out.gif)
+![alt text](docs/normalPID.gif)
 
 
 ## 🛠️ Requisites
