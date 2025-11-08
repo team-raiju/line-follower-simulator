@@ -9,8 +9,8 @@ from helper import Helper as hp
 import math
 
 TRACK_POINTS_DIST_CM = 3.0
-RADIUS_LIST = "../maps/mapping_data/map_example/map6_radius.txt"
-MAP_LIST = "../maps/mapping_data/map_example/map6_map_data.txt"
+RADIUS_LIST = "../maps/mapping_data/map_example/all_japan_2020_radius.txt"
+MAP_LIST = "../maps/mapping_data/map_example/all_japan_2020_map_data.txt"
 
 class OptimizedRunLogic(RobotLogic):
 

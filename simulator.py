@@ -25,11 +25,10 @@ SELECTED_LOGIC: RobotLogic = PIDLogic
 # SELECTED_LOGIC: RobotLogic = OptimizedRunLogic
 # SELECTED_LOGIC: RobotLogic = PurePursuitLogic
 
-# --- 2. SELECT THE MAP --- # Choose the desired map configuration (e.g., map1, map2, etc.)
-map_selected = map6
+# --- 2. SELECT THE MAP --- # Choose the desired map configuration (e.g., rc_2023, all_japan_2021, etc.)
+map_selected = all_japan_2020
 
 # --- 3. MAP & ROBOT PARAMS ---
-MAP_NAME = map_selected.MAP_NAME
 MAP_FILE_NAME = map_selected.MAP_FILE_NAME          
 MAP_WIDTH_CM = map_selected.MAP_WIDTH_CM            
 MAP_HEIGHT_CM = map_selected.MAP_HEIGHT_CM          

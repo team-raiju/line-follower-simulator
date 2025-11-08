@@ -8,11 +8,11 @@ import os
 
 TRACK_POINTS_DIST_CM = 3.0
 SHORTCUT_MOVING_AVG_POINTS = 8
-MAPPING_NAME = "map6" 
+MAPPING_NAME = "all_japan_2020" 
 
 class MapTrackLogic(RobotLogic):
     def __init__(self, **kwargs):
-        self.target_speed = kwargs.get('target_speed', 60)
+        self.target_speed = kwargs.get('target_speed', 70)
         kp = kwargs.get('kp', 35)
         kd = kwargs.get('kd', 50)
         ki = 0

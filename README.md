@@ -3,7 +3,7 @@
 ## Introduction
 
 The **Line Follower Simulator** is a Python-based simulation environment designed to emulate the behavior of a line-following robot. This project allows users to test and develop various robot control algorithms. The simulator includes a physics model for the robot's dynamics.
-![alt text](docs/normalPID.gif)
+![alt text](docs/compare_out.gif)
 
 
 ## 🛠️ Requisites
@@ -112,7 +112,6 @@ Maps are selected by editing the variable `map_selected` in the `simulator.py` f
 
 In addition to the .png image of the map, we need to define:
 
-- MAP_NAME: Name of the map
 - MAP_FILE_NAME: Name of the .png image that will be used as a map and is inside `maps`folder
 - MAP_WIDTH_CM: The real life width of the map in centimeters
 - MAP_HEIGHT_CM: The real life height of the map in centimeters

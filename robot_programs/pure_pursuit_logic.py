@@ -6,7 +6,7 @@ from helper import PIDFunctions as pid
 from helper import CountMarkers as cm
 from helper import Helper as hp
 
-MAP_FILE = "../maps/mapping_data/map_example/map6_shortcut_map.txt"
+MAP_FILE = "../maps/mapping_data/map_example/all_japan_2020_shortcut_map.txt"
 
 class PurePursuitLogic(RobotLogic):
 
@@ -16,13 +16,14 @@ class PurePursuitLogic(RobotLogic):
         self.wheels_dist_cm = kwargs.get('wheels_dist_cm', 12.0)
         self.look_ahead = kwargs.get('look_ahead', 10)
         self.max_waypoints_ahead = kwargs.get('max_waypoints_ahead', 13)
+        initial_speed = 40
 
         # Internal state
         self.time = 0.0
         self.finished = False
         self.waypoint_idx = 0
         self.w_pid_calc = pid(0, 1, 2, 0.0) # PID for angular velocity
-        self.pid_calc = pid(40, 25, 40)
+        self.pid_calc = pid(initial_speed, 25, 40)
 
         self.count_markers = cm()
         self.left_marker_counter = 0
