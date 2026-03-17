@@ -134,7 +134,7 @@ We have a script in `image_conversion/map_from_img`that converts photos of a map
 To convert a photo into a map, follow these steps:
 
 1. Take a picture of the map;
-2. Crop and align img using office lens app on your smartphone;
+2. Crop and align img using some image editing tool. To fix the perspective you can use https://imageonline.io/perspective-crop/
 3. Adjust parameters in `map_from_img.py`, such as input file, output file, and threshold
 4. Run `map_from_img.py` to convert image to black and white
 5. Use GIMP (or any other image editor) to adjust small errors in generated image

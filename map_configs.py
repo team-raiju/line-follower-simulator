@@ -136,6 +136,31 @@ all_japan_2022 = MapConfig(
     MIN_LEFT_MARKER_COUNTER = 33,
 )
 
+all_japan_2023 = MapConfig(
+    MAP_FILE_NAME = "all-japan-2023.png",
+    MAP_WIDTH_CM = 620.0,
+    MAP_HEIGHT_CM = 312.0,
+    MAP_MARGIN_CM = 25.0,
+    MAP_CM_PER_PIXELS = 2.0,
+    ROBOT_INIT_POS_X_CM = 80.0,
+    ROBOT_INIT_POS_Y_CM = 300.0,
+    ROBOT_INIT_ANGLE = 0.0,
+    MIN_LEFT_MARKER_COUNTER = 1,
+)
+
+
+all_japan_2024 = MapConfig(
+    MAP_FILE_NAME = "all-japan-2024.png",
+    MAP_WIDTH_CM = 829.0,
+    MAP_HEIGHT_CM = 304.0,
+    MAP_MARGIN_CM = 25.0,
+    MAP_CM_PER_PIXELS = 2.0,
+    ROBOT_INIT_POS_X_CM = 433.0,
+    ROBOT_INIT_POS_Y_CM = 11.0,
+    ROBOT_INIT_ANGLE = 0.0,
+    MIN_LEFT_MARKER_COUNTER = 5,
+)
+
 copa_pinhao_2024 = MapConfig(
     MAP_FILE_NAME = "copa-pinhao-2024.png",
     MAP_WIDTH_CM = 405.0,
@@ -158,4 +183,17 @@ map_rcx_2024 = MapConfig(
     ROBOT_INIT_POS_Y_CM = 100.0,
     ROBOT_INIT_ANGLE = 90.0,
     MIN_LEFT_MARKER_COUNTER = 53,
+)
+
+
+iron_cup_2026 = MapConfig(
+    MAP_FILE_NAME = "ironcup-2026.png",
+    MAP_WIDTH_CM = 534.0,
+    MAP_HEIGHT_CM = 345.0,
+    MAP_MARGIN_CM = 25.0,
+    MAP_CM_PER_PIXELS = 2.0,
+    ROBOT_INIT_POS_X_CM = 12.0,
+    ROBOT_INIT_POS_Y_CM = 250.0,
+    ROBOT_INIT_ANGLE = 270.0,
+    MIN_LEFT_MARKER_COUNTER = 50,
 )
